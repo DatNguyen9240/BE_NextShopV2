@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NextShopV2.Api", "NextShopV2.Api\NextShopV2.Api.csproj", "{C80AB37C-9AA7-41E9-85E7-CE82BD58B234}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NextShopV2.Application", "NextShopV2.Application\NextShopV2.Application.csproj", "{9313F79A-F7AC-4510-9403-A4C2CF30B2B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NextShopV2.Domain", "NextShopV2.Domain\NextShopV2.Domain.csproj", "{520E10A6-50C3-4A45-B293-AE51244E6B55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NextShopV2.Infrastructure", "NextShopV2.Infrastructure\NextShopV2.Infrastructure.csproj", "{C99EB819-343D-4785-824B-79D5D5E9DD28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C80AB37C-9AA7-41E9-85E7-CE82BD58B234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C80AB37C-9AA7-41E9-85E7-CE82BD58B234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C80AB37C-9AA7-41E9-85E7-CE82BD58B234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C80AB37C-9AA7-41E9-85E7-CE82BD58B234}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9313F79A-F7AC-4510-9403-A4C2CF30B2B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9313F79A-F7AC-4510-9403-A4C2CF30B2B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9313F79A-F7AC-4510-9403-A4C2CF30B2B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9313F79A-F7AC-4510-9403-A4C2CF30B2B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{520E10A6-50C3-4A45-B293-AE51244E6B55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{520E10A6-50C3-4A45-B293-AE51244E6B55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{520E10A6-50C3-4A45-B293-AE51244E6B55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{520E10A6-50C3-4A45-B293-AE51244E6B55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C99EB819-343D-4785-824B-79D5D5E9DD28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C99EB819-343D-4785-824B-79D5D5E9DD28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C99EB819-343D-4785-824B-79D5D5E9DD28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C99EB819-343D-4785-824B-79D5D5E9DD28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

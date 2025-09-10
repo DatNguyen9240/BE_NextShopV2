@@ -1,0 +1,56 @@
+# .gitignore for ASP.NET Core / .NET projects
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+
+# Logs
+*.log
+
+# Database
+*.mdf
+*.ldf
+
+# Others
+*.db
+*.sqlite
+*.pdb
+
+# Environment files
+.env
+
+# Dependency files
+packages/
+
+# Publish results
+publish/
+
+# Backup files
+*.bak
+
+# Temporary files
+~$*
+*.tmp
+*.temp
+
+# Test results
+TestResults/
+
+# NuGet
+*.nupkg
+.nuget/
+
+# Ignore migrations if needed
+# Migrations/
