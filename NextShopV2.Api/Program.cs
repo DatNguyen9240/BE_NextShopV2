@@ -20,6 +20,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+var enableHttps = Environment.GetEnvironmentVariable("ENABLE_HTTPS");
+if (enableHttps == "true")
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
 app.Run();
