@@ -12,8 +12,8 @@ using NextShopV2.Infrastructure.Persistence;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250912131155_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250912155125_AddAuthProcedures")]
+    partial class AddAuthProcedures
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
