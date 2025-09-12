@@ -68,8 +68,7 @@ namespace NextShopV2.Api.Controllers
 
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return AuthResponseHelper.ServerError("JWT key is missing in configuration");
-
-            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
 
             // Sinh refresh token (random string)
             var refreshToken = Guid.NewGuid().ToString();
@@ -89,8 +88,9 @@ namespace NextShopV2.Api.Controllers
             if (storedToken != request.RefreshToken)
                 return AuthResponseHelper.Unauthorized("Invalid refresh token");
 
-            // Sinh access token mới
-            var accessToken = JwtHelper.GenerateToken(_jwtKey ?? string.Empty, request.UserId, "");
+            if (string.IsNullOrWhiteSpace(_jwtKey))
+                return AuthResponseHelper.ServerError("JWT key is missing in configuration");
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
 
             return AuthResponseHelper.Success("Token refreshed", accessToken, null);
         }
