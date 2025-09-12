@@ -1,0 +1,17 @@
+using System;
+using System.Collections.Generic;
+
+namespace NextShopV2.Domain.Entities.Products
+{
+    public class Category
+    {
+        public Guid CategoryId { get; set; }
+        public string Name { get; set; } = null!;
+        public Guid? ParentId { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public Category? Parent { get; set; }
+        public ICollection<Category> Children { get; set; } = new List<Category>();
+        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+    }
+}

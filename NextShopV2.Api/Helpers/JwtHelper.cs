@@ -7,7 +7,7 @@ namespace NextShopV2.Api.Helpers
 {
     public static class JwtHelper
     {
-        public static string GenerateToken(string key, int userId, string email, int expireHours = 1)
+    public static string GenerateToken(string key, Guid userId, string email, int expireHours = 1)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var keyBytes = Encoding.ASCII.GetBytes(key);
