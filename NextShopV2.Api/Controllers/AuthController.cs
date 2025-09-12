@@ -31,7 +31,10 @@ namespace NextShopV2.Api.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
-            var passwordHash = PasswordHelper.HashPassword(request.Password ?? string.Empty);
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
 
             try
             {
@@ -49,7 +52,10 @@ namespace NextShopV2.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var passwordHash = PasswordHelper.HashPassword(request.Password ?? string.Empty);
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
 
             var users = _context.Users
                 .FromSqlRaw("EXEC dbo.CheckUserLogin @p0, @p1", request.Email, passwordHash)
@@ -60,26 +66,33 @@ namespace NextShopV2.Api.Controllers
             if (user == null)
                 return ResponseHelper.Unauthorized("Invalid credentials");
 
-            _redisDb.StringSet($"login:{request.Email}", "success", TimeSpan.FromHours(1));
+            if (string.IsNullOrWhiteSpace(_jwtKey))
+                return AuthResponseHelper.ServerError("JWT key is missing in configuration");
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtKey ?? string.Empty);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = tokenHandler.WriteToken(token);
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
+
+            // Sinh refresh token (random string)
+            var refreshToken = Guid.NewGuid().ToString();
+
+            // Lưu refresh token vào Redis với key là userId
+            _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
 
             var userData = new { user.Id, user.Email };
 
-            return AuthResponseHelper.Success("Login successful", jwtToken, userData);
+            return AuthResponseHelper.Success("Login successful", accessToken, refreshToken, new { User = userData });
+        }
+
+        [HttpPost("refresh")]
+        public IActionResult Refresh([FromBody] RefreshTokenRequest request)
+        {
+            var storedToken = _redisDb.StringGet($"refresh:{request.UserId}");
+            if (storedToken != request.RefreshToken)
+                return AuthResponseHelper.Unauthorized("Invalid refresh token");
+
+            // Sinh access token mới
+            var accessToken = JwtHelper.GenerateToken(_jwtKey ?? string.Empty, request.UserId, "");
+
+            return AuthResponseHelper.Success("Token refreshed", accessToken, null);
         }
     }
 }
