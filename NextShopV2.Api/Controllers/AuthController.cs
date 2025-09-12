@@ -69,7 +69,7 @@ namespace NextShopV2.Api.Controllers
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return AuthResponseHelper.ServerError("JWT key is missing in configuration");
 
-            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
 
             // Sinh refresh token (random string)
             var refreshToken = Guid.NewGuid().ToString();
