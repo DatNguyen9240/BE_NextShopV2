@@ -14,7 +14,7 @@ namespace NextShopV2.Domain.Entities.Marketing
         public string? Description { get; set; }
 
 
-        public string MediaUrl { get; set; } = string.Empty;
+        public string? MediaUrl { get; set; } = string.Empty;
 
 
         public string TargetUrl { get; set; } = string.Empty;
@@ -28,14 +28,14 @@ namespace NextShopV2.Domain.Entities.Marketing
    
         public bool IsActive { get; set; } = true;
 
-        public ICollection<AdvertisementImage> Images { get; set; }
+        public ICollection<AdvertisementImage> Images { get; set; } = new List<AdvertisementImage>();
     }
 
     public class AdvertisementImage
     {
         public Guid AdvertisementImageId { get; set; }
-        public string MediaUrl { get; set; }
+        public string? MediaUrl { get; set; } // Thêm dấu ?
         public Guid AdvertisementId { get; set; }
-        public Advertisement Advertisement { get; set; }
+        public Advertisement? Advertisement { get; set; } // Thêm dấu ?
     }
 }

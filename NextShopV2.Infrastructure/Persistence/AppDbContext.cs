@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Domain.Entities.Products;
@@ -55,6 +54,43 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<ProductVariant>()
                 .HasKey(pv => pv.VariantId);
+
+            // Ví dụ cho Coupon
+            modelBuilder.Entity<Coupon>()
+                .Property(c => c.DiscountPercent)
+                .HasPrecision(10, 2); // decimal(10,2)
+
+            // Ví dụ cho Order
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalAmount)
+                .HasPrecision(18, 2);
+
+            // Các entity khác tương tự:
+            modelBuilder.Entity<OrderCoupon>()
+                .Property(oc => oc.DiscountAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.UnitPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.AverageRating)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.BasePrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property(pv => pv.AdditionalPrice)
+                .HasPrecision(18, 2);
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
