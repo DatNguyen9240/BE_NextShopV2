@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using NextShopV2.Api.Models;
+using NextShopV2.Application.DTOs.Response;
 
 namespace NextShopV2.Api.Helpers
 {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace NextShopV2.Domain.Entities.Marketing
 {
@@ -26,5 +27,15 @@ namespace NextShopV2.Domain.Entities.Marketing
 
    
         public bool IsActive { get; set; } = true;
+
+        public ICollection<AdvertisementImage> Images { get; set; }
+    }
+
+    public class AdvertisementImage
+    {
+        public Guid AdvertisementImageId { get; set; }
+        public string MediaUrl { get; set; }
+        public Guid AdvertisementId { get; set; }
+        public Advertisement Advertisement { get; set; }
     }
 }

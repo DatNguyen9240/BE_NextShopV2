@@ -1,4 +1,4 @@
-namespace NextShopV2.Api.Models
+namespace NextShopV2.Application.DTOs.Response
 {
     public class AuthResponse
     {

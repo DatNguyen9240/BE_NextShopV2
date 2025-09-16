@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NextShopV2.Api.Models
+namespace NextShopV2.Application.DTOs.Request
 {
     public class RegisterRequest
     {
