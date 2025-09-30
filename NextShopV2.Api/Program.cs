@@ -28,6 +28,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.IUserRepository, Ne
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IBannerService, NextShopV2.Application.Services.BannerService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IBannerRepository, NextShopV2.Infrastructure.Repositories.BannerRepository>();
 
+
+// Register DI for ProductService and ProductRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductService, NextShopV2.Application.Services.ProductService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductRepository, NextShopV2.Infrastructure.Repositories.ProductRepository>();
 // Register DI for UploadService and UploadRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IUploadService, NextShopV2.Application.Services.UploadService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IUploadRepository, NextShopV2.Infrastructure.Repositories.UploadRepository>();
@@ -36,6 +40,9 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Global error handling middleware
+app.UseMiddleware<NextShopV2.Api.Middlewares.ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.MapControllers();
