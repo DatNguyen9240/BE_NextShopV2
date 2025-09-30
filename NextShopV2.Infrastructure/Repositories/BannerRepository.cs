@@ -20,13 +20,15 @@ namespace NextShopV2.Infrastructure.Repositories
         {
             await _context.Advertisements.AddAsync(banner);
         }
-        public async Task UpdateAsync(Advertisement banner)
+        public Task UpdateAsync(Advertisement banner)
         {
             _context.Advertisements.Update(banner);
+            return Task.CompletedTask;
         }
-        public async Task DeleteAsync(Advertisement banner)
+        public Task DeleteAsync(Advertisement banner)
         {
             _context.Advertisements.Remove(banner);
+            return Task.CompletedTask;
         }
         public async Task SaveAsync()
         {

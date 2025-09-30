@@ -22,7 +22,7 @@ namespace NextShopV2.Infrastructure.Repositories
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<UploadResultDto> UploadAsync(IFormFile file)
+    public async Task<UploadResultDto?> UploadAsync(IFormFile file)
         {
             await using var stream = file.OpenReadStream();
             var uploadParams = new ImageUploadParams
@@ -49,12 +49,13 @@ namespace NextShopV2.Infrastructure.Repositories
             foreach (var file in files)
             {
                 var result = await UploadAsync(file);
-                results.Add(result);
+                if (result != null)
+                    results.Add(result);
             }
             return results;
         }
 
-        public async Task<UploadResultDto> DeleteAsync(string publicId)
+    public async Task<UploadResultDto?> DeleteAsync(string publicId)
         {
             // Cloudinary không trả về Url khi xóa, nên chỉ trả về PublicId
             var deletionParams = new DeletionParams(publicId);

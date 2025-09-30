@@ -25,7 +25,7 @@ namespace NextShopV2.Api.Controllers
 
             var result = await _uploadService.UploadAsync(request.File);
             if (result == null)
-                return Ok(new ApiResponse { Success = false, Message = "Upload failed." });
+                return BadRequest(new ApiResponse { Success = false, Message = "Upload failed." });
             return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { publicId = result.PublicId } });
         }
 
@@ -34,8 +34,8 @@ namespace NextShopV2.Api.Controllers
         {
             var result = await _uploadService.DeleteAsync(publicId);
             if (result == null)
-                return Ok(new ApiResponse { Success = false, Message = "Delete failed." });
-            return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { url = result.Url, publicId = result.PublicId } });
+                return BadRequest(new ApiResponse { Success = false, Message = "Delete failed." });
+            return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { publicId = result.PublicId } });
         }
 
         [HttpPost("multi")]

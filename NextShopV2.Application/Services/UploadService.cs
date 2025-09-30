@@ -14,7 +14,7 @@ namespace NextShopV2.Application.Services
         {
             _uploadRepository = uploadRepository;
         }
-        public Task<UploadResultDto> UploadAsync(IFormFile file)
+        public Task<UploadResultDto?> UploadAsync(IFormFile file)
         {
             return _uploadRepository.UploadAsync(file);
         }
@@ -22,7 +22,7 @@ namespace NextShopV2.Application.Services
         {
             return _uploadRepository.UploadMultipleAsync(files);
         }
-        public Task<UploadResultDto> DeleteAsync(string publicId)
+        public Task<UploadResultDto?> DeleteAsync(string publicId)
         {
             return _uploadRepository.DeleteAsync(publicId);
         }
