@@ -1,0 +1,71 @@
+using NextShopV2.Application.DTOs.Request;
+using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.Interfaces;
+using NextShopV2.Domain.Entities.Users;
+using NextShopV2.Application.Common;
+using NextShopV2.Application.Common.Helpers;
+using StackExchange.Redis;
+using Microsoft.Extensions.Configuration;
+using System;
+
+namespace NextShopV2.Application.Services
+{
+    public class AuthService : IAuthService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IDatabase _redisDb;
+        private readonly string? _jwtKey;
+
+        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config)
+        {
+            _userRepository = userRepository;
+            _redisDb = redis.GetDatabase();
+            _jwtKey = config["Jwt:Key"];
+        }
+
+    public ApiResponse Register(RegisterRequest request)
+        {
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
+            if (_userRepository.ExistsByEmail(request.Email!))
+                return new ApiResponse { Success = false, Message = "Đã tồn tại" };
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = request.Email!,
+                PasswordHash = passwordHash,
+                FullName = request.FullName!,
+                Role = "User",
+                CreatedAt = DateTime.UtcNow
+            };
+            _userRepository.Add(user);
+            _userRepository.Save();
+            return new ApiResponse { Success = true, Message = "User registered successfully" };
+        }
+
+    public AuthResponse Login(LoginRequest request)
+        {
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
+            var user = _userRepository.GetByEmail(request.Email!);
+            if (user == null || user.PasswordHash != passwordHash)
+                return new AuthResponse { Success = false, Message = "Invalid credentials" };
+            if (string.IsNullOrWhiteSpace(_jwtKey))
+                return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
+            var refreshToken = Guid.NewGuid().ToString();
+            _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+            var userData = new { user.Id, user.Email };
+            return new AuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken, Data = new { User = userData } };
+        }
+
+    public AuthResponse Refresh(RefreshTokenRequest request)
+        {
+            var storedToken = _redisDb.StringGet($"refresh:{request.UserId}");
+            if (storedToken != request.RefreshToken)
+                return new AuthResponse { Success = false, Message = "Invalid refresh token" };
+            if (string.IsNullOrWhiteSpace(_jwtKey))
+                return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
+            return new AuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
+        }
+    }
+}

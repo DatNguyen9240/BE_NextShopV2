@@ -2,9 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NextShopV2.Domain\NextShopV2.Domain.csproj" />
+    <ProjectReference Include="..\NextShopV2.Application\NextShopV2.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

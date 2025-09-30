@@ -1,97 +1,51 @@
 using Microsoft.AspNetCore.Mvc;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using NextShopV2.Api.Models;
+using NextShopV2.Application.DTOs.Request;
+using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Application.DTOs.Response;
 namespace NextShopV2.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UploadController : ControllerBase
     {
-        private readonly Cloudinary _cloudinary;
+        private readonly IUploadService _uploadService;
 
-        public UploadController(IConfiguration config)
+        public UploadController(IUploadService uploadService)
         {
-            var account = new Account(
-                config["Cloudinary:CloudName"],
-                config["Cloudinary:ApiKey"],
-                config["Cloudinary:ApiSecret"]
-            );
-            _cloudinary = new Cloudinary(account);
+            _uploadService = uploadService;
         }
 
         [HttpPost]
         public async Task<IActionResult> Upload([FromForm] UploadFileRequest request)
         {
-            var file = request.File;
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
+            if (request.File == null || request.File.Length == 0)
+                return Ok(new ApiResponse { Success = false, Message = "No file uploaded." });
 
-            await using var stream = file.OpenReadStream();
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(file.FileName, stream),
-                Folder = "banners"
-            };
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
-                return Ok(new { 
-                    url = uploadResult.SecureUrl.ToString(),
-                    publicId = uploadResult.PublicId
-                });
-
-            return StatusCode(500, "Upload failed.");
+            var result = await _uploadService.UploadAsync(request.File);
+            if (result == null)
+                return Ok(new ApiResponse { Success = false, Message = "Upload failed." });
+            return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { publicId = result.PublicId } });
         }
 
         [HttpDelete]
-        public IActionResult Delete([FromQuery] string publicId)
+        public async Task<IActionResult> Delete([FromQuery] string publicId)
         {
-            var deletionParams = new DeletionParams(publicId);
-            var result = _cloudinary.Destroy(deletionParams);
-
-            if (result.Result == "ok")
-                return Ok(new { success = true });
-            return BadRequest(new { success = false, message = result.Error?.Message });
+            var result = await _uploadService.DeleteAsync(publicId);
+            if (result == null)
+                return Ok(new ApiResponse { Success = false, Message = "Delete failed." });
+            return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { url = result.Url, publicId = result.PublicId } });
         }
 
         [HttpPost("multi")]
         public async Task<IActionResult> UploadMultiple([FromForm] List<IFormFile> files)
         {
             if (files == null || files.Count == 0)
-                return BadRequest("No files uploaded.");
+                return Ok(new ApiResponse { Success = false, Message = "No files uploaded." });
 
-            var results = new List<object>();
-
-            foreach (var file in files)
-            {
-                await using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream),
-                    Folder = "banners"
-                };
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-                if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    results.Add(new
-                    {
-                        url = uploadResult.SecureUrl.ToString(),
-                        publicId = uploadResult.PublicId
-                    });
-                }
-                else
-                {
-                    results.Add(new
-                    {
-                        error = uploadResult.Error?.Message ?? "Upload failed.",
-                        file = file.FileName
-                    });
-                }
-            }
-
-            return Ok(results);
+            var results = await _uploadService.UploadMultipleAsync(files);
+            return Ok(new ApiResponse { Success = true, Data = results });
         }
     }
 }

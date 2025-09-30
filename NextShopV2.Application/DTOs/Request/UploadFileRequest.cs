@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace NextShopV2.Api.Models
+namespace NextShopV2.Application.DTOs.Request
 {
     public class UploadFileRequest
     {

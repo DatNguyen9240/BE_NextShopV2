@@ -4,6 +4,9 @@ namespace NextShopV2.Application.DTOs.Request
 {
     public class RegisterRequest
     {
+        [Required(ErrorMessage = "Please input full name!")]
+        public string? FullName { get; set; }
+
         [Required]
         [EmailAddress(ErrorMessage = "Please input a valid email!")]
         public string? Email { get; set; }

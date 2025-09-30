@@ -1,13 +1,14 @@
-using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
-namespace NextShopV2.Api.Helpers
+namespace NextShopV2.Application.Common.Helpers
 {
     public static class JwtHelper
     {
-    public static string GenerateToken(string key, Guid userId, string email, int expireHours = 1)
+        public static string GenerateToken(string key, Guid userId, string email, int expireHours = 1)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var keyBytes = Encoding.ASCII.GetBytes(key);

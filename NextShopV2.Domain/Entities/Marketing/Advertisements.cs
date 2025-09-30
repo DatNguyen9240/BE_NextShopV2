@@ -5,37 +5,12 @@ namespace NextShopV2.Domain.Entities.Marketing
 {
     public class Advertisement
     {
-        public Guid AdvertisementId { get; set; }
-
-
-        public string Title { get; set; } = string.Empty;
-
-
-        public string? Description { get; set; }
-
-
-        public string? MediaUrl { get; set; } = string.Empty;
-
-
-        public string TargetUrl { get; set; } = string.Empty;
-
-        public int SortOrder { get; set; } = 0;
-
-
-        public DateTime StartDate { get; set; } = DateTime.UtcNow;
-        public DateTime? EndDate { get; set; }
-
-   
-        public bool IsActive { get; set; } = true;
-
-        public ICollection<AdvertisementImage> Images { get; set; } = new List<AdvertisementImage>();
-    }
-
-    public class AdvertisementImage
-    {
-        public Guid AdvertisementImageId { get; set; }
-        public string? MediaUrl { get; set; } // Thêm dấu ?
-        public Guid AdvertisementId { get; set; }
-        public Advertisement? Advertisement { get; set; } // Thêm dấu ?
+        public Guid Id { get; set; }
+        public string PublicId { get; set; } = ""; // Thêm trường PublicId để lưu mã public (ví dụ Cloudinary)
+        public string Title { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+        public string Type { get; set; } = "";      // Ví dụ: "home", "product"
+        public int SortOrder { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
