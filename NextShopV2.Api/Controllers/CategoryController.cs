@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NextShopV2.Infrastructure.Persistence;
-using NextShopV2.Domain.Entities.Products;
+using NextShopV2.Application.DTOs.Request;
+using NextShopV2.Application.Interfaces.services;
+using NextShopV2.Api.Helpers;
 
 namespace NextShopV2.Api.Controllers
 {
@@ -9,73 +9,140 @@ namespace NextShopV2.Api.Controllers
     [Route("api/[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(AppDbContext context)
+        public CategoryController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
 
         // GET: api/Category
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var categories = await _context.Categories
-                .Include(c => c.Children)
-                .ToListAsync();
-            return Ok(categories);
+            try
+            {
+                var categories = await _categoryService.GetAllCategoriesAsync();
+                return ResponseHelper.Success(categories, "Categories retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
+        }
+
+        // GET: api/Category/root
+        [HttpGet("root")]
+        public async Task<IActionResult> GetRootCategories()
+        {
+            try
+            {
+                var categories = await _categoryService.GetRootCategoriesAsync();
+                return ResponseHelper.Success(categories, "Root categories retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
+        }
+
+        // GET: api/Category/{id}/children
+        [HttpGet("{id}/children")]
+        public async Task<IActionResult> GetChildCategories(Guid id)
+        {
+            try
+            {
+                var categories = await _categoryService.GetChildCategoriesAsync(id);
+                return ResponseHelper.Success(categories, "Child categories retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
         }
 
         // GET: api/Category/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var category = await _context.Categories
-                .Include(c => c.Children)
-                .FirstOrDefaultAsync(c => c.CategoryId == id);
-            if (category == null)
-                return NotFound();
-            return Ok(category);
+            try
+            {
+                var category = await _categoryService.GetCategoryByIdAsync(id);
+                if (category == null)
+                    return ResponseHelper.NotFound("Category not found");
+                
+                return ResponseHelper.Success(category, "Category retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
         }
 
         // POST: api/Category
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Category category)
+        public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
         {
-            category.CategoryId = Guid.NewGuid();
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return ResponseHelper.ValidationError(ModelState);
+
+                var category = await _categoryService.CreateCategoryAsync(request);
+                return ResponseHelper.Created(category, "Category created successfully");
+            }
+            catch (ArgumentException ex)
+            {
+                return ResponseHelper.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
         }
 
         // PUT: api/Category/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Category category)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateCategoryRequest request)
         {
-            if (id != category.CategoryId)
-                return BadRequest("Id mismatch");
+            try
+            {
+                if (!ModelState.IsValid)
+                    return ResponseHelper.ValidationError(ModelState);
 
-            var exist = await _context.Categories.FindAsync(id);
-            if (exist == null)
-                return NotFound();
-
-            exist.Name = category.Name;
-            exist.ParentId = category.ParentId;
-            await _context.SaveChangesAsync();
-            return Ok(exist);
+                var category = await _categoryService.UpdateCategoryAsync(id, request);
+                return ResponseHelper.Success(category, "Category updated successfully");
+            }
+            catch (ArgumentException ex)
+            {
+                return ResponseHelper.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
         }
 
         // DELETE: api/Category/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-                return NotFound();
+            try
+            {
+                var result = await _categoryService.DeleteCategoryAsync(id);
+                if (!result)
+                    return ResponseHelper.NotFound("Category not found");
 
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-            return Ok();
+                return ResponseHelper.Success(message: "Category deleted successfully");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return ResponseHelper.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
         }
     }
 }

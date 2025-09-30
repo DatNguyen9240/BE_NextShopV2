@@ -1,6 +1,7 @@
 using NextShopV2.Application.Interfaces.Repositories;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Domain.Entities.Products;
 using System;
 using System.Collections.Generic;
@@ -26,36 +27,36 @@ namespace NextShopV2.Application.Services
             var product = await _repo.GetByIdAsync(id);
             return product?.ToDto();
         }
-        public async Task<ProductDto> CreateAsync(ProductDto dto)
+        public async Task<ProductDto> CreateAsync(CreateProductRequest request)
         {
             var product = new Product
             {
                 ProductId = Guid.NewGuid(),
-                Name = dto.Name,
-                Description = dto.Description,
-                BasePrice = dto.BasePrice,
-                GenderTarget = dto.GenderTarget,
-                Brand = dto.Brand,
+                Name = request.Name,
+                Description = request.Description,
+                BasePrice = request.BasePrice,
+                GenderTarget = request.GenderTarget,
+                Brand = request.Brand,
                 AverageRating = 0,
                 TotalReviews = 0,
                 TotalLikes = 0,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = dto.IsActive
+                IsActive = request.IsActive
             };
             await _repo.AddAsync(product);
             await _repo.SaveAsync();
             return product.ToDto();
         }
-        public async Task<bool> UpdateAsync(Guid id, ProductDto dto)
+        public async Task<bool> UpdateAsync(Guid id, UpdateProductRequest request)
         {
             var product = await _repo.GetByIdAsync(id);
             if (product == null) return false;
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.BasePrice = dto.BasePrice;
-            product.GenderTarget = dto.GenderTarget;
-            product.Brand = dto.Brand;
-            product.IsActive = dto.IsActive;
+            product.Name = request.Name;
+            product.Description = request.Description;
+            product.BasePrice = request.BasePrice;
+            product.GenderTarget = request.GenderTarget;
+            product.Brand = request.Brand;
+            product.IsActive = request.IsActive;
             await _repo.UpdateAsync(product);
             await _repo.SaveAsync();
             return true;

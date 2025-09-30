@@ -36,6 +36,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IUploadService, NextShopV2.Application.Services.UploadService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IUploadRepository, NextShopV2.Infrastructure.Repositories.UploadRepository>();
 
+// Register DI for CategoryService and CategoryRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.services.ICategoryService, NextShopV2.Application.Services.CategoryService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.repositories.ICategoryRepository, NextShopV2.Infrastructure.Repositories.CategoryRepository>();
+
 var app = builder.Build();
 
 app.UseSwagger();

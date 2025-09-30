@@ -21,7 +21,7 @@ namespace NextShopV2.Api.Controllers
 		public async Task<IActionResult> GetAll()
 		{
 			var banners = await _bannerService.GetAllAsync();
-			return ResponseHelper.Success("", banners);
+			return ResponseHelper.Success(banners, "Banners retrieved successfully");
 		}
 
 		// GET: api/BannerCarousel/{id}
@@ -31,7 +31,7 @@ namespace NextShopV2.Api.Controllers
 			var banner = await _bannerService.GetByIdAsync(id);
 			if (banner == null)
 				return ResponseHelper.NotFound("Banner not found");
-			return ResponseHelper.Success("", banner);
+			return ResponseHelper.Success(banner, "Banner retrieved successfully");
 		}
 
 		// POST: api/BannerCarousel
@@ -66,7 +66,7 @@ namespace NextShopV2.Api.Controllers
 		{
 			var banner = await _bannerService.PatchAsync(id, dto);
 			if (banner == null) return ResponseHelper.NotFound("Banner not found");
-			return ResponseHelper.Success("Patched successfully", banner);
+			return ResponseHelper.Success(banner, "Patched successfully");
 		}
 	}
 }
