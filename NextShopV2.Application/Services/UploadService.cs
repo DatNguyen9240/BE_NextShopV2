@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using NextShopV2.Application.DTOs;
 using NextShopV2.Application.Interfaces.Repositories;
 using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Shared.Extensions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

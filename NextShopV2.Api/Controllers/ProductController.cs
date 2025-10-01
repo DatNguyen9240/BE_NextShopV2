@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.DTOs.Request;
-using NextShopV2.Api.Helpers;
+using NextShopV2.Shared.Helpers;
+using NextShopV2.Shared.Extensions;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var product = await _service.GetByIdAsync(id);
-            if (product == null)
+            if (product.IsNull())
                 return ResponseHelper.NotFound("Product not found");
             
             return ResponseHelper.Success(product, "Product retrieved successfully");

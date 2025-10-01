@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request;
-using NextShopV2.Api.Helpers;
+using NextShopV2.Shared.Helpers;
+using NextShopV2.Shared.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var variant = await _variantService.GetByIdAsync(id);
-            if (variant == null)
+            if (variant.IsNull())
                 return ResponseHelper.NotFound("Variant not found");
 
             return ResponseHelper.Success(variant, "Variant retrieved successfully");
@@ -46,7 +47,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetDefaultByProductId(Guid productId)
         {
             var variant = await _variantService.GetDefaultByProductIdAsync(productId);
-            if (variant == null)
+            if (variant.IsNull())
                 return ResponseHelper.NotFound("No default variant found for this product");
 
             return ResponseHelper.Success(variant, "Default variant retrieved successfully");

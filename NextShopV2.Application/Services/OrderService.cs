@@ -3,6 +3,7 @@ using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Domain.Entities.Orders;
+using NextShopV2.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace NextShopV2.Application.Services
         public async Task<OrderResponse?> GetByIdAsync(Guid id)
         {
             var order = await _orderRepo.GetByIdAsync(id);
-            return order == null ? null : MapToResponse(order);
+            return order.IsNull() ? null : MapToResponse(order!);
         }
 
         public async Task<List<OrderResponse>> GetByUserIdAsync(Guid userId)
@@ -47,6 +48,10 @@ namespace NextShopV2.Application.Services
 
         public async Task<OrderResponse> CreateAsync(Guid userId, CreateOrderRequest request)
         {
+            // Validate request has items
+            if (request.Items.IsNullOrEmpty())
+                throw new ArgumentException("Order must contain at least one item");
+
             // Validate all variants exist and calculate total
             var orderItems = new List<OrderItem>();
             decimal totalAmount = 0;
@@ -54,10 +59,10 @@ namespace NextShopV2.Application.Services
             foreach (var itemRequest in request.Items)
             {
                 var variant = await _variantRepo.GetByIdAsync(itemRequest.VariantId);
-                if (variant == null)
+                if (variant.IsNull())
                     throw new ArgumentException($"Variant {itemRequest.VariantId} not found");
 
-                if (variant.StockQuantity < itemRequest.Quantity)
+                if (variant!.StockQuantity < itemRequest.Quantity)
                     throw new ArgumentException($"Insufficient stock for variant {itemRequest.VariantId}");
 
                 var unitPrice = variant.AdditionalPrice; // You might want to add base price logic
@@ -98,9 +103,9 @@ namespace NextShopV2.Application.Services
         public async Task<bool> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
             var order = await _orderRepo.GetByIdAsync(id);
-            if (order == null) return false;
+            if (order.IsNull()) return false;
 
-            order.Status = request.Status;
+            order!.Status = request.Status;
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveAsync();
 
@@ -110,9 +115,9 @@ namespace NextShopV2.Application.Services
         public async Task<bool> CancelOrderAsync(Guid id)
         {
             var order = await _orderRepo.GetByIdAsync(id);
-            if (order == null) return false;
+            if (order.IsNull()) return false;
 
-            if (order.Status == "Completed" || order.Status == "Shipped")
+            if (order!.Status == "Completed" || order.Status == "Shipped")
                 throw new InvalidOperationException("Cannot cancel completed or shipped orders");
 
             // Restore stock
@@ -175,7 +180,7 @@ namespace NextShopV2.Application.Services
                     VariantId = item.VariantId,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice,
-                    Variant = item.Variant == null ? null : new ProductVariantResponse
+                    Variant = item.Variant.IsNull() ? null : new ProductVariantResponse
                     {
                         ProductVariantId = item.Variant.VariantId,
                         ProductId = item.Variant.ProductId,

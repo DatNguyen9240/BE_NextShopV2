@@ -1,8 +1,11 @@
 using NextShopV2.Application.Interfaces.Repositories;
 using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Shared.Interfaces;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Domain.Entities.Products;
+using NextShopV2.Shared.Extensions;
+using NextShopV2.Shared.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +17,22 @@ namespace NextShopV2.Application.Services
     {
         private readonly IProductVariantRepository _variantRepo;
         private readonly IProductRepository _productRepo;
+        private readonly IOrderResolutionService _orderResolutionService;
 
-        public ProductVariantService(IProductVariantRepository variantRepo, IProductRepository productRepo)
+        public ProductVariantService(IProductVariantRepository variantRepo, IProductRepository productRepo, IOrderResolutionService orderResolutionService)
         {
             _variantRepo = variantRepo;
             _productRepo = productRepo;
+            _orderResolutionService = orderResolutionService;
         }
 
         public async Task<List<ProductVariantResponse>> GetAllAsync()
         {
             var variants = await _variantRepo.GetAllAsync();
+            
+            if (variants.IsNullOrEmpty())
+                return new List<ProductVariantResponse>();
+                
             return variants.Select(v => new ProductVariantResponse
             {
                 ProductVariantId = v.VariantId,
@@ -41,9 +50,12 @@ namespace NextShopV2.Application.Services
         public async Task<ProductVariantResponse?> GetByIdAsync(Guid id)
         {
             var variant = await _variantRepo.GetByIdAsync(id);
-            return variant == null ? null : new ProductVariantResponse
+            if (variant.IsNull())
+                return null;
+
+            return new ProductVariantResponse
             {
-                ProductVariantId = variant.VariantId,
+                ProductVariantId = variant!.VariantId,
                 ProductId = variant.ProductId,
                 Color = variant.Color,
                 Size = variant.Size,
@@ -58,7 +70,17 @@ namespace NextShopV2.Application.Services
         public async Task<List<ProductVariantResponse>> GetByProductIdAsync(Guid productId)
         {
             var variants = await _variantRepo.GetByProductIdAsync(productId);
-            return variants.Select(v => new ProductVariantResponse
+            
+            if (variants.IsNullOrEmpty())
+                return new List<ProductVariantResponse>();
+            
+            // Sort by DisplayOrder first, then by VariantId for consistency when DisplayOrder is same
+            var sortedVariants = variants
+                .OrderBy(v => v.DisplayOrder)
+                .ThenBy(v => v.VariantId)
+                .ToList();
+            
+            return sortedVariants.Select(v => new ProductVariantResponse
             {
                 ProductVariantId = v.VariantId,
                 ProductId = v.ProductId,
@@ -75,9 +97,12 @@ namespace NextShopV2.Application.Services
         public async Task<ProductVariantResponse?> GetDefaultByProductIdAsync(Guid productId)
         {
             var variant = await _variantRepo.GetDefaultByProductIdAsync(productId);
-            return variant == null ? null : new ProductVariantResponse
+            if (variant.IsNull())
+                return null;
+
+            return new ProductVariantResponse
             {
-                ProductVariantId = variant.VariantId,
+                ProductVariantId = variant!.VariantId,
                 ProductId = variant.ProductId,
                 Color = variant.Color,
                 Size = variant.Size,
@@ -97,23 +122,35 @@ namespace NextShopV2.Application.Services
                 throw new ArgumentException("Product not found");
             }
 
+            // Auto-resolve DisplayOrder conflict using OrderResolutionService
+            var existingVariants = await _variantRepo.GetByProductIdAsync(request.ProductId);
+            var existingDisplayOrders = existingVariants.IsNullOrEmpty() 
+                ? new List<int>() 
+                : existingVariants.Select(v => v.DisplayOrder);
+            var resolvedDisplayOrder = _orderResolutionService.ResolveOrder(existingDisplayOrders, request.DisplayOrder);
+
             // If this is marked as default, unmark other defaults for this product
             if (request.IsDefault)
             {
                 await UnmarkOtherDefaultsAsync(request.ProductId);
             }
 
+            // Auto-generate SKU if not provided
+            var generatedSKU = string.IsNullOrEmpty(request.SKU) 
+                ? CommonHelpers.GenerateSKU("PRD", request.Color, request.Size)
+                : request.SKU;
+
             var variant = new ProductVariant
             {
                 VariantId = Guid.NewGuid(),
                 ProductId = request.ProductId,
-                SKU = request.SKU,
+                SKU = generatedSKU,
                 Color = request.Color,
                 Size = request.Size,
                 AdditionalPrice = request.AdditionalPrice,
                 StockQuantity = request.StockQuantity,
                 IsDefault = request.IsDefault,
-                DisplayOrder = request.DisplayOrder,
+                DisplayOrder = resolvedDisplayOrder, // ← Use resolved DisplayOrder
                 ImageUrl = request.ImageUrl
             };
 
@@ -137,7 +174,14 @@ namespace NextShopV2.Application.Services
         public async Task<bool> UpdateAsync(Guid id, UpdateProductVariantRequest request)
         {
             var variant = await _variantRepo.GetByIdAsync(id);
-            if (variant == null) return false;
+            if (variant.IsNull()) return false;
+
+            // Auto-resolve DisplayOrder conflict using OrderResolutionService
+            var existingVariants = await _variantRepo.GetByProductIdAsync(variant!.ProductId);
+            var existingDisplayOrders = existingVariants.IsNullOrEmpty() 
+                ? new List<int>() 
+                : existingVariants.Select(v => v.DisplayOrder);
+            var resolvedDisplayOrder = _orderResolutionService.ResolveOrder(existingDisplayOrders, request.DisplayOrder, variant.DisplayOrder);
 
             // If marking as default, unmark other defaults for this product
             if (request.IsDefault && !variant.IsDefault)
@@ -145,13 +189,22 @@ namespace NextShopV2.Application.Services
                 await UnmarkOtherDefaultsAsync(variant.ProductId);
             }
 
-            variant.SKU = request.SKU;
+            // Auto-generate SKU if empty or null
+            if (string.IsNullOrEmpty(request.SKU))
+            {
+                variant.SKU = CommonHelpers.GenerateSKU("PRD", request.Color, request.Size);
+            }
+            else
+            {
+                variant.SKU = request.SKU;
+            }
+            
             variant.Color = request.Color;
             variant.Size = request.Size;
             variant.AdditionalPrice = request.AdditionalPrice;
             variant.StockQuantity = request.StockQuantity;
             variant.IsDefault = request.IsDefault;
-            variant.DisplayOrder = request.DisplayOrder;
+            variant.DisplayOrder = resolvedDisplayOrder; // ← Use resolved DisplayOrder
             variant.ImageUrl = request.ImageUrl;
 
             await _variantRepo.UpdateAsync(variant);
@@ -163,9 +216,9 @@ namespace NextShopV2.Application.Services
         public async Task<bool> UpdateStockAsync(Guid id, UpdateStockRequest request)
         {
             var variant = await _variantRepo.GetByIdAsync(id);
-            if (variant == null) return false;
+            if (variant.IsNull()) return false;
 
-            variant.StockQuantity = request.StockQuantity;
+            variant!.StockQuantity = request.StockQuantity;
 
             await _variantRepo.UpdateAsync(variant);
             await _variantRepo.SaveAsync();
@@ -176,10 +229,10 @@ namespace NextShopV2.Application.Services
         public async Task<bool> SetAsDefaultAsync(Guid id)
         {
             var variant = await _variantRepo.GetByIdAsync(id);
-            if (variant == null) return false;
+            if (variant.IsNull()) return false;
 
             // Unmark other defaults for this product
-            await UnmarkOtherDefaultsAsync(variant.ProductId);
+            await UnmarkOtherDefaultsAsync(variant!.ProductId);
 
             // Mark this as default
             variant.IsDefault = true;
@@ -203,13 +256,17 @@ namespace NextShopV2.Application.Services
         private async Task UnmarkOtherDefaultsAsync(Guid productId)
         {
             var variants = await _variantRepo.GetByProductIdAsync(productId);
+            
+            if (variants.IsNullOrEmpty()) 
+                return;
+                
             var defaultVariants = variants.Where(v => v.IsDefault).ToList();
 
-            foreach (var variant in defaultVariants)
+            await defaultVariants.SafeForEachAsync(async variant =>
             {
                 variant.IsDefault = false;
                 await _variantRepo.UpdateAsync(variant);
-            }
+            });
         }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NextShopV2.Application.Interfaces.repositories;
 using NextShopV2.Domain.Entities.Products;
 using NextShopV2.Infrastructure.Persistence;
+using NextShopV2.Shared.Extensions;
 
 namespace NextShopV2.Infrastructure.Repositories
 {
@@ -66,7 +67,7 @@ namespace NextShopV2.Infrastructure.Repositories
         public async Task<bool> DeleteAsync(Guid id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category == null) return false;
+            if (category.IsNull()) return false;
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();

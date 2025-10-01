@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NextShopV2.Application\NextShopV2.Application.csproj" />
     <ProjectReference Include="..\NextShopV2.Infrastructure\NextShopV2.Infrastructure.csproj" />
+    <ProjectReference Include="..\NextShopV2.Shared\NextShopV2.Shared.csproj" />
   </ItemGroup>
 
 </Project>

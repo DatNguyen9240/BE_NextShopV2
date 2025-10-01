@@ -1,10 +1,13 @@
+using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using NextShopV2.Api.Helpers;
-using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Shared.Helpers;
 
-namespace NextShopV2.Api.Extensions
+namespace NextShopV2.Shared.Extensions.Web
 {
+    /// <summary>
+    /// Extension methods for authorization operations in ASP.NET Core controllers
+    /// </summary>
     public static class AuthorizationExtensions
     {
         /// <summary>
@@ -26,6 +29,23 @@ namespace NextShopV2.Api.Extensions
         {
             var userRole = controller.User.FindFirst(ClaimTypes.Role)?.Value;
             return userRole == "Admin";
+        }
+
+        /// <summary>
+        /// Get current user role
+        /// </summary>
+        public static string? GetCurrentUserRole(this ControllerBase controller)
+        {
+            return controller.User.FindFirst(ClaimTypes.Role)?.Value;
+        }
+
+        /// <summary>
+        /// Check if current user has specific role
+        /// </summary>
+        public static bool HasRole(this ControllerBase controller, string role)
+        {
+            var userRole = controller.User.FindFirst(ClaimTypes.Role)?.Value;
+            return string.Equals(userRole, role, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

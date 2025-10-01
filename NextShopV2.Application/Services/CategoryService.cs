@@ -3,6 +3,7 @@ using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces.services;
 using NextShopV2.Application.Interfaces.repositories;
 using NextShopV2.Domain.Entities.Products;
+using NextShopV2.Shared.Extensions;
 
 namespace NextShopV2.Application.Services
 {
@@ -62,9 +63,9 @@ namespace NextShopV2.Application.Services
         {
             var category = await _categoryRepository.GetByIdAsync(id);
 
-            if (category == null) return null;
+            if (category.IsNull()) return null;
 
-            return MapToResponse(category);
+            return MapToResponse(category!);
         }
 
         public async Task<List<CategoryResponse>> GetAllCategoriesAsync()
@@ -77,13 +78,13 @@ namespace NextShopV2.Application.Services
         public async Task<CategoryResponse> UpdateCategoryAsync(Guid id, CreateCategoryRequest request)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
-            if (category == null)
+            if (category.IsNull())
             {
                 throw new ArgumentException("Category not found");
             }
 
             // Validate parent category if changing
-            if (request.ParentId.HasValue && request.ParentId != category.ParentId)
+            if (request.ParentId.HasValue && request.ParentId != category!.ParentId)
             {
                 var parentExists = await _categoryRepository.ExistsAsync(request.ParentId.Value);
                 if (!parentExists)
@@ -105,7 +106,7 @@ namespace NextShopV2.Application.Services
                 throw new ArgumentException("Category with this name already exists at this level");
             }
 
-            category.Name = request.Name;
+            category!.Name = request.Name;
             category.ParentId = request.ParentId;
 
             var updatedCategory = await _categoryRepository.UpdateAsync(category);

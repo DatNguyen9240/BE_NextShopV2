@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.Interfaces.services;
-using NextShopV2.Api.Helpers;
+using NextShopV2.Shared.Helpers;
+using NextShopV2.Shared.Extensions;
 
 namespace NextShopV2.Api.Controllers
 {
@@ -45,7 +46,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
-            if (category == null)
+            if (category.IsNull())
                 return ResponseHelper.NotFound("Category not found");
             
             return ResponseHelper.Success(category, "Category retrieved successfully");

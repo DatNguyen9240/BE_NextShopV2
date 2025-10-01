@@ -8,9 +8,8 @@ namespace NextShopV2.Application.DTOs.Request
         [Required]
         public Guid ProductId { get; set; }
         
-        [Required]
         [StringLength(50)]
-        public string SKU { get; set; } = null!;
+        public string? SKU { get; set; }
         
         [StringLength(50)]
         public string? Color { get; set; }

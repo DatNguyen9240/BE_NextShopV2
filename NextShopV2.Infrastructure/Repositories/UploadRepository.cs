@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using NextShopV2.Application.DTOs;
 using NextShopV2.Application.Interfaces.Repositories;
+using NextShopV2.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -45,13 +46,18 @@ namespace NextShopV2.Infrastructure.Repositories
 
         public async Task<List<UploadResultDto>> UploadMultipleAsync(List<IFormFile> files)
         {
+            if (files.IsNullOrEmpty()) 
+                return new List<UploadResultDto>();
+
             var results = new List<UploadResultDto>();
+            
             foreach (var file in files)
             {
                 var result = await UploadAsync(file);
                 if (result != null)
                     results.Add(result);
             }
+            
             return results;
         }
 

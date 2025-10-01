@@ -3,6 +3,7 @@ using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Domain.Entities.Products;
+using NextShopV2.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -50,8 +51,9 @@ namespace NextShopV2.Application.Services
         public async Task<bool> UpdateAsync(Guid id, UpdateProductRequest request)
         {
             var product = await _repo.GetByIdAsync(id);
-            if (product == null) return false;
-            product.Name = request.Name;
+            if (product.IsNull()) return false;
+            
+            product!.Name = request.Name;
             product.Description = request.Description;
             product.BasePrice = request.BasePrice;
             product.GenderTarget = request.GenderTarget;
@@ -64,8 +66,9 @@ namespace NextShopV2.Application.Services
         public async Task<bool> DeleteAsync(Guid id)
         {
             var product = await _repo.GetByIdAsync(id);
-            if (product == null) return false;
-            await _repo.DeleteAsync(product);
+            if (product.IsNull()) return false;
+            
+            await _repo.DeleteAsync(product!);
             await _repo.SaveAsync();
             return true;
         }
@@ -86,18 +89,24 @@ namespace NextShopV2.Application.Services
                 TotalReviews = p.TotalReviews,
                 TotalLikes = p.TotalLikes,
                 IsActive = p.IsActive,
-                Variants = p.Variants.Select(v => new ProductVariantResponse
-                {
-                    ProductVariantId = v.VariantId,
-                    ProductId = v.ProductId,
-                    Color = v.Color,
-                    Size = v.Size,
-                    AdditionalPrice = v.AdditionalPrice,
-                    StockQuantity = v.StockQuantity,
-                    IsDefault = v.IsDefault,
-                    DisplayOrder = v.DisplayOrder,
-                    ImageUrl = v.ImageUrl
-                }).ToList()
+                Variants = p.Variants.IsNullOrEmpty() 
+                    ? new List<ProductVariantResponse>()
+                    : p.Variants
+                        .OrderBy(v => v.DisplayOrder)
+                        .ThenBy(v => v.VariantId)
+                        .Select(v => new ProductVariantResponse
+                        {
+                            ProductVariantId = v.VariantId,
+                            ProductId = v.ProductId,
+                            Sku = v.SKU,
+                            Color = v.Color,
+                            Size = v.Size,
+                            AdditionalPrice = v.AdditionalPrice,
+                            StockQuantity = v.StockQuantity,
+                            IsDefault = v.IsDefault,
+                            DisplayOrder = v.DisplayOrder,
+                            ImageUrl = v.ImageUrl
+                        }).ToList()
             };
         }
     }

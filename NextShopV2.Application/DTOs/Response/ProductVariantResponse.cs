@@ -6,6 +6,7 @@ namespace NextShopV2.Application.DTOs.Response
     {
         public Guid ProductVariantId { get; set; }
         public Guid ProductId { get; set; }
+        public string Sku { get; set; } = null!;
         public string? Color { get; set; }
         public string? Size { get; set; }
         public decimal AdditionalPrice { get; set; }

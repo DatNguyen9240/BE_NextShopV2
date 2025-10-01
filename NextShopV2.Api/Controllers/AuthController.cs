@@ -6,7 +6,8 @@ using NextShopV2.Application.Common;
 using StackExchange.Redis;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.DTOs.Request;
-using NextShopV2.Api.Helpers;
+using NextShopV2.Shared.Helpers;
+using NextShopV2.Shared.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -70,11 +71,11 @@ namespace NextShopV2.Api.Controllers
         {
             // Get userId from JWT token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            if (userIdClaim.IsNull() || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
             var user = _authService.GetMe(userId);
-            if (user == null)
+            if (user.IsNull())
                 return ResponseHelper.NotFound("User not found");
 
             return ResponseHelper.Success(user);

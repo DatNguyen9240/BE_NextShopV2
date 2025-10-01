@@ -4,6 +4,7 @@ using NextShopV2.Application.Interfaces;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Application.Common;
 using NextShopV2.Application.Common.Helpers;
+using NextShopV2.Shared.Extensions;
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -46,7 +47,7 @@ namespace NextShopV2.Application.Services
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = _userRepository.GetByEmail(request.Email!);
-            if (user == null || user.PasswordHash != passwordHash)
+            if (user.IsNull() || user?.PasswordHash != passwordHash)
                 return new AuthResponse { Success = false, Message = "Invalid credentials" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
@@ -71,11 +72,12 @@ namespace NextShopV2.Application.Services
         public UserResponse? GetMe(Guid userId)
         {
             var user = _userRepository.GetById(userId);
-            if (user == null) return null;
+            if (user.IsNull()) 
+                return null;
 
             return new UserResponse
             {
-                Id = user.Id,
+                Id = user!.Id,
                 Email = user.Email,
                 FullName = user.FullName,
                 Role = user.Role,

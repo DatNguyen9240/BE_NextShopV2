@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request;
-using NextShopV2.Api.Helpers;
+using NextShopV2.Shared.Helpers;
+using NextShopV2.Shared.Extensions;
 using NextShopV2.Api.Attributes;
-using NextShopV2.Api.Extensions;
+using NextShopV2.Shared.Extensions.Web;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var order = await _orderService.GetByIdAsync(id);
-            if (order == null)
+            if (order.IsNull())
                 return ResponseHelper.NotFound("Order not found");
 
             // Check ownership: Admin can view all, User can only view their own
@@ -120,7 +121,7 @@ namespace NextShopV2.Api.Controllers
             if (!this.IsAdmin())
             {
                 var order = await _orderService.GetByIdAsync(id);
-                if (order == null)
+                if (order.IsNull())
                     return ResponseHelper.NotFound("Order not found");
 
                 var ownershipCheck = this.CheckResourceOwnership(order.UserId);

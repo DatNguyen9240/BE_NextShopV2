@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using NextShopV2.Infrastructure.Persistence;
 using StackExchange.Redis;
-using NextShopV2.Api.Services;
+using NextShopV2.Application.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using NextShopV2.Shared.Extensions.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,7 +83,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddScoped<AdvertisementCacheService>();
+
+// Register shared cache service
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.ICacheService>(provider =>
+{
+    var redis = provider.GetRequiredService<IConnectionMultiplexer>();
+    return new NextShopV2.Shared.Services.RedisCacheService(redis, TimeSpan.FromMinutes(5));
+});
+
+// Register advertisement cache service
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IAdvertisementCacheService, NextShopV2.Application.Services.AdvertisementCacheService>();
+
+// Register DI for OrderResolutionService (shared utility)
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IOrderResolutionService, NextShopV2.Shared.Services.OrderResolutionService>();
 
 // Register DI for AuthService and UserRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAuthService, NextShopV2.Application.Services.AuthService>();
@@ -99,6 +112,9 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 // Register DI for UploadService and UploadRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IUploadService, NextShopV2.Application.Services.UploadService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IUploadRepository, NextShopV2.Infrastructure.Repositories.UploadRepository>();
+
+// Register DI for LoggingService
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.ILoggingService, NextShopV2.Shared.Services.LoggingService>();
 
 // Register DI for CategoryService and CategoryRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.services.ICategoryService, NextShopV2.Application.Services.CategoryService>();
@@ -122,7 +138,7 @@ app.UseSwaggerUI(c =>
 });
 
 // Global error handling middleware
-app.UseMiddleware<NextShopV2.Api.Middlewares.ExceptionMiddleware>();
+app.UseGlobalExceptionHandler();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
