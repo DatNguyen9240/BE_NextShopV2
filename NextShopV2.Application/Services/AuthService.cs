@@ -3,11 +3,13 @@ using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Application.Common;
-using NextShopV2.Application.Common.Helpers;
 using NextShopV2.Shared.Extensions;
+using NextShopV2.Shared.Helpers;
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
 using System;
+using AppApiResponse = NextShopV2.Application.DTOs.Response.ApiResponse;
+using AppAuthResponse = NextShopV2.Application.DTOs.Response.AuthResponse;
 
 namespace NextShopV2.Application.Services
 {
@@ -24,11 +26,11 @@ namespace NextShopV2.Application.Services
             _jwtKey = config["Jwt:Key"];
         }
 
-    public ApiResponse Register(RegisterRequest request)
+    public AppApiResponse Register(RegisterRequest request)
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             if (_userRepository.ExistsByEmail(request.Email!))
-                return new ApiResponse { Success = false, Message = "Đã tồn tại" };
+                return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -40,33 +42,33 @@ namespace NextShopV2.Application.Services
             };
             _userRepository.Add(user);
             _userRepository.Save();
-            return new ApiResponse { Success = true, Message = "User registered successfully" };
+            return new AppApiResponse { Success = true, Message = "User registered successfully" };
         }
 
-    public AuthResponse Login(LoginRequest request)
+    public AppAuthResponse Login(LoginRequest request)
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = _userRepository.GetByEmail(request.Email!);
             if (user.IsNull() || user?.PasswordHash != passwordHash)
-                return new AuthResponse { Success = false, Message = "Invalid credentials" };
+                return new AppAuthResponse { Success = false, Message = "Invalid credentials" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
-                return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+                return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             
             var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
             var refreshToken = Guid.NewGuid().ToString();
             _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
-            return new AuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
+            return new AppAuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
         }
 
-    public AuthResponse Refresh(RefreshTokenRequest request)
+    public AppAuthResponse Refresh(RefreshTokenRequest request)
         {
             var storedToken = _redisDb.StringGet($"refresh:{request.UserId}");
             if (storedToken != request.RefreshToken)
-                return new AuthResponse { Success = false, Message = "Invalid refresh token" };
+                return new AppAuthResponse { Success = false, Message = "Invalid refresh token" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
-                return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+                return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
-            return new AuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
+            return new AppAuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
         }
 
         public UserResponse? GetMe(Guid userId)

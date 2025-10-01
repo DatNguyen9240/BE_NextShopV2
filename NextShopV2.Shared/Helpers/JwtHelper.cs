@@ -4,10 +4,21 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace NextShopV2.Application.Common.Helpers
+namespace NextShopV2.Shared.Helpers
 {
+    /// <summary>
+    /// JWT token generation and validation utilities
+    /// </summary>
     public static class JwtHelper
     {
+        /// <summary>
+        /// Generate JWT token for user authentication
+        /// </summary>
+        /// <param name="key">Secret key for signing</param>
+        /// <param name="userId">User ID</param>
+        /// <param name="email">User email</param>
+        /// <param name="expireHours">Token expiration in hours (default: 1)</param>
+        /// <returns>JWT token string</returns>
         public static string GenerateToken(string key, Guid userId, string email, int expireHours = 1)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
