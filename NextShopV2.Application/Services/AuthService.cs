@@ -50,11 +50,11 @@ namespace NextShopV2.Application.Services
                 return new AuthResponse { Success = false, Message = "Invalid credentials" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+            
             var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
             var refreshToken = Guid.NewGuid().ToString();
             _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
-            var userData = new { user.Id, user.Email };
-            return new AuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken, Data = new { User = userData } };
+            return new AuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
         }
 
     public AuthResponse Refresh(RefreshTokenRequest request)
@@ -66,6 +66,21 @@ namespace NextShopV2.Application.Services
                 return new AuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
             return new AuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
+        }
+
+        public UserResponse? GetMe(Guid userId)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null) return null;
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt
+            };
         }
     }
 }

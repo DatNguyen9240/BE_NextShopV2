@@ -5,11 +5,11 @@ namespace NextShopV2.Api.Helpers
 {
     public static class AuthResponseHelper
     {
-        public static IActionResult Success(string message, string? accessToken = null, string? refreshToken = null, object? data = null)
+        public static IActionResult Success(string message, string? accessToken = null, string? refreshToken = null)
         {
-            if (accessToken == null && refreshToken == null && data == null)
+            if (accessToken == null && refreshToken == null)
                 return new OkObjectResult(new { Success = true, Message = message ?? string.Empty });
-            return new OkObjectResult(new AuthResponse { Success = true, Message = message ?? string.Empty, AccessToken = accessToken, RefreshToken = refreshToken, Data = data });
+            return new OkObjectResult(new AuthResponse { Success = true, Message = message ?? string.Empty, AccessToken = accessToken, RefreshToken = refreshToken });
         }
 
         public static IActionResult BadRequest(string message)

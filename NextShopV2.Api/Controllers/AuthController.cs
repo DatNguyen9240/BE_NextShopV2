@@ -13,6 +13,9 @@ using System.Security.Claims;
 using System.Text;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Linq;
 namespace NextShopV2.Api.Controllers
 {
     [ApiController]
@@ -43,14 +46,40 @@ namespace NextShopV2.Api.Controllers
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
             var result = _authService.Login(request);
-            return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken, result.Data);
+            return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
 
         [HttpPost("refresh")]
         public IActionResult Refresh([FromBody] RefreshTokenRequest request)
         {
             var result = _authService.Refresh(request);
-            return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken, result.Data);
+            return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
+
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult GetMe()
+        {
+            try
+            {
+                // Get userId from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                    return ResponseHelper.Unauthorized("Invalid token");
+
+                var user = _authService.GetMe(userId);
+                if (user == null)
+                    return ResponseHelper.NotFound("User not found");
+
+                return ResponseHelper.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex.Message);
+            }
+        }
+
+
     }
+
 }
