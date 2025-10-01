@@ -37,6 +37,9 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = v.VariantId,
                 ProductId = v.ProductId,
+                Sku = string.IsNullOrEmpty(v.SKU) 
+                    ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
+                    : v.SKU,
                 Color = v.Color,
                 Size = v.Size,
                 AdditionalPrice = v.AdditionalPrice,
@@ -57,6 +60,9 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant!.VariantId,
                 ProductId = variant.ProductId,
+                Sku = string.IsNullOrEmpty(variant.SKU) 
+                    ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
+                    : variant.SKU,
                 Color = variant.Color,
                 Size = variant.Size,
                 AdditionalPrice = variant.AdditionalPrice,
@@ -84,6 +90,9 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = v.VariantId,
                 ProductId = v.ProductId,
+                Sku = string.IsNullOrEmpty(v.SKU) 
+                    ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
+                    : v.SKU,
                 Color = v.Color,
                 Size = v.Size,
                 AdditionalPrice = v.AdditionalPrice,
@@ -104,6 +113,9 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant!.VariantId,
                 ProductId = variant.ProductId,
+                Sku = string.IsNullOrEmpty(variant.SKU) 
+                    ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
+                    : variant.SKU,
                 Color = variant.Color,
                 Size = variant.Size,
                 AdditionalPrice = variant.AdditionalPrice,
@@ -161,6 +173,7 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant.VariantId,
                 ProductId = variant.ProductId,
+                Sku = variant.SKU, // SKU đã được generate trong CreateAsync
                 Color = variant.Color,
                 Size = variant.Size,
                 AdditionalPrice = variant.AdditionalPrice,
