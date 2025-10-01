@@ -46,6 +46,10 @@ namespace NextShopV2.Api.Controllers
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
             var result = _authService.Login(request);
+            
+            if (!result.Success)
+                return ResponseHelper.Unauthorized(result.Message ?? "Login failed");
+            
             return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
 
@@ -53,6 +57,10 @@ namespace NextShopV2.Api.Controllers
         public IActionResult Refresh([FromBody] RefreshTokenRequest request)
         {
             var result = _authService.Refresh(request);
+            
+            if (!result.Success)
+                return ResponseHelper.Unauthorized(result.Message ?? "Token refresh failed");
+            
             return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
 
@@ -60,23 +68,16 @@ namespace NextShopV2.Api.Controllers
         [Authorize]
         public IActionResult GetMe()
         {
-            try
-            {
-                // Get userId from JWT token
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-                    return ResponseHelper.Unauthorized("Invalid token");
+            // Get userId from JWT token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return ResponseHelper.Unauthorized("Invalid token");
 
-                var user = _authService.GetMe(userId);
-                if (user == null)
-                    return ResponseHelper.NotFound("User not found");
+            var user = _authService.GetMe(userId);
+            if (user == null)
+                return ResponseHelper.NotFound("User not found");
 
-                return ResponseHelper.Success(user);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.Error(ex.Message);
-            }
+            return ResponseHelper.Success(user);
         }
 
 

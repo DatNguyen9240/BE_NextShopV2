@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
+using NextShopV2.Api.Helpers;
+using System.Net;
 using System.Text.Json;
 
 namespace NextShopV2.Api.Middlewares
@@ -25,13 +23,47 @@ namespace NextShopV2.Api.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = 500;
-                var response = new { success = false, message = "Internal server error" };
-                var json = JsonSerializer.Serialize(response);
-                await context.Response.WriteAsync(json);
+                _logger.LogError(ex, "An unhandled exception occurred");
+                await HandleExceptionAsync(context, ex);
             }
+        }
+
+        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            
+            var response = exception switch
+            {
+                ArgumentException => new { 
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Response = ResponseHelper.BadRequest(exception.Message)
+                },
+                UnauthorizedAccessException => new {
+                    StatusCode = (int)HttpStatusCode.Unauthorized,
+                    Response = ResponseHelper.Unauthorized(exception.Message)
+                },
+                KeyNotFoundException => new {
+                    StatusCode = (int)HttpStatusCode.NotFound,
+                    Response = ResponseHelper.NotFound(exception.Message)
+                },
+                InvalidOperationException => new {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Response = ResponseHelper.BadRequest(exception.Message)
+                },
+                _ => new {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Response = ResponseHelper.Error("An unexpected error occurred")
+                }
+            };
+
+            context.Response.StatusCode = response.StatusCode;
+            
+            var jsonResponse = JsonSerializer.Serialize(response.Response, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            await context.Response.WriteAsync(jsonResponse);
         }
     }
 }

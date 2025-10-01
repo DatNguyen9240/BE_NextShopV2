@@ -22,86 +22,51 @@ namespace NextShopV2.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var products = await _service.GetAllAsync();
-                return ResponseHelper.Success(products, "Products retrieved successfully");
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.Error(ex.Message);
-            }
+            var products = await _service.GetAllAsync();
+            return ResponseHelper.Success(products, "Products retrieved successfully");
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            try
-            {
-                var product = await _service.GetByIdAsync(id);
-                if (product == null)
-                    return ResponseHelper.NotFound("Product not found");
-                
-                return ResponseHelper.Success(product, "Product retrieved successfully");
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.Error(ex.Message);
-            }
+            var product = await _service.GetByIdAsync(id);
+            if (product == null)
+                return ResponseHelper.NotFound("Product not found");
+            
+            return ResponseHelper.Success(product, "Product retrieved successfully");
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return ResponseHelper.ValidationError(ModelState);
+            if (!ModelState.IsValid)
+                return ResponseHelper.ValidationError(ModelState);
 
-                var created = await _service.CreateAsync(request);
-                return ResponseHelper.Created(created, "Product created successfully");
-            }
-            catch (ArgumentException ex)
-            {
-                return ResponseHelper.BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.Error(ex.Message);
-            }
+            var created = await _service.CreateAsync(request);
+            return ResponseHelper.Created(created, "Product created successfully");
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return ResponseHelper.ValidationError(ModelState);
+            if (!ModelState.IsValid)
+                return ResponseHelper.ValidationError(ModelState);
 
-                var result = await _service.UpdateAsync(id, request);
-                if (!result)
-                    return ResponseHelper.NotFound("Product not found");
+            var result = await _service.UpdateAsync(id, request);
+            if (!result)
+                return ResponseHelper.NotFound("Product not found");
 
-                return ResponseHelper.Success(message: "Product updated successfully");
-            }
-            catch (ArgumentException ex)
-            {
-                return ResponseHelper.BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper.Error(ex.Message);
-            }
+            return ResponseHelper.Success(message: "Product updated successfully");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var ok = await _service.DeleteAsync(id);
-            if (!ok)
-                return NotFound(new ApiResponse { Success = false, Message = "Product not found" });
-            return Ok(new ApiResponse { Success = true });
+            var result = await _service.DeleteAsync(id);
+            if (!result)
+                return ResponseHelper.NotFound("Product not found");
+            
+            return ResponseHelper.Success(message: "Product deleted successfully");
         }
     }
 }
