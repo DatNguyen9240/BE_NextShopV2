@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NextShopV2.Infrastructure.Persistence;
 using NextShopV2.Domain.Entities;
-using NextShopV2.Application.Common;
 using StackExchange.Redis;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.DTOs.Request;

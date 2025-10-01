@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace NextShopV2.Shared.Helpers
 {
@@ -12,6 +13,8 @@ namespace NextShopV2.Shared.Helpers
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
+        
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public object? Data { get; set; }
     }
 

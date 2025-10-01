@@ -2,7 +2,6 @@ using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces;
 using NextShopV2.Domain.Entities.Users;
-using NextShopV2.Application.Common;
 using NextShopV2.Shared.Extensions;
 using NextShopV2.Shared.Helpers;
 using StackExchange.Redis;
