@@ -67,11 +67,13 @@ namespace NextShopV2.Infrastructure.Repositories
         public async Task<bool> DeleteAsync(Guid id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category.IsNull()) return false;
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-            return true;
+            if (category is not null)
+            {
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> ExistsAsync(Guid id)

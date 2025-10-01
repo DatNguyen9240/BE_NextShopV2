@@ -63,9 +63,12 @@ namespace NextShopV2.Application.Services
         {
             var category = await _categoryRepository.GetByIdAsync(id);
 
-            if (category.IsNull()) return null;
+            if (category is not null)
+            {
+                return MapToResponse(category);
+            }
 
-            return MapToResponse(category!);
+            return null;
         }
 
         public async Task<List<CategoryResponse>> GetAllCategoriesAsync()
@@ -78,13 +81,13 @@ namespace NextShopV2.Application.Services
         public async Task<CategoryResponse> UpdateCategoryAsync(Guid id, CreateCategoryRequest request)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
-            if (category.IsNull())
+            if (category is null)
             {
                 throw new ArgumentException("Category not found");
             }
 
             // Validate parent category if changing
-            if (request.ParentId.HasValue && request.ParentId != category!.ParentId)
+            if (request.ParentId.HasValue && request.ParentId != category.ParentId)
             {
                 var parentExists = await _categoryRepository.ExistsAsync(request.ParentId.Value);
                 if (!parentExists)
@@ -106,7 +109,7 @@ namespace NextShopV2.Application.Services
                 throw new ArgumentException("Category with this name already exists at this level");
             }
 
-            category!.Name = request.Name;
+            category.Name = request.Name;
             category.ParentId = request.ParentId;
 
             var updatedCategory = await _categoryRepository.UpdateAsync(category);

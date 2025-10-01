@@ -39,7 +39,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var order = await _orderService.GetByIdAsync(id);
-            if (order.IsNull())
+            if (order is null)
                 return ResponseHelper.NotFound("Order not found");
 
             // Check ownership: Admin can view all, User can only view their own
@@ -121,7 +121,7 @@ namespace NextShopV2.Api.Controllers
             if (!this.IsAdmin())
             {
                 var order = await _orderService.GetByIdAsync(id);
-                if (order.IsNull())
+                if (order is null)
                     return ResponseHelper.NotFound("Order not found");
 
                 var ownershipCheck = this.CheckResourceOwnership(order.UserId);

@@ -71,11 +71,11 @@ namespace NextShopV2.Api.Controllers
         {
             // Get userId from JWT token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
-            if (userIdClaim.IsNull() || !Guid.TryParse(userIdClaim.Value, out var userId))
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
             var user = _authService.GetMe(userId);
-            if (user.IsNull())
+            if (user is null)
                 return ResponseHelper.NotFound("User not found");
 
             return ResponseHelper.Success(user);

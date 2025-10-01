@@ -21,29 +21,33 @@ namespace NextShopV2.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload([FromForm] UploadFileRequest request)
         {
-            if (request.File.IsNull() || request.File.Length == 0)
+            if (request.File is null || request.File.Length == 0)
                 return Ok(new ApiResponse { Success = false, Message = "No file uploaded." });
 
             var result = await _uploadService.UploadAsync(request.File);
-            if (result.IsNull())
-                return BadRequest(new ApiResponse { Success = false, Message = "Upload failed." });
-            return Ok(new ApiResponse { 
-                Success = true, 
-                Message = "Tải thành công", 
-                Data = new { 
-                    url = result.Url,        
-                    publicId = result.PublicId
-                } 
-            });
+            if (result is not null)
+            {
+                return Ok(new ApiResponse { 
+                    Success = true, 
+                    Message = "Tải thành công", 
+                    Data = new { 
+                        url = result.Url,        
+                        publicId = result.PublicId
+                    } 
+                });
+            }
+            return BadRequest(new ApiResponse { Success = false, Message = "Upload failed." });
         }
 
         [HttpDelete]
         public async Task<IActionResult> Delete([FromQuery] string publicId)
         {
             var result = await _uploadService.DeleteAsync(publicId);
-            if (result.IsNull())
-                return BadRequest(new ApiResponse { Success = false, Message = "Delete failed." });
-            return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { publicId = result.PublicId } });
+            if (result is not null)
+            {
+                return Ok(new ApiResponse { Success = true, Message = "Xóa thành công", Data = new { publicId = result.PublicId } });
+            }
+            return BadRequest(new ApiResponse { Success = false, Message = "Delete failed." });
         }
 
         [HttpPost("multi")]
