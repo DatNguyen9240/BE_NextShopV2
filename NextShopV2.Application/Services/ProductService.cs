@@ -85,7 +85,19 @@ namespace NextShopV2.Application.Services
                 AverageRating = p.AverageRating,
                 TotalReviews = p.TotalReviews,
                 TotalLikes = p.TotalLikes,
-                IsActive = p.IsActive
+                IsActive = p.IsActive,
+                Variants = p.Variants.Select(v => new ProductVariantResponse
+                {
+                    ProductVariantId = v.VariantId,
+                    ProductId = v.ProductId,
+                    Color = v.Color,
+                    Size = v.Size,
+                    AdditionalPrice = v.AdditionalPrice,
+                    StockQuantity = v.StockQuantity,
+                    IsDefault = v.IsDefault,
+                    DisplayOrder = v.DisplayOrder,
+                    ImageUrl = v.ImageUrl
+                }).ToList()
             };
         }
     }

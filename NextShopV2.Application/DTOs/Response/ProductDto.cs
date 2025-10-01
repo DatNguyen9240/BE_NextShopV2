@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace NextShopV2.Application.DTOs.Response
 {
@@ -14,6 +15,6 @@ namespace NextShopV2.Application.DTOs.Response
         public int TotalReviews { get; set; }
         public int TotalLikes { get; set; }
         public bool IsActive { get; set; }
-        // Có thể bổ sung các trường khác nếu cần
+        public List<ProductVariantResponse> Variants { get; set; } = new List<ProductVariantResponse>();
     }
 }

@@ -16,9 +16,15 @@ namespace NextShopV2.Infrastructure.Repositories
             _context = context;
         }
         public async Task<List<Product>> GetAllAsync()
-            => await _context.Products.ToListAsync();
+            => await _context.Products
+                .Include(p => p.Variants.OrderBy(v => v.DisplayOrder))
+                .ToListAsync();
         public async Task<Product?> GetByIdAsync(Guid id)
-            => await _context.Products.FindAsync(id);
+            => await _context.Products
+                .Include(p => p.Variants.OrderBy(v => v.DisplayOrder))
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+        public async Task<bool> ExistsAsync(Guid id)
+            => await _context.Products.AnyAsync(p => p.ProductId == id);
         public async Task AddAsync(Product product)
             => await _context.Products.AddAsync(product);
         public Task UpdateAsync(Product product)

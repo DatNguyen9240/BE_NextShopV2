@@ -40,6 +40,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IUploa
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.services.ICategoryService, NextShopV2.Application.Services.CategoryService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.repositories.ICategoryRepository, NextShopV2.Infrastructure.Repositories.CategoryRepository>();
 
+// Register DI for ProductVariantService and ProductVariantRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductVariantRepository, NextShopV2.Infrastructure.Repositories.ProductVariantRepository>();
+
 var app = builder.Build();
 
 app.UseSwagger();
