@@ -15,11 +15,13 @@ namespace NextShopV2.Application.Services
     {
         private readonly IOrderRepository _orderRepo;
         private readonly IProductVariantRepository _variantRepo;
+        private readonly IInventoryService _inventoryService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
+            _inventoryService = inventoryService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -52,6 +54,9 @@ namespace NextShopV2.Application.Services
             if (request.Items.IsNullOrEmpty())
                 throw new ArgumentException("Order must contain at least one item");
 
+            // Generate order ID first
+            var orderId = Guid.NewGuid();
+            
             // Validate all variants exist and calculate total
             var orderItems = new List<OrderItem>();
             decimal totalAmount = 0;
@@ -78,14 +83,18 @@ namespace NextShopV2.Application.Services
                 orderItems.Add(orderItem);
                 totalAmount += orderItem.Quantity * orderItem.UnitPrice;
 
-                // Update stock
-                variant.StockQuantity -= itemRequest.Quantity;
-                await _variantRepo.UpdateAsync(variant);
+                // Create inventory transaction for stock reduction
+                await _inventoryService.UpdateInventoryAsync(
+                    itemRequest.VariantId,
+                    -itemRequest.Quantity, // Negative value to reduce stock
+                    $"Order #{orderId}",
+                    "System"
+                );
             }
 
             var order = new Order
             {
-                OrderId = Guid.NewGuid(),
+                OrderId = orderId,
                 UserId = userId, // Use userId from parameter instead of request
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
