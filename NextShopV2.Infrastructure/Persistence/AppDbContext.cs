@@ -22,7 +22,6 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<ProductLike> ProductLikes { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
-        public DbSet<ProductMedia> ProductMedia { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
@@ -45,9 +44,6 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<OrderCoupon>()
                 .HasKey(oc => new { oc.OrderId, oc.CouponId });
-
-                modelBuilder.Entity<ProductMedia>()
-                    .HasKey(pm => pm.MediaId);
 
                 modelBuilder.Entity<InventoryTransaction>()
                     .HasKey(it => it.TransactionId);

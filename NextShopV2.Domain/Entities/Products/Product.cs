@@ -20,7 +20,6 @@ namespace NextShopV2.Domain.Entities.Products
 
         public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
-        public ICollection<ProductMedia> Media { get; set; } = new List<ProductMedia>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<ProductLike> ProductLikes { get; set; } = new List<ProductLike>();
     }
