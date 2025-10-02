@@ -9,7 +9,10 @@ namespace NextShopV2.Application.DTOs.Response
         public Guid UserId { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = null!;
+        public decimal SubTotal { get; set; }
+        public decimal DiscountAmount { get; set; }
         public decimal TotalAmount { get; set; }
+        public string? CouponCode { get; set; }
         public string? ShippingAddress { get; set; }
         public List<OrderItemResponse> Items { get; set; } = new List<OrderItemResponse>();
     }

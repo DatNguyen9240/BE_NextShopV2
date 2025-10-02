@@ -1,0 +1,145 @@
+using NextShopV2.Application.Interfaces.Repositories;
+using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Application.DTOs.Request;
+using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Domain.Entities.Coupons;
+using NextShopV2.Shared.Extensions;
+
+namespace NextShopV2.Application.Services
+{
+    public class CouponService : ICouponService
+    {
+        private readonly ICouponRepository _couponRepo;
+
+        public CouponService(ICouponRepository couponRepo)
+        {
+            _couponRepo = couponRepo;
+        }
+
+        public async Task<List<CouponResponse>> GetAllAsync()
+        {
+            var coupons = await _couponRepo.GetAllAsync();
+            return coupons.Select(MapToResponse).ToList();
+        }
+
+        public async Task<CouponResponse?> GetByIdAsync(Guid id)
+        {
+            var coupon = await _couponRepo.GetByIdAsync(id);
+            return coupon.IsNull() ? null : MapToResponse(coupon!);
+        }
+
+        public async Task<CouponResponse?> GetByCodeAsync(string code)
+        {
+            var coupon = await _couponRepo.GetByCodeAsync(code);
+            return coupon.IsNull() ? null : MapToResponse(coupon!);
+        }
+
+        public async Task<CouponResponse> CreateAsync(CreateCouponRequest request)
+        {
+            // Check if coupon code already exists
+            if (await _couponRepo.ExistsAsync(request.Code))
+                throw new ArgumentException($"Coupon code '{request.Code}' already exists");
+
+            // Validate dates
+            if (request.EndDate <= request.StartDate)
+                throw new ArgumentException("End date must be after start date");
+
+            var coupon = new Coupon
+            {
+                CouponId = Guid.NewGuid(),
+                Code = request.Code.ToUpper().Trim(),
+                DiscountPercent = request.DiscountPercent,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                IsActive = request.IsActive
+            };
+
+            await _couponRepo.CreateAsync(coupon);
+            return MapToResponse(coupon);
+        }
+
+        public async Task<CouponResponse?> UpdateAsync(Guid id, UpdateCouponRequest request)
+        {
+            var coupon = await _couponRepo.GetByIdAsync(id);
+            if (coupon.IsNull())
+                return null;
+
+            // Check if new code already exists (excluding current coupon)
+            if (!string.IsNullOrEmpty(request.Code))
+            {
+                var existingCoupon = await _couponRepo.GetByCodeAsync(request.Code);
+                if (existingCoupon != null && existingCoupon.CouponId != id)
+                    throw new ArgumentException($"Coupon code '{request.Code}' already exists");
+                
+                coupon!.Code = request.Code.ToUpper().Trim();
+            }
+
+            if (request.DiscountPercent.HasValue)
+                coupon!.DiscountPercent = request.DiscountPercent.Value;
+
+            if (request.StartDate.HasValue)
+                coupon!.StartDate = request.StartDate.Value;
+
+            if (request.EndDate.HasValue)
+                coupon!.EndDate = request.EndDate.Value;
+
+            if (request.IsActive.HasValue)
+                coupon!.IsActive = request.IsActive.Value;
+
+            // Validate dates after update
+            if (coupon!.EndDate <= coupon.StartDate)
+                throw new ArgumentException("End date must be after start date");
+
+            await _couponRepo.UpdateAsync(coupon);
+            return MapToResponse(coupon);
+        }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            return await _couponRepo.DeleteAsync(id);
+        }
+
+        public async Task<List<CouponResponse>> GetActiveCouponsAsync()
+        {
+            var coupons = await _couponRepo.GetActiveCouponsAsync();
+            return coupons.Select(MapToResponse).ToList();
+        }
+
+        public async Task<bool> ValidateCouponAsync(string code)
+        {
+            var coupon = await _couponRepo.GetByCodeAsync(code);
+            if (coupon.IsNull())
+                return false;
+
+            var now = DateTime.UtcNow;
+            return coupon!.IsActive && 
+                   coupon.StartDate <= now && 
+                   coupon.EndDate >= now;
+        }
+
+        public async Task<decimal> CalculateDiscountAsync(string couponCode, decimal originalAmount)
+        {
+            if (!await ValidateCouponAsync(couponCode))
+                return 0;
+
+            var coupon = await _couponRepo.GetByCodeAsync(couponCode);
+            if (coupon.IsNull())
+                return 0;
+
+            return originalAmount * (coupon!.DiscountPercent / 100);
+        }
+
+        private CouponResponse MapToResponse(Coupon coupon)
+        {
+            return new CouponResponse
+            {
+                CouponId = coupon.CouponId,
+                Code = coupon.Code,
+                DiscountPercent = coupon.DiscountPercent,
+                StartDate = coupon.StartDate,
+                EndDate = coupon.EndDate,
+                IsActive = coupon.IsActive
+            };
+        }
+    }
+}

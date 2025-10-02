@@ -136,6 +136,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IOrder
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IInventoryService, NextShopV2.Application.Services.InventoryService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IInventoryTransactionRepository, NextShopV2.Infrastructure.Repositories.InventoryTransactionRepository>();
 
+// Register DI for CouponService and CouponRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.ICouponService, NextShopV2.Application.Services.CouponService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.ICouponRepository, NextShopV2.Infrastructure.Repositories.CouponRepository>();
+
 // Register DI for Redis Cart Service (from Shared)
 builder.Services.AddScoped<IDatabase>(serviceProvider =>
 {

@@ -16,12 +16,14 @@ namespace NextShopV2.Application.Services
         private readonly IOrderRepository _orderRepo;
         private readonly IProductVariantRepository _variantRepo;
         private readonly IInventoryService _inventoryService;
+        private readonly ICouponService _couponService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
             _inventoryService = inventoryService;
+            _couponService = couponService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -92,13 +94,37 @@ namespace NextShopV2.Application.Services
                 );
             }
 
+            // Calculate discount if coupon is provided
+            decimal discountAmount = 0;
+            string? appliedCouponCode = null;
+
+            if (!string.IsNullOrEmpty(request.CouponCode))
+            {
+                // Validate coupon
+                var isValidCoupon = await _couponService.ValidateCouponAsync(request.CouponCode);
+                if (isValidCoupon)
+                {
+                    discountAmount = await _couponService.CalculateDiscountAsync(request.CouponCode, totalAmount);
+                    appliedCouponCode = request.CouponCode;
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid or expired coupon code: {request.CouponCode}");
+                }
+            }
+
+            var finalAmount = totalAmount - discountAmount;
+
             var order = new Order
             {
                 OrderId = orderId,
-                UserId = userId, // Use userId from parameter instead of request
+                UserId = userId,
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
-                TotalAmount = totalAmount,
+                SubTotal = totalAmount,
+                DiscountAmount = discountAmount,
+                TotalAmount = finalAmount,
+                CouponCode = appliedCouponCode,
                 ShippingAddress = request.ShippingAddress,
                 Items = orderItems
             };
@@ -181,7 +207,10 @@ namespace NextShopV2.Application.Services
                 UserId = order.UserId,
                 OrderDate = order.OrderDate,
                 Status = order.Status,
+                SubTotal = order.SubTotal,
+                DiscountAmount = order.DiscountAmount,
                 TotalAmount = order.TotalAmount,
+                CouponCode = order.CouponCode,
                 ShippingAddress = order.ShippingAddress,
                 Items = order.Items.Select(item => new OrderItemResponse
                 {
