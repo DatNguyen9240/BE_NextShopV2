@@ -128,6 +128,15 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IOrderService, NextShopV2.Application.Services.OrderService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IOrderRepository, NextShopV2.Infrastructure.Repositories.OrderRepository>();
 
+// Register DI for Redis Cart Service (from Shared)
+builder.Services.AddScoped<IDatabase>(serviceProvider =>
+{
+    var redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+    return redis.GetDatabase();
+});
+builder.Services.AddScoped<NextShopV2.Shared.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantCartService>();
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IRedisCartService, NextShopV2.Shared.Services.RedisCartService>();
+
 var app = builder.Build();
 
 app.UseSwagger();
