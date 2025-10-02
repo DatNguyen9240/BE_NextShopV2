@@ -14,5 +14,6 @@ namespace NextShopV2.Application.DTOs.Response
         public bool IsDefault { get; set; }
         public int DisplayOrder { get; set; }
         public string? ImageUrl { get; set; }
+        public string? ImgHover { get; set; }
     }
 }

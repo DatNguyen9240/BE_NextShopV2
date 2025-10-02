@@ -46,7 +46,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
-                ImageUrl = v.ImageUrl
+                ImageUrl = v.ImageUrl,
+                ImgHover = v.ImgHover
             }).ToList();
         }
 
@@ -69,7 +70,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
-                ImageUrl = variant.ImageUrl
+                ImageUrl = variant.ImageUrl,
+                ImgHover = variant.ImgHover
             };
         }
 
@@ -99,7 +101,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
-                ImageUrl = v.ImageUrl
+                ImageUrl = v.ImageUrl,
+                ImgHover = v.ImgHover
             }).ToList();
         }
 
@@ -122,7 +125,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
-                ImageUrl = variant.ImageUrl
+                ImageUrl = variant.ImageUrl,
+                ImgHover = variant.ImgHover
             };
         }
 
@@ -163,7 +167,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = request.StockQuantity,
                 IsDefault = request.IsDefault,
                 DisplayOrder = resolvedDisplayOrder, // ← Use resolved DisplayOrder
-                ImageUrl = request.ImageUrl
+                ImageUrl = request.ImageUrl,
+                ImgHover = request.ImgHover
             };
 
             await _variantRepo.AddAsync(variant);
@@ -180,7 +185,8 @@ namespace NextShopV2.Application.Services
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
-                ImageUrl = variant.ImageUrl
+                ImageUrl = variant.ImageUrl,
+                ImgHover = variant.ImgHover
             };
         }
 
@@ -219,6 +225,7 @@ namespace NextShopV2.Application.Services
             variant.IsDefault = request.IsDefault;
             variant.DisplayOrder = resolvedDisplayOrder; // ← Use resolved DisplayOrder
             variant.ImageUrl = request.ImageUrl;
+            variant.ImgHover = request.ImgHover;
 
             await _variantRepo.UpdateAsync(variant);
             await _variantRepo.SaveAsync();

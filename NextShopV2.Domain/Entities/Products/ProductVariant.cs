@@ -15,6 +15,7 @@ namespace NextShopV2.Domain.Entities.Products
         public bool IsDefault { get; set; } = false;
         public int DisplayOrder { get; set; } = 0;
         public string? ImageUrl { get; set; }
+        public string? ImgHover { get; set; } // Image hiển thị khi hover
 
         public Product Product { get; set; } = null!;
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = new List<InventoryTransaction>();

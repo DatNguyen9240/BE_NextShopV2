@@ -26,5 +26,8 @@ namespace NextShopV2.Application.DTOs.Request
         
         [StringLength(500)]
         public string? ImageUrl { get; set; }
+        
+        [StringLength(500)]
+        public string? ImgHover { get; set; }
     }
 }
