@@ -140,6 +140,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IInven
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.ICouponService, NextShopV2.Application.Services.CouponService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.ICouponRepository, NextShopV2.Infrastructure.Repositories.CouponRepository>();
 
+// Register DI for ProductLikeService and ProductLikeRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductLikeService, NextShopV2.Application.Services.ProductLikeService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductLikeRepository, NextShopV2.Infrastructure.Repositories.ProductLikeRepository>();
+
 // Register DI for Redis Cart Service (from Shared)
 builder.Services.AddScoped<IDatabase>(serviceProvider =>
 {
