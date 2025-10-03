@@ -10,11 +10,7 @@ namespace NextShopV2.Application.DTOs.Request
         
         [MaxLength(1000)]
         public string? Description { get; set; }
-        
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        public decimal BasePrice { get; set; }
-        
+                
         [MaxLength(50)]
         public string? GenderTarget { get; set; }
         

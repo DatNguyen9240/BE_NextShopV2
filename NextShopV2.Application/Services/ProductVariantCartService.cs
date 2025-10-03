@@ -23,7 +23,7 @@ namespace NextShopV2.Application.Services
 
             return new VariantInfo
             {
-                Price = variant.Product?.BasePrice + variant.AdditionalPrice ?? variant.AdditionalPrice,
+                Price = variant.PriceAfterDiscount,
                 ProductName = variant.Product?.Name ?? string.Empty,
                 Color = variant.Color ?? string.Empty,
                 Size = variant.Size ?? string.Empty,

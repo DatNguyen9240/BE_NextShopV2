@@ -42,12 +42,16 @@ namespace NextShopV2.Application.Services
                     : v.SKU,
                 Color = v.Color,
                 Size = v.Size,
-                AdditionalPrice = v.AdditionalPrice,
+                // Xoá AdditionalPrice
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
                 ImageUrl = v.ImageUrl,
-                ImgHover = v.ImgHover
+                ImgHover = v.ImgHover,
+                BasePrice = v.BasePrice,
+                DiscountPercent = v.DiscountPercent,
+                DiscountAmount = v.DiscountAmount,
+                PriceAfterDiscount = v.PriceAfterDiscount
             }).ToList();
         }
 
@@ -59,19 +63,22 @@ namespace NextShopV2.Application.Services
 
             return new ProductVariantResponse
             {
-                ProductVariantId = variant!.VariantId,
+                ProductVariantId = variant.VariantId,
                 ProductId = variant.ProductId,
                 Sku = string.IsNullOrEmpty(variant.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
                     : variant.SKU,
                 Color = variant.Color,
                 Size = variant.Size,
-                AdditionalPrice = variant.AdditionalPrice,
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover
+                ImgHover = variant.ImgHover,
+                BasePrice = variant.BasePrice,
+                DiscountPercent = variant.DiscountPercent,
+                DiscountAmount = variant.DiscountAmount,
+                PriceAfterDiscount = variant.PriceAfterDiscount
             };
         }
 
@@ -97,7 +104,7 @@ namespace NextShopV2.Application.Services
                     : v.SKU,
                 Color = v.Color,
                 Size = v.Size,
-                AdditionalPrice = v.AdditionalPrice,
+            
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
@@ -121,7 +128,7 @@ namespace NextShopV2.Application.Services
                     : variant.SKU,
                 Color = variant.Color,
                 Size = variant.Size,
-                AdditionalPrice = variant.AdditionalPrice,
+                // Xoá AdditionalPrice
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
@@ -156,6 +163,19 @@ namespace NextShopV2.Application.Services
                 ? CommonHelpers.GenerateSKU("PRD", request.Color, request.Size)
                 : request.SKU;
 
+            // Tính DiscountAmount và PriceAfterDiscount
+            decimal discountAmount = 0;
+            decimal priceAfterDiscount = 0;
+            if (request.BasePrice > 0 && request.DiscountPercent > 0)
+            {
+                discountAmount = request.BasePrice * request.DiscountPercent / 100;
+                priceAfterDiscount = request.BasePrice - discountAmount;
+            }
+            else
+            {
+                priceAfterDiscount = request.BasePrice;
+            }
+
             var variant = new ProductVariant
             {
                 VariantId = Guid.NewGuid(),
@@ -163,12 +183,15 @@ namespace NextShopV2.Application.Services
                 SKU = generatedSKU,
                 Color = request.Color,
                 Size = request.Size,
-                AdditionalPrice = request.AdditionalPrice,
                 StockQuantity = request.StockQuantity,
                 IsDefault = request.IsDefault,
                 DisplayOrder = resolvedDisplayOrder, // ← Use resolved DisplayOrder
                 ImageUrl = request.ImageUrl,
-                ImgHover = request.ImgHover
+                ImgHover = request.ImgHover,
+                BasePrice = request.BasePrice,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = discountAmount,
+                PriceAfterDiscount = priceAfterDiscount
             };
 
             await _variantRepo.AddAsync(variant);
@@ -181,7 +204,6 @@ namespace NextShopV2.Application.Services
                 Sku = variant.SKU, // SKU đã được generate trong CreateAsync
                 Color = variant.Color,
                 Size = variant.Size,
-                AdditionalPrice = variant.AdditionalPrice,
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
@@ -220,7 +242,7 @@ namespace NextShopV2.Application.Services
             
             variant.Color = request.Color;
             variant.Size = request.Size;
-            variant.AdditionalPrice = request.AdditionalPrice;
+            // Xoá AdditionalPrice
             variant.StockQuantity = request.StockQuantity;
             variant.IsDefault = request.IsDefault;
             variant.DisplayOrder = resolvedDisplayOrder; // ← Use resolved DisplayOrder

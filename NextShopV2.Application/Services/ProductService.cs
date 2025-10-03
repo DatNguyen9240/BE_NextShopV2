@@ -35,7 +35,6 @@ namespace NextShopV2.Application.Services
                 ProductId = Guid.NewGuid(),
                 Name = request.Name,
                 Description = request.Description,
-                BasePrice = request.BasePrice,
                 GenderTarget = request.GenderTarget,
                 Brand = request.Brand,
                 AverageRating = 0,
@@ -55,7 +54,6 @@ namespace NextShopV2.Application.Services
             
             product!.Name = request.Name;
             product.Description = request.Description;
-            product.BasePrice = request.BasePrice;
             product.GenderTarget = request.GenderTarget;
             product.Brand = request.Brand;
             product.IsActive = request.IsActive;
@@ -82,7 +80,6 @@ namespace NextShopV2.Application.Services
                 ProductId = p.ProductId,
                 Name = p.Name,
                 Description = p.Description,
-                BasePrice = p.BasePrice,
                 GenderTarget = p.GenderTarget,
                 Brand = p.Brand,
                 AverageRating = p.AverageRating,
@@ -101,7 +98,6 @@ namespace NextShopV2.Application.Services
                             Sku = v.SKU,
                             Color = v.Color,
                             Size = v.Size,
-                            AdditionalPrice = v.AdditionalPrice,
                             StockQuantity = v.StockQuantity,
                             IsDefault = v.IsDefault,
                             DisplayOrder = v.DisplayOrder,

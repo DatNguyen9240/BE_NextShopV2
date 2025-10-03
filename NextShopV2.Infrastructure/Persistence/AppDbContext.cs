@@ -78,13 +78,6 @@ namespace NextShopV2.Infrastructure.Persistence
                 .Property(p => p.AverageRating)
                 .HasPrecision(5, 2);
 
-            modelBuilder.Entity<Product>()
-                .Property(p => p.BasePrice)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<ProductVariant>()
-                .Property(pv => pv.AdditionalPrice)
-                .HasPrecision(18, 2);
 
             base.OnModelCreating(modelBuilder);
         }

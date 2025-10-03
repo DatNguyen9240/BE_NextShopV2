@@ -10,7 +10,10 @@ namespace NextShopV2.Domain.Entities.Products
         public string SKU { get; set; } = null!;
         public string? Color { get; set; }
         public string? Size { get; set; }
-        public decimal AdditionalPrice { get; set; }
+        public decimal BasePrice { get; set; }
+        public decimal DiscountPercent { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal PriceAfterDiscount { get; set; }
         public int StockQuantity { get; set; }
         public bool IsDefault { get; set; } = false;
         public int DisplayOrder { get; set; } = 0;

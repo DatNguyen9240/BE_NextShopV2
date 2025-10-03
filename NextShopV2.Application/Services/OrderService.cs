@@ -72,7 +72,7 @@ namespace NextShopV2.Application.Services
                 if (variant!.StockQuantity < itemRequest.Quantity)
                     throw new ArgumentException($"Insufficient stock for variant {itemRequest.VariantId}");
 
-                var unitPrice = variant.AdditionalPrice; // You might want to add base price logic
+                var unitPrice = variant.PriceAfterDiscount;
                 var orderItem = new OrderItem
                 {
                     OrderItemId = Guid.NewGuid(),
@@ -198,7 +198,7 @@ namespace NextShopV2.Application.Services
                 var variant = await _variantRepo.GetByIdAsync(itemRequest.VariantId);
                 if (variant != null)
                 {
-                    total += variant.AdditionalPrice * itemRequest.Quantity;
+                    total += variant.PriceAfterDiscount * itemRequest.Quantity;
                 }
             }
 
@@ -229,7 +229,10 @@ namespace NextShopV2.Application.Services
                         ProductId = item.Variant.ProductId,
                         Color = item.Variant.Color,
                         Size = item.Variant.Size,
-                        AdditionalPrice = item.Variant.AdditionalPrice,
+                        BasePrice = item.Variant.BasePrice,
+                        DiscountPercent = item.Variant.DiscountPercent,
+                        DiscountAmount = item.Variant.DiscountAmount,
+                        PriceAfterDiscount = item.Variant.PriceAfterDiscount,
                         StockQuantity = item.Variant.StockQuantity,
                         IsDefault = item.Variant.IsDefault,
                         DisplayOrder = item.Variant.DisplayOrder,

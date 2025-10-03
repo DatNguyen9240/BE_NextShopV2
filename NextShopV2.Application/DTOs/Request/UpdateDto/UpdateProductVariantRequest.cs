@@ -12,10 +12,7 @@ namespace NextShopV2.Application.DTOs.Request
         
         [StringLength(20)]
         public string? Size { get; set; }
-        
-        [Range(0, double.MaxValue)]
-        public decimal AdditionalPrice { get; set; } = 0;
-        
+                
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; } = 0;
         
