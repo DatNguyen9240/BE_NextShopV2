@@ -9,6 +9,8 @@ namespace NextShopV2.Domain.Entities.Products
         public string Name { get; set; } = null!;
         public Guid? ParentId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string? ImageUrl { get; set; }
+        public string? Icon { get; set; }
 
         public Category? Parent { get; set; }
         public ICollection<Category> Children { get; set; } = new List<Category>();

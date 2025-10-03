@@ -41,7 +41,9 @@ namespace NextShopV2.Application.Services
                 CategoryId = Guid.NewGuid(),
                 Name = request.Name,
                 ParentId = request.ParentId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ImageUrl = request.ImageUrl,
+                Icon = request.Icon
             };
 
             var createdCategory = await _categoryRepository.AddAsync(category);
@@ -53,6 +55,8 @@ namespace NextShopV2.Application.Services
                 Name = createdCategory.Name,
                 ParentId = createdCategory.ParentId,
                 CreatedAt = createdCategory.CreatedAt,
+                ImageUrl = createdCategory.ImageUrl,
+                Icon = createdCategory.Icon,
                 ParentName = request.ParentId.HasValue 
                     ? await _categoryRepository.GetParentNameAsync(request.ParentId.Value) 
                     : null

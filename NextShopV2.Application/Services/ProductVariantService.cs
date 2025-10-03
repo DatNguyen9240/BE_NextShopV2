@@ -58,7 +58,7 @@ namespace NextShopV2.Application.Services
         public async Task<ProductVariantResponse?> GetByIdAsync(Guid id)
         {
             var variant = await _variantRepo.GetByIdAsync(id);
-            if (variant.IsNull())
+            if (variant == null)
                 return null;
 
             return new ProductVariantResponse
