@@ -34,7 +34,6 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                .Include(o => o.Coupons)
                 .Include(o => o.Payments)
                 .Include(o => o.Shipment)
                 .FirstOrDefaultAsync(o => o.OrderId == id);

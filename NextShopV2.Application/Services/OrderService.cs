@@ -94,40 +94,46 @@ namespace NextShopV2.Application.Services
                 );
             }
 
-            // Calculate discount if coupon is provided
-            decimal discountAmount = 0;
-            string? appliedCouponCode = null;
-
-            if (!string.IsNullOrEmpty(request.CouponCode))
-            {
-                // Validate coupon
-                var isValidCoupon = await _couponService.ValidateCouponAsync(request.CouponCode);
-                if (isValidCoupon)
+                // Áp dụng nhiều coupon nếu có
+                var orderCoupons = new List<OrderCoupon>();
+                decimal discountAmount = 0;
+                if (request.CouponIds != null && request.CouponIds.Any())
                 {
-                    discountAmount = await _couponService.CalculateDiscountAsync(request.CouponCode, totalAmount);
-                    appliedCouponCode = request.CouponCode;
+                    foreach (var couponId in request.CouponIds)
+                    {
+                        var coupon = await _couponService.GetByIdAsync(couponId);
+                        if (coupon == null || !coupon.IsValid)
+                            continue;
+                        var couponDiscount = await _couponService.CalculateDiscountAsync(coupon.Code, totalAmount - discountAmount);
+                        if (couponDiscount > 0)
+                        {
+                            discountAmount += couponDiscount;
+                            orderCoupons.Add(new OrderCoupon
+                            {
+                                OrderId = orderId,
+                                CouponId = coupon.CouponId,
+                                DiscountAmount = couponDiscount,
+                                AppliedAt = DateTime.UtcNow
+                            });
+                        }
+                    }
                 }
-                else
+
+                var finalAmount = totalAmount - discountAmount;
+
+                var order = new Order
                 {
-                    throw new ArgumentException($"Invalid or expired coupon code: {request.CouponCode}");
-                }
-            }
-
-            var finalAmount = totalAmount - discountAmount;
-
-            var order = new Order
-            {
-                OrderId = orderId,
-                UserId = userId,
-                OrderDate = DateTime.UtcNow,
-                Status = "Pending",
-                SubTotal = totalAmount,
-                DiscountAmount = discountAmount,
-                TotalAmount = finalAmount,
-                CouponCode = appliedCouponCode,
-                ShippingAddress = request.ShippingAddress,
-                Items = orderItems
-            };
+                    OrderId = orderId,
+                    UserId = userId,
+                    OrderDate = DateTime.UtcNow,
+                    Status = "Pending",
+                    SubTotal = totalAmount,
+                    DiscountAmount = discountAmount,
+                    TotalAmount = finalAmount,
+                    ShippingAddress = request.ShippingAddress,
+                    Items = orderItems,
+                    // Không còn CouponId, coupon
+                };
 
             await _orderRepo.AddAsync(order);
             await _orderRepo.SaveAsync();
@@ -210,7 +216,6 @@ namespace NextShopV2.Application.Services
                 SubTotal = order.SubTotal,
                 DiscountAmount = order.DiscountAmount,
                 TotalAmount = order.TotalAmount,
-                CouponCode = order.CouponCode,
                 ShippingAddress = order.ShippingAddress,
                 Items = order.Items.Select(item => new OrderItemResponse
                 {
@@ -230,7 +235,14 @@ namespace NextShopV2.Application.Services
                         DisplayOrder = item.Variant.DisplayOrder,
                         ImageUrl = item.Variant.ImageUrl
                     }
-                }).ToList()
+                }).ToList(),
+                Coupons = order.OrderCoupons?.Select(oc => new OrderCouponResponse
+                {
+                    CouponId = oc.CouponId,
+                    Code = oc.Coupon?.Code ?? string.Empty,
+                    DiscountAmount = oc.DiscountAmount,
+                    AppliedAt = oc.AppliedAt
+                }).ToList() ?? new List<OrderCouponResponse>(),
             };
         }
     }

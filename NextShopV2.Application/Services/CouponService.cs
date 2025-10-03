@@ -49,8 +49,11 @@ namespace NextShopV2.Application.Services
                 CouponId = Guid.NewGuid(),
                 Code = request.Code.ToUpper().Trim(),
                 DiscountPercent = request.DiscountPercent,
+                MinOrderAmount = request.MinOrderAmount,
+                MaxDiscountAmount = request.MaxDiscountAmount,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
+                UsageLimit = request.UsageLimit,
                 IsActive = request.IsActive
             };
 
@@ -74,14 +77,25 @@ namespace NextShopV2.Application.Services
                 coupon!.Code = request.Code.ToUpper().Trim();
             }
 
+
             if (request.DiscountPercent.HasValue)
                 coupon!.DiscountPercent = request.DiscountPercent.Value;
+
+            if (request.MinOrderAmount.HasValue)
+                coupon!.MinOrderAmount = request.MinOrderAmount.Value;
+
+            if (request.MaxDiscountAmount.HasValue)
+                coupon!.MaxDiscountAmount = request.MaxDiscountAmount.Value;
+
 
             if (request.StartDate.HasValue)
                 coupon!.StartDate = request.StartDate.Value;
 
             if (request.EndDate.HasValue)
                 coupon!.EndDate = request.EndDate.Value;
+
+            if (request.UsageLimit.HasValue)
+                coupon!.UsageLimit = request.UsageLimit.Value;
 
             if (request.IsActive.HasValue)
                 coupon!.IsActive = request.IsActive.Value;
@@ -119,14 +133,50 @@ namespace NextShopV2.Application.Services
 
         public async Task<decimal> CalculateDiscountAsync(string couponCode, decimal originalAmount)
         {
-            if (!await ValidateCouponAsync(couponCode))
-                return 0;
-
             var coupon = await _couponRepo.GetByCodeAsync(couponCode);
             if (coupon.IsNull())
                 return 0;
 
-            return originalAmount * (coupon!.DiscountPercent / 100);
+            // Validate coupon
+            if (!IsValidCoupon(coupon!, originalAmount))
+                return 0;
+
+            // Calculate discount
+            var discountAmount = originalAmount * (coupon!.DiscountPercent / 100);
+
+            // Apply max discount limit if set
+            if (coupon.MaxDiscountAmount.HasValue && discountAmount > coupon.MaxDiscountAmount.Value)
+                discountAmount = coupon.MaxDiscountAmount.Value;
+
+            return discountAmount;
+        }
+
+        public async Task<bool> CanApplyCouponAsync(string couponCode, decimal orderAmount)
+        {
+            var coupon = await _couponRepo.GetByCodeAsync(couponCode);
+            if (coupon.IsNull())
+                return false;
+
+            return IsValidCoupon(coupon!, orderAmount);
+        }
+
+        private bool IsValidCoupon(Coupon coupon, decimal orderAmount)
+        {
+            var now = DateTime.UtcNow;
+
+            // Check basic validity
+            if (!coupon.IsActive || coupon.StartDate > now || coupon.EndDate < now)
+                return false;
+
+            // Check minimum order amount
+            if (coupon.MinOrderAmount.HasValue && orderAmount < coupon.MinOrderAmount.Value)
+                return false;
+
+            // Check usage limit
+            if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
+                return false;
+
+            return true;
         }
 
         private CouponResponse MapToResponse(Coupon coupon)
@@ -136,8 +186,12 @@ namespace NextShopV2.Application.Services
                 CouponId = coupon.CouponId,
                 Code = coupon.Code,
                 DiscountPercent = coupon.DiscountPercent,
+                MinOrderAmount = coupon.MinOrderAmount,
+                MaxDiscountAmount = coupon.MaxDiscountAmount,
                 StartDate = coupon.StartDate,
                 EndDate = coupon.EndDate,
+                UsageLimit = coupon.UsageLimit,
+                UsedCount = coupon.UsedCount,
                 IsActive = coupon.IsActive
             };
         }

@@ -12,7 +12,7 @@ namespace NextShopV2.Application.DTOs.Response
         public decimal SubTotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal TotalAmount { get; set; }
-        public string? CouponCode { get; set; }
+    public List<OrderCouponResponse> Coupons { get; set; } = new List<OrderCouponResponse>();
         public string? ShippingAddress { get; set; }
         public List<OrderItemResponse> Items { get; set; } = new List<OrderItemResponse>();
     }

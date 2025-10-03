@@ -13,8 +13,8 @@ namespace NextShopV2.Application.DTOs.Request
         [StringLength(500)]
         public string? ShippingAddress { get; set; }
         
-        [StringLength(20)]
-        public string? CouponCode { get; set; }
+    // Hỗ trợ nhiều coupon cho mỗi order
+    public List<Guid>? CouponIds { get; set; }
     }
     
     public class CreateOrderItemRequest
