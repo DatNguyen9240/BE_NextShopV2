@@ -64,6 +64,30 @@ namespace NextShopV2.Api.Controllers
             return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
 
+        [HttpPost("logout")]
+        public IActionResult Logout([FromBody] NextShopV2.Application.DTOs.Request.LogoutRequest request)
+        {
+            // Prefer access token from Authorization header: "Bearer <token>", fallback to body.AccessToken
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            string? accessToken = null;
+            if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer "))
+            {
+                accessToken = authHeader.Substring("Bearer ".Length).Trim();
+            }
+            else if (!string.IsNullOrWhiteSpace(request?.AccessToken))
+            {
+                accessToken = request!.AccessToken;
+            }
+
+            if (string.IsNullOrWhiteSpace(accessToken))
+                return ResponseHelper.BadRequest("Access token is required either in Authorization header or request body");
+
+            var result = _authService.Logout(accessToken, request?.RefreshToken ?? string.Empty);
+            if (!result.Success)
+                return ResponseHelper.BadRequest(result.Message ?? "Logout failed");
+            return ResponseHelper.Success(result.Message ?? "Logged out");
+        }
+
         [HttpGet("me")]
         [Authorize]
         public IActionResult GetMe()

@@ -70,6 +70,48 @@ namespace NextShopV2.Application.Services
             return new AppAuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
         }
 
+        public AppApiResponse Logout(string accessToken, string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(accessToken))
+                return new AppApiResponse { Success = false, Message = "Access token is required" };
+
+            try
+            {
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(accessToken);
+                var exp = jwt.ValidTo; // UTC
+                var now = DateTime.UtcNow;
+                if (exp > now)
+                {
+                    var ttl = exp - now;
+                    var key = $"blacklist:access:{accessToken}";
+                    _redisDb.StringSet(key, "1", ttl);
+                }
+
+                // Invalidate refresh token stored in redis
+                // We stored refresh token as "refresh:{userId}" earlier
+                var userIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "userId");
+                if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+                {
+                    // remove stored refresh token for the user
+                    _redisDb.KeyDelete($"refresh:{userId}");
+                }
+
+                // Optionally blacklist the refresh token string if provided
+                if (!string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    // we don't have expiry for refresh token here, set a reasonable TTL (7 days) or remove if stored
+                    _redisDb.StringSet($"blacklist:refresh:{refreshToken}", "1", TimeSpan.FromDays(7));
+                }
+
+                return new AppApiResponse { Success = true, Message = "Logged out" };
+            }
+            catch (Exception ex)
+            {
+                return new AppApiResponse { Success = false, Message = ex.Message };
+            }
+        }
+
         public UserResponse? GetMe(Guid userId)
         {
             var user = _userRepository.GetById(userId);

@@ -11,6 +11,7 @@ namespace NextShopV2.Application.Interfaces
         AppApiResponse Register(RegisterRequest request);
         AppAuthResponse Login(LoginRequest request);
         AppAuthResponse Refresh(RefreshTokenRequest request);
+        AppApiResponse Logout(string accessToken, string refreshToken);
         UserResponse? GetMe(Guid userId);
     }
 }

@@ -23,6 +23,30 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// CORS: allow local Next.js dev origin so browser preflight succeeds
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// CORS: allow local Next.js dev origin so browser preflight succeeds
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Configure Swagger with JWT
 builder.Services.AddSwaggerGen(c =>
 {
@@ -78,11 +102,49 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
-        
-
+        // Reject tokens that are present in Redis blacklist
+        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                try
+                {
+                    var db = context.HttpContext.RequestServices.GetService<StackExchange.Redis.IDatabase>();
+                    var token = context.SecurityToken as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+                    if (db != null && token != null)
+                    {
+                        var key = $"blacklist:{context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim()}";
+                        var exists = db.StringGet(key);
+                        if (!exists.IsNullOrEmpty)
+                        {
+                            // token is blacklisted
+                            context.Fail("Token is blacklisted");
+                        }
+                    }
+                }
+                catch
+                {
+                    // ignore Redis issues and allow token (or you can fail)
+                }
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+
+// Configure Https redirection port so middleware can determine redirect target.
+var httpsPortEnv = builder.Configuration["ASPNETCORE_HTTPS_PORT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
+int httpsPort = 0;
+if (!string.IsNullOrWhiteSpace(httpsPortEnv))
+{
+    int.TryParse(httpsPortEnv, out httpsPort);
+}
+if (httpsPort == 0)
+{
+    httpsPort = 7264; // fallback dev SSL port
+}
+builder.Services.AddHttpsRedirection(options => { options.HttpsPort = httpsPort; });
 
 // Register shared cache service
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.ICacheService>(provider =>
@@ -159,6 +221,9 @@ builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IRedisCartService, NextS
 
 var app = builder.Build();
 
+// Enable CORS as early as possible so preflight requests are handled
+app.UseCors("AllowLocalDev");
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -169,7 +234,12 @@ app.UseSwaggerUI(c =>
 // Global error handling middleware
 app.UseGlobalExceptionHandler();
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection when not in Development to avoid redirecting
+// local HTTP dev requests to an HTTPS port that may not be listening.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

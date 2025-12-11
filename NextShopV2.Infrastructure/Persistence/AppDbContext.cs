@@ -55,10 +55,25 @@ namespace NextShopV2.Infrastructure.Persistence
             modelBuilder.Entity<Coupon>()
                 .Property(c => c.DiscountPercent)
                 .HasPrecision(10, 2); // decimal(10,2)
+            modelBuilder.Entity<Coupon>()
+                .Property(c => c.MinOrderAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Coupon>()
+                .Property(c => c.MaxDiscountAmount)
+                .HasPrecision(18, 2);
 
             // Ví dụ cho Order
             modelBuilder.Entity<Order>()
                 .Property(o => o.TotalAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.SubTotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.DiscountAmount)
                 .HasPrecision(18, 2);
 
             // Các entity khác tương tự:
@@ -77,6 +92,22 @@ namespace NextShopV2.Infrastructure.Persistence
             modelBuilder.Entity<Product>()
                 .Property(p => p.AverageRating)
                 .HasPrecision(5, 2);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property(pv => pv.BasePrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property(pv => pv.DiscountAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property(pv => pv.DiscountPercent)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property(pv => pv.PriceAfterDiscount)
+                .HasPrecision(18, 2);
 
 
             base.OnModelCreating(modelBuilder);
