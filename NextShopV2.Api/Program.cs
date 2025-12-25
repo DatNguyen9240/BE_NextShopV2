@@ -153,8 +153,6 @@ builder.Services.AddScoped<NextShopV2.Shared.Interfaces.ICacheService>(provider 
     return new NextShopV2.Shared.Services.RedisCacheService(redis, TimeSpan.FromMinutes(5));
 });
 
-// Register advertisement cache service
-builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IAdvertisementCacheService, NextShopV2.Application.Services.AdvertisementCacheService>();
 
 // Register DI for OrderResolutionService (shared utility)
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IOrderResolutionService, NextShopV2.Shared.Services.OrderResolutionService>();

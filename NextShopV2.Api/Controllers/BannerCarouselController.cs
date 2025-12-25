@@ -21,9 +21,9 @@ namespace NextShopV2.Api.Controllers
 		// GET: api/BannerCarousel
 		[HttpGet]
 		// Public endpoint - anyone can view banners
-		public async Task<IActionResult> GetAll()
+		public async Task<IActionResult> GetAll([FromQuery] string? type = null)
 		{
-			var banners = await _bannerService.GetAllAsync();
+			var banners = await _bannerService.GetAllAsync(type);
 			return ResponseHelper.Success(banners, "Banners retrieved successfully");
 		}
 

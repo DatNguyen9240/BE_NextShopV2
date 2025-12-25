@@ -19,7 +19,7 @@ namespace NextShopV2.Shared.Helpers
         /// <param name="email">User email</param>
         /// <param name="expireHours">Token expiration in hours (default: 1)</param>
         /// <returns>JWT token string</returns>
-        public static string GenerateToken(string key, Guid userId, string email, int expireHours = 1)
+        public static string GenerateToken(string key, Guid userId, string email, string? role = null, int expireHours = 1)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var keyBytes = Encoding.UTF8.GetBytes(key);
@@ -31,7 +31,7 @@ namespace NextShopV2.Shared.Helpers
                     new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                     new Claim(ClaimTypes.Email, email),
                     new Claim("userId", userId.ToString()) // Add custom claim for easier access
-                }),
+                } .Concat(string.IsNullOrWhiteSpace(role) ? Array.Empty<Claim>() : new[] { new Claim(ClaimTypes.Role, role) })),
                 Expires = DateTime.UtcNow.AddHours(expireHours),
                 Issuer = "NextShopAPI",
                 Audience = "NextShopUsers",

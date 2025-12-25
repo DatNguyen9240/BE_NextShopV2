@@ -12,5 +12,6 @@ namespace NextShopV2.Application.Interfaces.services
         Task<bool> DeleteCategoryAsync(Guid id);
         Task<List<CategoryResponse>> GetRootCategoriesAsync();
         Task<List<CategoryResponse>> GetChildCategoriesAsync(Guid parentId);
+        Task<List<CategoryResponse>> GetCategoryTreeAsync();
     }
 }

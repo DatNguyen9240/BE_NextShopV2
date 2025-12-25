@@ -22,9 +22,15 @@ namespace NextShopV2.Application.Services
             _orderResolutionService = orderResolutionService;
             _loggingService = loggingService;
         }
-        public async Task<List<Advertisement>> GetAllAsync()
+        public async Task<List<Advertisement>> GetAllAsync(string? type = null)
         {
             var banners = await _repo.GetAllAsync();
+
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                banners = banners.Where(b => string.Equals(b.Type, type, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
             // Sort by SortOrder first, then by Id for consistency when SortOrder is same
             return banners.OrderBy(b => b.SortOrder).ThenBy(b => b.Id).ToList();
         }

@@ -53,7 +53,7 @@ namespace NextShopV2.Application.Services
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             
-            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email);
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
             var refreshToken = Guid.NewGuid().ToString();
             _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
             return new AppAuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
@@ -66,7 +66,11 @@ namespace NextShopV2.Application.Services
                 return new AppAuthResponse { Success = false, Message = "Invalid refresh token" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
-            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, "");
+            // Include user's role in refreshed token so role-based authorization continues to work
+            var user = _userRepository.GetById(request.UserId);
+            var role = user?.Role ?? string.Empty;
+            var email = user?.Email ?? string.Empty;
+            var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, email, role);
             return new AppAuthResponse { Success = true, Message = "Token refreshed", AccessToken = accessToken };
         }
 

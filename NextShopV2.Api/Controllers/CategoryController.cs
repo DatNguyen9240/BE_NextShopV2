@@ -18,11 +18,12 @@ namespace NextShopV2.Api.Controllers
         }
 
         // GET: api/Category
+        // Returns category tree (root categories with nested children)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
-            return ResponseHelper.Success(categories, "Categories retrieved successfully");
+            var categories = await _categoryService.GetCategoryTreeAsync();
+            return ResponseHelper.Success(categories, "Category tree retrieved successfully");
         }
 
         // GET: api/Category/root
@@ -31,6 +32,14 @@ namespace NextShopV2.Api.Controllers
         {
             var categories = await _categoryService.GetRootCategoriesAsync();
             return ResponseHelper.Success(categories, "Root categories retrieved successfully");
+        }
+
+        // GET: api/Category/tree
+        [HttpGet("tree")]
+        public async Task<IActionResult> GetTree()
+        {
+            var categories = await _categoryService.GetCategoryTreeAsync();
+            return ResponseHelper.Success(categories, "Category tree retrieved successfully");
         }
 
         // GET: api/Category/{id}/children

@@ -162,6 +162,31 @@ namespace NextShopV2.Application.Services
             return categories.Select(MapToResponse).ToList();
         }
 
+        public async Task<List<CategoryResponse>> GetCategoryTreeAsync()
+        {
+            // Build a tree from all categories to ensure nested children are assembled correctly
+            var allCategories = await _categoryRepository.GetAllAsync();
+
+            // Reset children collections and rebuild a parent -> children relationship
+            var lookup = allCategories.ToDictionary(c => c.CategoryId);
+            foreach (var cat in lookup.Values)
+            {
+                cat.Children = new List<Category>();
+            }
+
+            foreach (var cat in allCategories)
+            {
+                if (cat.ParentId.HasValue && lookup.ContainsKey(cat.ParentId.Value))
+                {
+                    lookup[cat.ParentId.Value].Children.Add(cat);
+                }
+            }
+
+            var roots = lookup.Values.Where(c => c.ParentId == null).OrderBy(c => c.Name).ToList();
+
+            return roots.Select(MapToResponse).ToList();
+        }
+
 
 
         private CategoryResponse MapToResponse(Category category)
