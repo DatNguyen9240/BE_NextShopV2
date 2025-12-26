@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NextShopV2.Application.DTOs.Request
@@ -18,8 +19,11 @@ namespace NextShopV2.Application.DTOs.Request
         public string? Brand { get; set; }
         
         public bool IsActive { get; set; }
+
+        public List<string>? Tags { get; set; }
+
+        // Optional: replace product categories with these (bulk assign)
+        public List<Guid>? CategoryIds { get; set; }
         
-        // KHÔNG CÓ productId - lấy từ URL parameter
-        // KHÔNG CÓ calculated fields
     }
-}
+}  

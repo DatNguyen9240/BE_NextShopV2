@@ -50,7 +50,8 @@ namespace NextShopV2.Application.Services
             var productCategory = new ProductCategory
             {
                 ProductId = request.ProductId,
-                CategoryId = request.CategoryId
+                CategoryId = request.CategoryId,
+                AssignedAt = DateTime.UtcNow
             };
 
             var createdAssignment = await _productCategoryRepository.AddAsync(productCategory);
@@ -65,7 +66,7 @@ namespace NextShopV2.Application.Services
                 CategoryId = createdAssignment.CategoryId,
                 ProductName = product?.Name ?? string.Empty,
                 CategoryName = category?.Name ?? string.Empty,
-                AssignedAt = DateTime.UtcNow
+                AssignedAt = createdAssignment.AssignedAt
             };
         }
 
@@ -150,7 +151,7 @@ namespace NextShopV2.Application.Services
                 CategoryId = productCategory.CategoryId,
                 ProductName = productCategory.Product?.Name ?? string.Empty,
                 CategoryName = productCategory.Category?.Name ?? string.Empty,
-                AssignedAt = DateTime.UtcNow // This should ideally come from the entity if you add CreatedAt field
+                AssignedAt = productCategory.AssignedAt
             };
         }
     }

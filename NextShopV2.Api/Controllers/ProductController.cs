@@ -15,16 +15,29 @@ namespace NextShopV2.Api.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;
-        public ProductController(IProductService service)
+        private readonly Microsoft.Extensions.Logging.ILogger<ProductController> _logger;
+        public ProductController(IProductService service, Microsoft.Extensions.Logging.ILogger<ProductController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(string? section, string? categoryId = null, int page = 1, int pageSize = 12)
         {
-            var products = await _service.GetAllAsync();
-            return ResponseHelper.Success(products, "Products retrieved successfully");
+            _logger.LogInformation("ProductController.GetAll called with section={Section}, categoryId={CategoryId}, page={Page}, pageSize={PageSize}", section ?? "<null>", categoryId ?? "<null>", page, pageSize);
+
+            if (string.IsNullOrEmpty(section) && string.IsNullOrEmpty(categoryId))
+            {
+                var products = await _service.GetAllAsync();
+                return ResponseHelper.Success(products, "Products retrieved successfully");
+            }
+
+            Guid? catGuid = null;
+            if (!string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var parsed)) catGuid = parsed;
+
+            var paged = await _service.GetBySectionAsync(section, catGuid, page, pageSize);
+            return ResponseHelper.Success(paged, "Products retrieved successfully");
         }
 
         [HttpGet("{id}")]

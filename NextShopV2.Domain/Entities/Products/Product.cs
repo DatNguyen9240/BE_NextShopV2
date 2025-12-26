@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using NextShopV2.Domain.Entities.Interactions;
 namespace NextShopV2.Domain.Entities.Products
 {
@@ -17,9 +19,20 @@ namespace NextShopV2.Domain.Entities.Products
         public DateTime? UpdatedAt { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+        // Store tags as JSON in the DB column
+        public string? TagsJson { get; set; }
+
+        [NotMapped]
+        public List<string> Tags
+        {
+            get => string.IsNullOrEmpty(TagsJson) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(TagsJson)!;
+            set => TagsJson = JsonSerializer.Serialize(value ?? new List<string>());
+        }
+
+
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<ProductLike> ProductLikes { get; set; } = new List<ProductLike>();
+        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
     }
 }

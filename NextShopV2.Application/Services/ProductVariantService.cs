@@ -109,7 +109,11 @@ namespace NextShopV2.Application.Services
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
                 ImageUrl = v.ImageUrl,
-                ImgHover = v.ImgHover
+                ImgHover = v.ImgHover,
+                BasePrice = v.BasePrice,
+                DiscountPercent = v.DiscountPercent,
+                DiscountAmount = v.DiscountAmount,
+                PriceAfterDiscount = v.PriceAfterDiscount
             }).ToList();
         }
 
@@ -133,7 +137,11 @@ namespace NextShopV2.Application.Services
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover
+                ImgHover = variant.ImgHover,
+                BasePrice = variant.BasePrice,
+                DiscountPercent = variant.DiscountPercent,
+                DiscountAmount = variant.DiscountAmount,
+                PriceAfterDiscount = variant.PriceAfterDiscount
             };
         }
 
@@ -163,18 +171,25 @@ namespace NextShopV2.Application.Services
                 ? CommonHelpers.GenerateSKU("PRD", request.Color, request.Size)
                 : request.SKU;
 
-            // Tính DiscountAmount và PriceAfterDiscount
+            // Tính DiscountAmount và PriceAfterDiscount.
+            // If DiscountAmount > 0 is provided, it takes precedence over DiscountPercent.
             decimal discountAmount = 0;
-            decimal priceAfterDiscount = 0;
-            if (request.BasePrice > 0 && request.DiscountPercent > 0)
+            decimal priceAfterDiscount = request.BasePrice;
+
+            if (request.DiscountAmount > 0)
+            {
+                discountAmount = request.DiscountAmount;
+            }
+            else if (request.BasePrice > 0 && request.DiscountPercent > 0)
             {
                 discountAmount = request.BasePrice * request.DiscountPercent / 100;
-                priceAfterDiscount = request.BasePrice - discountAmount;
             }
-            else
-            {
-                priceAfterDiscount = request.BasePrice;
-            }
+
+            // Ensure discount does not exceed base price
+            if (discountAmount > request.BasePrice)
+                throw new ArgumentException("Discount amount cannot be greater than base price");
+
+            priceAfterDiscount = request.BasePrice - discountAmount;
 
             var variant = new ProductVariant
             {
@@ -208,7 +223,11 @@ namespace NextShopV2.Application.Services
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover
+                ImgHover = variant.ImgHover,
+                BasePrice = variant.BasePrice,
+                DiscountPercent = variant.DiscountPercent,
+                DiscountAmount = variant.DiscountAmount,
+                PriceAfterDiscount = variant.PriceAfterDiscount
             };
         }
 
@@ -242,7 +261,28 @@ namespace NextShopV2.Application.Services
             
             variant.Color = request.Color;
             variant.Size = request.Size;
-            // Xoá AdditionalPrice
+            // Update base price / discounts if provided
+            if (request.BasePrice.HasValue)
+            {
+                variant.BasePrice = request.BasePrice.Value;
+            }
+
+            // Determine discount amount (request.DiscountAmount takes precedence)
+            if (request.DiscountAmount.HasValue)
+            {
+                if (request.DiscountAmount.Value > variant.BasePrice)
+                    throw new ArgumentException("Discount amount cannot be greater than base price");
+                variant.DiscountAmount = request.DiscountAmount.Value;
+            }
+            else if (request.DiscountPercent.HasValue)
+            {
+                variant.DiscountPercent = request.DiscountPercent.Value;
+                variant.DiscountAmount = variant.BasePrice * variant.DiscountPercent / 100;
+            }
+
+            // Recalculate price after discount
+            variant.PriceAfterDiscount = variant.BasePrice - variant.DiscountAmount;
+
             variant.StockQuantity = request.StockQuantity;
             variant.IsDefault = request.IsDefault;
             variant.DisplayOrder = resolvedDisplayOrder; // ← Use resolved DisplayOrder

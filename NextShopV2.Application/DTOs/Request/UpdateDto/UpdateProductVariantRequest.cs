@@ -20,6 +20,16 @@ namespace NextShopV2.Application.DTOs.Request
         
         [Range(0, int.MaxValue)]
         public int DisplayOrder { get; set; } = 0;
+
+        // Allow updating base price and discount amount (discount amount takes precedence over percent)
+        [Range(0.01, double.MaxValue, ErrorMessage = "Base price must be greater than 0")]
+        public decimal? BasePrice { get; set; }
+
+        [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100")]
+        public decimal? DiscountPercent { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "Discount amount must be >= 0")]
+        public decimal? DiscountAmount { get; set; }
         
         [StringLength(500)]
         public string? ImageUrl { get; set; }

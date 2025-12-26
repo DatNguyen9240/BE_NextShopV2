@@ -1,4 +1,7 @@
 using NextShopV2.Domain.Entities.Products;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NextShopV2.Application.Interfaces.repositories
 {

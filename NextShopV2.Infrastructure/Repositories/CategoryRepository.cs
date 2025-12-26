@@ -99,9 +99,11 @@ namespace NextShopV2.Infrastructure.Repositories
             return await _context.Categories.AnyAsync(c => c.ParentId == id);
         }
 
-        public async Task<bool> HasProductsAsync(Guid id)
+        public Task<bool> HasProductsAsync(Guid id)
         {
-            return await _context.ProductCategories.AnyAsync(pc => pc.CategoryId == id);
+            // ProductCategory join table removed — this check is no longer supported.
+            // Return false to indicate no products are associated (or update logic when a replacement relation exists).
+            return Task.FromResult(false);
         }
 
         public async Task<string?> GetParentNameAsync(Guid parentId)

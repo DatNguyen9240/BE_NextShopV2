@@ -11,6 +11,10 @@ namespace NextShopV2.Application.DTOs.Request
         [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100")]
         public decimal DiscountPercent { get; set; } = 0;
 
+        // Discount amount in the same currency as BasePrice. If provided (>0) it takes precedence over DiscountPercent.
+        [Range(0, double.MaxValue, ErrorMessage = "Discount amount must be >= 0")]
+        public decimal DiscountAmount { get; set; } = 0;
+
         [Required]
         public Guid ProductId { get; set; }
 

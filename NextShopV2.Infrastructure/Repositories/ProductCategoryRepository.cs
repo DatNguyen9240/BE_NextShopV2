@@ -81,7 +81,8 @@ namespace NextShopV2.Infrastructure.Repositories
             var productCategories = categoryIds.Select(categoryId => new ProductCategory
             {
                 ProductId = productId,
-                CategoryId = categoryId
+                CategoryId = categoryId,
+                AssignedAt = DateTime.UtcNow
             }).ToList();
 
             _context.ProductCategories.AddRange(productCategories);

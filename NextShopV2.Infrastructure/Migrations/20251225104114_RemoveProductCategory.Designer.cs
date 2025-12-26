@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NextShopV2.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using NextShopV2.Infrastructure.Persistence;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251225104114_RemoveProductCategory")]
+    partial class RemoveProductCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -445,24 +448,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductCategory", b =>
-                {
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ProductId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("ProductCategories");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductVariant", b =>
                 {
                     b.Property<Guid>("VariantId")
@@ -756,25 +741,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("Variant");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductCategory", b =>
-                {
-                    b.HasOne("NextShopV2.Domain.Entities.Products.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NextShopV2.Domain.Entities.Products.Product", "Product")
-                        .WithMany("ProductCategories")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductVariant", b =>
                 {
                     b.HasOne("NextShopV2.Domain.Entities.Products.Product", "Product")
@@ -820,8 +786,6 @@ namespace NextShopV2.Infrastructure.Migrations
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Product", b =>
                 {
-                    b.Navigation("ProductCategories");
-
                     b.Navigation("ProductLikes");
 
                     b.Navigation("Reviews");

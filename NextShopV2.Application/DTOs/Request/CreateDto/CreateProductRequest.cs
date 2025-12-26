@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NextShopV2.Application.DTOs.Request
@@ -19,7 +20,10 @@ namespace NextShopV2.Application.DTOs.Request
         
         public bool IsActive { get; set; } = true;
         
-        // KHÔNG CÓ productId - server sẽ tự generate
-        // KHÔNG CÓ averageRating, totalReviews, totalLikes - sẽ được tính toán
+        public List<string>? Tags { get; set; }
+
+        // Optional: categories to assign to the product on creation
+        public List<Guid>? CategoryIds { get; set; }
+
     }
-}
+} 

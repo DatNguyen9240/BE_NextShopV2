@@ -14,6 +14,9 @@ namespace NextShopV2.Application.DTOs.Response
         public int TotalReviews { get; set; }
         public int TotalLikes { get; set; }
         public bool IsActive { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
         public List<ProductVariantResponse> Variants { get; set; } = new List<ProductVariantResponse>();
+        public List<string> Images { get; set; } = new List<string>();
+        public List<Guid> CategoryIds { get; set; } = new List<Guid>();
     }
 }
