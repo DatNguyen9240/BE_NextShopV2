@@ -25,7 +25,8 @@ namespace NextShopV2.Application.Services
         public async Task<List<ProductDto>> GetAllAsync()
         {
             var products = await _repo.GetAllAsync();
-            return products.Select(p => p.ToDto()).ToList();
+            // For listing endpoints return only the default/representative variant
+            return products.Select(p => p.ToDto(includeVariants: false)).ToList();
         }
 
         public async Task<PagedResult<ProductDto>> GetBySectionAsync(string? section, Guid? categoryId = null, int page = 1, int pageSize = 12)
@@ -56,7 +57,7 @@ namespace NextShopV2.Application.Services
 
             return new PagedResult<ProductDto>
             {
-                Items = items.Select(p => p.ToDto()).ToList(),
+                Items = items.Select(p => p.ToDto(includeVariants: false)).ToList(),
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = total,
@@ -99,7 +100,7 @@ namespace NextShopV2.Application.Services
             }
 
             // reload product with categories if needed
-            var created = await _repo.GetByIdAsync(product.ProductId);
+            var created = await _repo.GetByIdAsync(product.ProductId) ?? throw new InvalidOperationException("Created product not found after save.");
             return created.ToDto();
         }
         public async Task<bool> UpdateAsync(Guid id, UpdateProductRequest request)
@@ -140,8 +141,52 @@ namespace NextShopV2.Application.Services
     }
     public static class ProductMapping
     {
-        public static ProductDto ToDto(this Product p)
+        public static ProductDto ToDto(this Product p, bool includeVariants = true)
         {
+            var orderedVariants = p.Variants.IsNullOrEmpty() ? new List<ProductVariant>() : p.Variants.OrderBy(v => v.DisplayOrder).ThenBy(v => v.VariantId).ToList();
+            var defaultVariant = orderedVariants.FirstOrDefault(v => v.IsDefault) ?? (orderedVariants.Count > 0 ? orderedVariants[0] : null);
+
+            var variantsList = new List<ProductVariantResponse>();
+
+            if (includeVariants)
+            {
+                variantsList = orderedVariants.Select(v => new ProductVariantResponse
+                {
+                    ProductVariantId = v.VariantId,
+                    Sku = v.SKU,
+                    Color = v.Color,
+                    Size = v.Size,
+                    StockQuantity = v.StockQuantity,
+                    IsDefault = v.IsDefault,
+                    DisplayOrder = v.DisplayOrder,
+                    ImageUrl = v.ImageUrl,
+                    ImgHover = string.IsNullOrEmpty(v.ImgHover) ? v.ImageUrl : v.ImgHover,
+                    BasePrice = v.BasePrice,
+                    DiscountPercent = v.DiscountPercent,
+                    DiscountAmount = v.DiscountAmount,
+                    PriceAfterDiscount = v.PriceAfterDiscount
+                }).ToList();
+            }
+            else
+            {
+                if (defaultVariant != null)
+                {
+                    variantsList.Add(new ProductVariantResponse
+                    {
+                        ProductVariantId = defaultVariant.VariantId,
+                        Color = defaultVariant.Color,
+                        Size = defaultVariant.Size,
+                        ImageUrl = defaultVariant.ImageUrl,
+                        ImgHover = string.IsNullOrEmpty(defaultVariant.ImgHover) ? defaultVariant.ImageUrl : defaultVariant.ImgHover,
+                        StockQuantity = defaultVariant.StockQuantity,
+                        BasePrice = defaultVariant.BasePrice,
+                        PriceAfterDiscount = defaultVariant.PriceAfterDiscount,
+                        DiscountPercent = defaultVariant.DiscountPercent,
+                        IsDefault = true
+                    });
+                }
+            }
+
             return new ProductDto
             {
                 ProductId = p.ProductId,
@@ -154,29 +199,9 @@ namespace NextShopV2.Application.Services
                 TotalLikes = p.TotalLikes,
                 IsActive = p.IsActive,
                 Tags = p.Tags ?? new List<string>(),
-                Variants = p.Variants.IsNullOrEmpty() 
-                    ? new List<ProductVariantResponse>()
-                    : p.Variants
-                        .OrderBy(v => v.DisplayOrder)
-                        .ThenBy(v => v.VariantId)
-                        .Select(v => new ProductVariantResponse
-                        {
-                            ProductVariantId = v.VariantId,
-                            ProductId = v.ProductId,
-                            Sku = v.SKU,
-                            Color = v.Color,
-                            Size = v.Size,
-                            StockQuantity = v.StockQuantity,
-                            IsDefault = v.IsDefault,
-                            DisplayOrder = v.DisplayOrder,
-                            ImageUrl = v.ImageUrl,
-                            ImgHover = v.ImgHover,
-                            BasePrice = v.BasePrice,
-                            DiscountPercent = v.DiscountPercent,
-                            DiscountAmount = v.DiscountAmount,
-                            PriceAfterDiscount = v.PriceAfterDiscount
-                        }).ToList(),
-                CategoryIds = p.ProductCategories.IsNullOrEmpty() ? new List<Guid>() : p.ProductCategories.Select(pc => pc.CategoryId).ToList()
+                // Total stock across all variants
+                TotalStockQuantity = orderedVariants.Sum(v => v.StockQuantity),
+                Variants = variantsList
             };
         }
     }

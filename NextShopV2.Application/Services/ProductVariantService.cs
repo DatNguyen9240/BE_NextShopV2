@@ -36,7 +36,6 @@ namespace NextShopV2.Application.Services
             return variants.Select(v => new ProductVariantResponse
             {
                 ProductVariantId = v.VariantId,
-                ProductId = v.ProductId,
                 Sku = string.IsNullOrEmpty(v.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
                     : v.SKU,
@@ -47,7 +46,7 @@ namespace NextShopV2.Application.Services
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
                 ImageUrl = v.ImageUrl,
-                ImgHover = v.ImgHover,
+                ImgHover = string.IsNullOrEmpty(v.ImgHover) ? v.ImageUrl : v.ImgHover,
                 BasePrice = v.BasePrice,
                 DiscountPercent = v.DiscountPercent,
                 DiscountAmount = v.DiscountAmount,
@@ -64,7 +63,6 @@ namespace NextShopV2.Application.Services
             return new ProductVariantResponse
             {
                 ProductVariantId = variant.VariantId,
-                ProductId = variant.ProductId,
                 Sku = string.IsNullOrEmpty(variant.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
                     : variant.SKU,
@@ -74,7 +72,8 @@ namespace NextShopV2.Application.Services
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover,
+                ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover,
+
                 BasePrice = variant.BasePrice,
                 DiscountPercent = variant.DiscountPercent,
                 DiscountAmount = variant.DiscountAmount,
@@ -98,18 +97,17 @@ namespace NextShopV2.Application.Services
             return sortedVariants.Select(v => new ProductVariantResponse
             {
                 ProductVariantId = v.VariantId,
-                ProductId = v.ProductId,
                 Sku = string.IsNullOrEmpty(v.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
                     : v.SKU,
                 Color = v.Color,
                 Size = v.Size,
-            
+
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
                 DisplayOrder = v.DisplayOrder,
                 ImageUrl = v.ImageUrl,
-                ImgHover = v.ImgHover,
+                ImgHover = string.IsNullOrEmpty(v.ImgHover) ? v.ImageUrl : v.ImgHover,
                 BasePrice = v.BasePrice,
                 DiscountPercent = v.DiscountPercent,
                 DiscountAmount = v.DiscountAmount,
@@ -126,7 +124,6 @@ namespace NextShopV2.Application.Services
             return new ProductVariantResponse
             {
                 ProductVariantId = variant!.VariantId,
-                ProductId = variant.ProductId,
                 Sku = string.IsNullOrEmpty(variant.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
                     : variant.SKU,
@@ -137,7 +134,7 @@ namespace NextShopV2.Application.Services
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover,
+                ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover,
                 BasePrice = variant.BasePrice,
                 DiscountPercent = variant.DiscountPercent,
                 DiscountAmount = variant.DiscountAmount,
@@ -215,7 +212,6 @@ namespace NextShopV2.Application.Services
             return new ProductVariantResponse
             {
                 ProductVariantId = variant.VariantId,
-                ProductId = variant.ProductId,
                 Sku = variant.SKU, // SKU đã được generate trong CreateAsync
                 Color = variant.Color,
                 Size = variant.Size,
@@ -223,7 +219,7 @@ namespace NextShopV2.Application.Services
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
                 ImageUrl = variant.ImageUrl,
-                ImgHover = variant.ImgHover,
+                ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover,
                 BasePrice = variant.BasePrice,
                 DiscountPercent = variant.DiscountPercent,
                 DiscountAmount = variant.DiscountAmount,

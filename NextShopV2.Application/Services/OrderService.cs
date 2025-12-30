@@ -226,7 +226,6 @@ namespace NextShopV2.Application.Services
                     Variant = item.Variant.IsNull() ? null : new ProductVariantResponse
                     {
                         ProductVariantId = item.Variant.VariantId,
-                        ProductId = item.Variant.ProductId,
                         Color = item.Variant.Color,
                         Size = item.Variant.Size,
                         BasePrice = item.Variant.BasePrice,
@@ -236,7 +235,8 @@ namespace NextShopV2.Application.Services
                         StockQuantity = item.Variant.StockQuantity,
                         IsDefault = item.Variant.IsDefault,
                         DisplayOrder = item.Variant.DisplayOrder,
-                        ImageUrl = item.Variant.ImageUrl
+                        ImageUrl = item.Variant.ImageUrl,
+                        ImgHover = string.IsNullOrEmpty(item.Variant.ImgHover) ? item.Variant.ImageUrl : item.Variant.ImgHover
                     }
                 }).ToList(),
                 Coupons = order.OrderCoupons?.Select(oc => new OrderCouponResponse

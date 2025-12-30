@@ -16,7 +16,11 @@ namespace NextShopV2.Application.DTOs.Response
         public bool IsActive { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
         public List<ProductVariantResponse> Variants { get; set; } = new List<ProductVariantResponse>();
-        public List<string> Images { get; set; } = new List<string>();
-        public List<Guid> CategoryIds { get; set; } = new List<Guid>();
+        /// <summary>
+        /// Total stock available for this product (sum of all variants' StockQuantity)
+        /// </summary>
+        public int TotalStockQuantity { get; set; }
+
+        // Removed `Images`, `CategoryNames`, and `CategoryIds` per API contract — variant-level `ImgHover` will be returned instead
     }
 }
