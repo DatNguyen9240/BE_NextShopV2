@@ -8,6 +8,7 @@ namespace NextShopV2.Application.DTOs.Response
         public Guid ProductId { get; set; }
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
+        public string? AdditionalInfo { get; set; }
         public string? GenderTarget { get; set; }
         public string? Brand { get; set; }
         public decimal AverageRating { get; set; }

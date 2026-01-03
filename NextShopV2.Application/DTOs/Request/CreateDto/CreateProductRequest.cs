@@ -11,6 +11,9 @@ namespace NextShopV2.Application.DTOs.Request
         
         [MaxLength(1000)]
         public string? Description { get; set; }
+
+        [MaxLength(1000)]
+        public string? AdditionalInfo { get; set; }
                 
         [MaxLength(50)]
         public string? GenderTarget { get; set; }

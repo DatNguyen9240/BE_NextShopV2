@@ -17,13 +17,13 @@ namespace NextShopV2.Infrastructure.Repositories
         }
         public async Task<List<Product>> GetAllAsync()
             => await _context.Products
-                .Include(p => p.Variants.OrderBy(v => v.DisplayOrder))
+                .Include(p => p.Variants)
                 .Include(p => p.ProductCategories)
                     .ThenInclude(pc => pc.Category)
                 .ToListAsync();
         public async Task<Product?> GetByIdAsync(Guid id)
             => await _context.Products
-                .Include(p => p.Variants.OrderBy(v => v.DisplayOrder))
+                .Include(p => p.Variants)
                 .Include(p => p.ProductCategories)
                     .ThenInclude(pc => pc.Category)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
