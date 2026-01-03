@@ -10,13 +10,13 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace NextShopV2.Application.Services
 {
-    public class BannerService : IBannerService
+    public class AdvertisementService : IAdvertisementService
     {
-        private readonly IBannerRepository _repo;
+        private readonly IAdvertisementRepository _repo;
         private readonly IOrderResolutionService _orderResolutionService;
         private readonly ILoggingService _loggingService;
         
-        public BannerService(IBannerRepository repo, IOrderResolutionService orderResolutionService, ILoggingService loggingService)
+        public AdvertisementService(IAdvertisementRepository repo, IOrderResolutionService orderResolutionService, ILoggingService loggingService)
         {
             _repo = repo;
             _orderResolutionService = orderResolutionService;
@@ -36,7 +36,7 @@ namespace NextShopV2.Application.Services
         }
         public async Task<Advertisement?> GetByIdAsync(Guid id)
             => await _repo.GetByIdAsync(id);
-    public async Task<Advertisement> CreateAsync(BannerRequestDto dto)
+    public async Task<Advertisement> CreateAsync(AdvertisementRequestDto dto)
         {
             // Auto-resolve SortOrder conflict using OrderResolutionService
             var existingBanners = await _repo.GetAllAsync();
@@ -57,7 +57,7 @@ namespace NextShopV2.Application.Services
             await _repo.SaveAsync();
             return banner;
         }
-    public async Task<bool> UpdateAsync(Guid id, BannerRequestDto dto)
+    public async Task<bool> UpdateAsync(Guid id, AdvertisementRequestDto dto)
         {
             var exist = await _repo.GetByIdAsync(id);
             if (exist.IsNull()) return false;
@@ -87,7 +87,7 @@ namespace NextShopV2.Application.Services
             var banner = await _repo.GetByIdAsync(id);
             if (banner.IsNull()) 
             {
-                _loggingService.LogEntityNotFound("Banner", id);
+                _loggingService.LogEntityNotFound("Advertisement", id);
                 return false;
             }
             
@@ -95,10 +95,10 @@ namespace NextShopV2.Application.Services
             await _repo.DeleteAsync(banner!);
             await _repo.SaveAsync();
             
-            _loggingService.LogEntityDeleted("Banner", id);
+            _loggingService.LogEntityDeleted("Advertisement", id);
             return true;
         }
-        public async Task<Advertisement?> PatchAsync(Guid id, BannerRequestDto dto)
+        public async Task<Advertisement?> PatchAsync(Guid id, AdvertisementRequestDto dto)
         {
             var banner = await _repo.GetByIdAsync(id);
             if (banner.IsNull()) return null;
@@ -125,33 +125,32 @@ namespace NextShopV2.Application.Services
         /// <summary>
         /// Delete multiple banners - Example usage of SafeForEachAsync
         /// </summary>
-        public async Task<bool> DeleteMultipleBannersAsync(List<Guid> bannerIds)
+        public async Task<bool> DeleteMultipleAdvertisementsAsync(List<Guid> advertisementIds)
         {
-            if (bannerIds.IsNullOrEmpty())
+            if (advertisementIds.IsNullOrEmpty())
             {
-                _loggingService.LogValidationFailure("BulkBannerDeletion", "Empty or null banner IDs");
+                _loggingService.LogValidationFailure("BulkAdvertisementDeletion", "Empty or null advertisement IDs");
                 return false;
             }
 
-            var banners = await _repo.GetByIdsAsync(bannerIds);
+            var ads = await _repo.GetByIdsAsync(advertisementIds);
             
-            if (banners.IsNullOrEmpty())
+            if (ads.IsNullOrEmpty())
             {
-                _loggingService.LogValidationFailure("BulkBannerDeletion", new { BannerIds = bannerIds, Reason = "No banners found" });
+                _loggingService.LogValidationFailure("BulkAdvertisementDeletion", new { AdvertisementIds = advertisementIds, Reason = "No advertisements found" });
                 return false;
             }
 
-            _loggingService.LogOperationStarted("BulkBannerDeletion", new { Count = banners.Count });
+            _loggingService.LogOperationStarted("BulkAdvertisementDeletion", new { Count = ads.Count });
 
             // Delete all from database
-            await _repo.DeleteRangeAsync(banners);
+            await _repo.DeleteRangeAsync(ads);
             await _repo.SaveAsync();
 
-            _loggingService.LogOperationCompleted("BulkBannerDeletion", new { 
-                Count = banners.Count, 
-                BannerIds = banners.Select(b => b.Id).ToList() 
-            });
+            _loggingService.LogOperationCompleted("BulkAdvertisementDeletion", new { Count = ads.Count, AdvertisementIds = ads.Select(b => b.Id).ToList() });
             return true;
         }
     }
 }
+
+

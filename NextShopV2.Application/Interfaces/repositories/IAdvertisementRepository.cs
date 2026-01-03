@@ -1,15 +1,15 @@
 using NextShopV2.Domain.Entities.Marketing;
 namespace NextShopV2.Application.Interfaces
 {
-    public interface IBannerRepository
+    public interface IAdvertisementRepository
     {
         Task<List<Advertisement>> GetAllAsync();
         Task<Advertisement?> GetByIdAsync(Guid id);
         Task<List<Advertisement>> GetByIdsAsync(List<Guid> ids);
-        Task AddAsync(Advertisement banner);
-        Task UpdateAsync(Advertisement banner);
-        Task DeleteAsync(Advertisement banner);
-        Task DeleteRangeAsync(List<Advertisement> banners);
+        Task AddAsync(Advertisement advertisement);
+        Task UpdateAsync(Advertisement advertisement);
+        Task DeleteAsync(Advertisement advertisement);
+        Task DeleteRangeAsync(List<Advertisement> advertisements);
         Task SaveAsync();
     }
 }

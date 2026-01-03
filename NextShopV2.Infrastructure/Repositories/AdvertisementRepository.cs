@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 namespace NextShopV2.Infrastructure.Repositories
 {
-    public class BannerRepository : IBannerRepository
+    public class AdvertisementRepository : IAdvertisementRepository
     {
         private readonly AppDbContext _context;
-        public BannerRepository(AppDbContext context)
+        public AdvertisementRepository(AppDbContext context)
         {
             _context = context;
         }

@@ -1,6 +1,6 @@
 namespace NextShopV2.Application.DTOs.Request.CreateDto
 {
-    public class BannerRequestDto
+    public class AdvertisementRequestDto
     {
         public string? Title { get; set; }
         public string? PublicId { get; set; }

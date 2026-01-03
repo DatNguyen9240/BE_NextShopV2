@@ -29,7 +29,7 @@ namespace NextShopV2.Application.Services
             return products.Select(p => p.ToDto(includeVariants: false)).ToList();
         }
 
-        public async Task<PagedResult<ProductDto>> GetBySectionAsync(string? section, Guid? categoryId = null, int page = 1, int pageSize = 12)
+        public async Task<PagedResult<ProductDto>> GetBySectionAsync(string? section, Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null)
         {
             // For now, load all and filter in-memory. For large datasets, implement repository queries.
             var products = (await _repo.GetAllAsync()).AsQueryable();
@@ -49,6 +49,39 @@ namespace NextShopV2.Application.Services
 
                 // Only return tagged products for the requested section; if none found, return empty result set.
                 products = tagged;
+            }
+
+            // Price filtering across variants (use PriceAfterDiscount if available)
+            if (minPrice.HasValue)
+            {
+                products = products.Where(p => (p.Variants ?? new List<ProductVariant>()).Any(v => (v.PriceAfterDiscount >= minPrice.Value)));
+            }
+
+            if (maxPrice.HasValue)
+            {
+                products = products.Where(p => (p.Variants ?? new List<ProductVariant>()).Any(v => (v.PriceAfterDiscount <= maxPrice.Value)));
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "price_asc":
+                        products = products.OrderBy(p => (p.Variants ?? new List<ProductVariant>()).OrderBy(v => v.PriceAfterDiscount).Select(v => v.PriceAfterDiscount).FirstOrDefault());
+                        break;
+                    case "price_desc":
+                        products = products.OrderByDescending(p => (p.Variants ?? new List<ProductVariant>()).OrderBy(v => v.PriceAfterDiscount).Select(v => v.PriceAfterDiscount).FirstOrDefault());
+                        break;
+                    case "rating_asc":
+                        products = products.OrderBy(p => p.AverageRating);
+                        break;
+                    case "rating_desc":
+                        products = products.OrderByDescending(p => p.AverageRating);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             var total = products.Count();

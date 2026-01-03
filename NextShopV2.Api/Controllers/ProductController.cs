@@ -23,9 +23,9 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(string? section, string? categoryId = null, int page = 1, int pageSize = 12)
+        public async Task<IActionResult> GetAll(string? section, string? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null)
         {
-            _logger.LogInformation("ProductController.GetAll called with section={Section}, categoryId={CategoryId}, page={Page}, pageSize={PageSize}", section ?? "<null>", categoryId ?? "<null>", page, pageSize);
+            _logger.LogInformation("ProductController.GetAll called with section={Section}, categoryId={CategoryId}, page={Page}, pageSize={PageSize}, minPrice={MinPrice}, maxPrice={MaxPrice}, sort={Sort}", section ?? "<null>", categoryId ?? "<null>", page, pageSize, minPrice?.ToString() ?? "<null>", maxPrice?.ToString() ?? "<null>", sort ?? "<null>");
 
             if (string.IsNullOrEmpty(section) && string.IsNullOrEmpty(categoryId))
             {
@@ -36,7 +36,7 @@ namespace NextShopV2.Api.Controllers
             Guid? catGuid = null;
             if (!string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var parsed)) catGuid = parsed;
 
-            var paged = await _service.GetBySectionAsync(section, catGuid, page, pageSize);
+            var paged = await _service.GetBySectionAsync(section, catGuid, page, pageSize, minPrice, maxPrice, sort);
             return ResponseHelper.Success(paged, "Products retrieved successfully");
         }
 

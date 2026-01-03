@@ -162,8 +162,8 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAuthService, NextS
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IUserRepository, NextShopV2.Infrastructure.Repositories.UserRepository>();
 
 // Register DI for BannerService and BannerRepository
-builder.Services.AddScoped<NextShopV2.Application.Interfaces.IBannerService, NextShopV2.Application.Services.BannerService>();
-builder.Services.AddScoped<NextShopV2.Application.Interfaces.IBannerRepository, NextShopV2.Infrastructure.Repositories.BannerRepository>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementService, NextShopV2.Application.Services.AdvertisementService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementRepository, NextShopV2.Infrastructure.Repositories.AdvertisementRepository>();
 
 
 // Register DI for ProductService and ProductRepository

@@ -29,7 +29,7 @@ namespace NextShopV2.Infrastructure.Repositories
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, stream),
-                Folder = "banners"
+                Folder = "advertisements"
             };
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
             if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
