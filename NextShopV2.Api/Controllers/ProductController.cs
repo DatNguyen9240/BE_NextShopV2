@@ -27,7 +27,9 @@ namespace NextShopV2.Api.Controllers
         {
             _logger.LogInformation("ProductController.GetAll called with section={Section}, categoryId={CategoryId}, page={Page}, pageSize={PageSize}, minPrice={MinPrice}, maxPrice={MaxPrice}, sort={Sort}", section ?? "<null>", categoryId ?? "<null>", page, pageSize, minPrice?.ToString() ?? "<null>", maxPrice?.ToString() ?? "<null>", sort ?? "<null>");
 
-            if (string.IsNullOrEmpty(section) && string.IsNullOrEmpty(categoryId))
+            // If there are absolutely no filters or pagination provided, return the full list.
+            // Otherwise use the paged/filtering endpoint which supports price/sort/paging.
+            if (string.IsNullOrEmpty(section) && string.IsNullOrEmpty(categoryId) && !minPrice.HasValue && !maxPrice.HasValue && string.IsNullOrEmpty(sort) && page == 1 && pageSize == 12)
             {
                 var products = await _service.GetAllAsync();
                 return ResponseHelper.Success(products, "Products retrieved successfully");

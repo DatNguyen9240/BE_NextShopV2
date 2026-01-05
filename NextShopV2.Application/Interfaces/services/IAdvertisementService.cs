@@ -10,5 +10,8 @@ namespace NextShopV2.Application.Interfaces
     Task<bool> UpdateAsync(Guid id, AdvertisementRequestDto dto);
     Task<bool> DeleteAsync(Guid id);
     Task<Advertisement?> PatchAsync(Guid id, AdvertisementRequestDto dto);
+
+    // New: get advertisements grouped by type
+    Task<Dictionary<string, List<Advertisement>>> GetGroupedAsync();
     }
 }

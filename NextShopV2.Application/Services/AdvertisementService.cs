@@ -123,6 +123,18 @@ namespace NextShopV2.Application.Services
         }
 
         /// <summary>
+        /// Get advertisements grouped by their Type field
+        /// </summary>
+        public async Task<Dictionary<string, List<Advertisement>>> GetGroupedAsync()
+        {
+            var all = await _repo.GetAllAsync();
+            var grouped = all
+                .GroupBy(a => string.IsNullOrWhiteSpace(a.Type) ? "default" : a.Type)
+                .ToDictionary(g => g.Key, g => g.OrderBy(a => a.SortOrder).ThenBy(a => a.Id).ToList());
+            return grouped;
+        }
+
+        /// <summary>
         /// Delete multiple banners - Example usage of SafeForEachAsync
         /// </summary>
         public async Task<bool> DeleteMultipleAdvertisementsAsync(List<Guid> advertisementIds)

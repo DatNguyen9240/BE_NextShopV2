@@ -20,8 +20,17 @@ namespace NextShopV2.Api.Controllers
 
 		// GET: api/Advertisements
 		[HttpGet]
-		// Public endpoint - anyone can view advertisements
-		public async Task<IActionResult> GetAll([FromQuery] string? type = null)
+		// Returns advertisements grouped by type
+		public async Task<IActionResult> GetAll()
+		{
+			var grouped = await _advertService.GetGroupedAsync();
+			return ResponseHelper.Success(grouped, "Advertisements grouped by type retrieved successfully");
+		}
+
+		// GET: api/Advertisements/type/{type}
+		[HttpGet("type/{type}")]
+		// Returns advertisements for a specific type as a flat list
+		public async Task<IActionResult> GetByType(string type)
 		{
 			var ads = await _advertService.GetAllAsync(type);
 			return ResponseHelper.Success(ads, "Advertisements retrieved successfully");
