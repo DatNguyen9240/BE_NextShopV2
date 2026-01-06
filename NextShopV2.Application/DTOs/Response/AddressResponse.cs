@@ -1,0 +1,13 @@
+using System;
+
+namespace NextShopV2.Application.DTOs.Response
+{
+    public class AddressResponse
+    {
+        public Guid AddressId { get; set; }
+        public string FullAddress { get; set; } = string.Empty;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public bool IsDefault { get; set; }
+    }
+}

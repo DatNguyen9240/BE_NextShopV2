@@ -16,6 +16,8 @@ namespace NextShopV2.Domain.Entities.Users
         public string? Phone { get; set; }
         public string Role { get; set; } = "User";
         public string? Gender { get; set; }
+        // Optional avatar URL
+        public string? Avatar { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

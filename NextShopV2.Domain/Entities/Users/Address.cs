@@ -7,11 +7,11 @@ namespace NextShopV2.Domain.Entities.Users
         public Guid AddressId { get; set; }
         public Guid UserId { get; set; }
         public string RecipientName { get; set; } = null!;
-        public string Street { get; set; } = null!;
-        public string City { get; set; } = null!;
-        public string District { get; set; } = null!;
-        public string Ward { get; set; } = null!;
-        public string? PostalCode { get; set; }
+        // Single-line address input (e.g., "123 Main St, Ward, District, City")
+        public string FullAddress { get; set; } = null!;
+        // Optional latitude & longitude for geolocation
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public bool IsDefault { get; set; }
 
         public User User { get; set; } = null!;

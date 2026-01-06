@@ -48,8 +48,8 @@ namespace NextShopV2.Application.Services
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = _userRepository.GetByEmail(request.Email!);
-            if (user.IsNull() || user?.PasswordHash != passwordHash)
-                return new AppAuthResponse { Success = false, Message = "Invalid credentials" };
+            if (user == null || user.PasswordHash != passwordHash)
+                return new AppAuthResponse { Success = false, Message = "Invalid credentials" }; 
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             
@@ -119,17 +119,200 @@ namespace NextShopV2.Application.Services
         public UserResponse? GetMe(Guid userId)
         {
             var user = _userRepository.GetById(userId);
-            if (user.IsNull()) 
-                return null;
+            if (user == null) 
+                return null; 
 
             return new UserResponse
             {
                 Id = user!.Id,
                 Email = user.Email,
                 FullName = user.FullName,
+                Phone = user.Phone,
+                Gender = user.Gender,
                 Role = user.Role,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                // Order addresses with default first for nicer UX
+                Addresses = user.Addresses
+                    .OrderByDescending(a => a.IsDefault)
+                    .Select(a => new AddressResponse
+                    {
+                        AddressId = a.AddressId,
+                        FullAddress = a.FullAddress,
+                        Latitude = a.Latitude,
+                        Longitude = a.Longitude,
+                        IsDefault = a.IsDefault
+                    }).ToList(),
+                // include avatar URL if present (allow null)
+                Avatar = user.Avatar
             };
+        }
+
+        public AppApiResponse UpdateProfile(Guid userId, UpdateProfileRequest request)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null)
+                return new AppApiResponse { Success = false, Message = "User not found" }; 
+
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                user.FullName = request.FullName!;
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+                user.Phone = request.Phone;
+            if (!string.IsNullOrWhiteSpace(request.Gender))
+                user.Gender = request.Gender;
+            // Support explicit clearing of avatar by passing null, or updating when non-empty value provided
+            if (request.AvatarUrl == null)
+            {
+                user.Avatar = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
+            {
+                user.Avatar = request.AvatarUrl;
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
+            _userRepository.Save();
+
+            return new AppApiResponse { Success = true, Message = "Profile updated" };
+        }
+
+        public AddressResponse? UpsertAddress(Guid userId, UpdateAddressRequest request)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null)
+                return null; 
+
+            // Parse incoming AddressId if provided. If it's not a valid GUID, treat as new address (create)
+            Guid? parsedAddressId = null;
+            if (!string.IsNullOrWhiteSpace(request.AddressId))
+            {
+                if (Guid.TryParse(request.AddressId, out var g))
+                    parsedAddressId = g;
+                // else: ignore invalid non-GUID values and create a new address
+            }
+
+            // If this address should be default, unset other defaults in DB atomically (exclude current address when updating)
+            if (request.IsDefault)
+            {
+                _userRepository.UnsetDefaultAddresses(userId, parsedAddressId);
+            }
+
+            Domain.Entities.Users.Address? address = null;
+            if (parsedAddressId.HasValue)
+            {
+                address = user.Addresses.FirstOrDefault(a => a.AddressId == parsedAddressId.Value);
+            }
+
+            if (address == null)
+            {
+                // Create new address record directly (avoid concurrency with tracked entities)
+                var newAddress = new Domain.Entities.Users.Address
+                {
+                    AddressId = Guid.NewGuid(),
+                    UserId = userId,
+                    RecipientName = user.FullName,
+                    FullAddress = request.FullAddress,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude,
+                    IsDefault = request.IsDefault
+                };
+
+                _userRepository.InsertAddress(newAddress);
+
+                try
+                {
+                    _userRepository.Save();
+
+                    return new AddressResponse
+                    {
+                        AddressId = newAddress.AddressId,
+                        FullAddress = newAddress.FullAddress,
+                        Latitude = newAddress.Latitude,
+                        Longitude = newAddress.Longitude,
+                        IsDefault = newAddress.IsDefault
+                    };
+                }
+                catch
+                {
+                    // If insert fails with concurrency (rare), rethrow to be handled upstream
+                    throw;
+                }
+            }
+            else
+            {
+                // Try atomic DB update first
+                var updated = _userRepository.TryUpdateAddress(address.AddressId, request.FullAddress, request.Latitude, request.Longitude, request.IsDefault);
+                if (updated)
+                {
+                    return new AddressResponse
+                    {
+                        AddressId = address.AddressId,
+                        FullAddress = request.FullAddress,
+                        Latitude = request.Latitude,
+                        Longitude = request.Longitude,
+                        IsDefault = request.IsDefault
+                    };
+                }
+
+                // If atomic update didn't affect rows (concurrency or missing), create a new address record instead
+                var fallbackAddress = new Domain.Entities.Users.Address
+                {
+                    AddressId = Guid.NewGuid(),
+                    UserId = userId,
+                    RecipientName = user.FullName,
+                    FullAddress = request.FullAddress,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude,
+                    IsDefault = request.IsDefault
+                };
+
+                _userRepository.InsertAddress(fallbackAddress);
+
+                try
+                {
+                    _userRepository.Save();
+
+                    return new AddressResponse
+                    {
+                        AddressId = fallbackAddress.AddressId,
+                        FullAddress = fallbackAddress.FullAddress,
+                        Latitude = fallbackAddress.Latitude,
+                        Longitude = fallbackAddress.Longitude,
+                        IsDefault = fallbackAddress.IsDefault
+                    };
+                }
+                catch
+                {
+                    // If saving still fails (very rare), surface as concurrency error to be handled by the controller
+                    throw new InvalidOperationException("Concurrency conflict: Could not save address after retries");
+                }
+            }
+
+            // This point should never be reached; surface as an error if it does
+            throw new InvalidOperationException("Unexpected state in UpsertAddress");
+        }
+
+        public bool DeleteAddress(Guid userId, Guid addressId)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null) return false;
+
+            var address = user.Addresses.FirstOrDefault(a => a.AddressId == addressId);
+            if (address == null) return false;
+
+            var wasDefault = address.IsDefault;
+
+            user.Addresses.Remove(address);
+
+            // If we deleted the default address, pick another address and mark it default
+            if (wasDefault && user.Addresses.Any())
+            {
+                // Prefer an address that was previously not default; pick the first one
+                var next = user.Addresses.First();
+                next.IsDefault = true;
+            }
+
+            _userRepository.Save();
+            return true;
         }
     }
 }

@@ -62,6 +62,7 @@ namespace NextShopV2.Application.Services
             // Validate all variants exist and calculate total
             var orderItems = new List<OrderItem>();
             decimal totalAmount = 0;
+            var inventoryChanges = new List<(Guid VariantId, int Quantity)>();
 
             foreach (var itemRequest in request.Items)
             {
@@ -92,6 +93,7 @@ namespace NextShopV2.Application.Services
                     $"Order #{orderId}",
                     "System"
                 );
+                inventoryChanges.Add((itemRequest.VariantId, itemRequest.Quantity));
             }
 
                 // Áp dụng nhiều coupon nếu có
@@ -119,7 +121,7 @@ namespace NextShopV2.Application.Services
                     }
                 }
 
-                var finalAmount = totalAmount - discountAmount;
+                var finalAmount = Math.Max(0, totalAmount - discountAmount);
 
                 var order = new Order
                 {
@@ -132,11 +134,36 @@ namespace NextShopV2.Application.Services
                     TotalAmount = finalAmount,
                     ShippingAddress = request.ShippingAddress,
                     Items = orderItems,
+                    OrderCoupons = orderCoupons,
                     // Không còn CouponId, coupon
                 };
 
-            await _orderRepo.AddAsync(order);
-            await _orderRepo.SaveAsync();
+            try
+            {
+                await _orderRepo.AddAsync(order);
+                await _orderRepo.SaveAsync();
+            }
+            catch
+            {
+                // Rollback inventory changes
+                foreach (var change in inventoryChanges)
+                {
+                    try
+                    {
+                        await _inventoryService.UpdateInventoryAsync(
+                            change.VariantId,
+                            change.Quantity, // add back
+                            $"Rollback for order #{orderId}",
+                            "System"
+                        );
+                    }
+                    catch
+                    {
+                        // swallow rollback errors to avoid masking original exception
+                    }
+                }
+                throw;
+            }
 
             return MapToResponse(order);
         }
@@ -161,15 +188,15 @@ namespace NextShopV2.Application.Services
             if (order!.Status == "Completed" || order.Status == "Shipped")
                 throw new InvalidOperationException("Cannot cancel completed or shipped orders");
 
-            // Restore stock
+            // Restore stock using inventory service (creates transaction)
             foreach (var item in order.Items)
             {
-                var variant = await _variantRepo.GetByIdAsync(item.VariantId);
-                if (variant != null)
-                {
-                    variant.StockQuantity += item.Quantity;
-                    await _variantRepo.UpdateAsync(variant);
-                }
+                await _inventoryService.UpdateInventoryAsync(
+                    item.VariantId,
+                    item.Quantity,
+                    $"Order #{id} cancelled",
+                    "System"
+                );
             }
 
             order.Status = "Cancelled";

@@ -102,6 +102,15 @@ namespace NextShopV2.Shared.Helpers
             };
         }
 
+        public static IActionResult Conflict(string message = "Conflict")
+        {
+            return new ObjectResult(new ApiResponse
+            {
+                Success = false,
+                Message = message
+            }) { StatusCode = 409 };
+        }
+
         public static ApiResponse Error(string message = "An error occurred")
         {
             return new ApiResponse 

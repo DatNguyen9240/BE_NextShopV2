@@ -13,5 +13,10 @@ namespace NextShopV2.Application.Interfaces
         AppAuthResponse Refresh(RefreshTokenRequest request);
         AppApiResponse Logout(string accessToken, string refreshToken);
         UserResponse? GetMe(Guid userId);
+
+        // Profile & address management
+        AppApiResponse UpdateProfile(Guid userId, UpdateProfileRequest request);
+        AddressResponse? UpsertAddress(Guid userId, UpdateAddressRequest request);
+        bool DeleteAddress(Guid userId, Guid addressId);
     }
 }
