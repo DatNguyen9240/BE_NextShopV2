@@ -80,10 +80,13 @@ namespace NextShopV2.Shared.Middlewares
 
             context.Response.StatusCode = statusCode;
             
-            var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+            var jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            };
+            // Ensure consistent DateTime serialization in exceptions
+            jsonOptions.Converters.Add(new NextShopV2.Shared.Json.DateTimeUtcConverter());
+            var jsonResponse = JsonSerializer.Serialize(response, jsonOptions);
 
             await context.Response.WriteAsync(jsonResponse);
         }

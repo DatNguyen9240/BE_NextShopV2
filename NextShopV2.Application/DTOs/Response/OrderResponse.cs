@@ -12,6 +12,11 @@ namespace NextShopV2.Application.DTOs.Response
         public decimal SubTotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal TotalAmount { get; set; }
+
+        // Buyer info
+        public string? BuyerName { get; set; }
+        public string? BuyerPhone { get; set; }
+
     public List<OrderCouponResponse> Coupons { get; set; } = new List<OrderCouponResponse>();
         public string? ShippingAddress { get; set; }
         public List<OrderItemResponse> Items { get; set; } = new List<OrderItemResponse>();
@@ -25,5 +30,7 @@ namespace NextShopV2.Application.DTOs.Response
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice => Quantity * UnitPrice;
         public ProductVariantResponse? Variant { get; set; }
+        // Thêm tên sản phẩm để frontend hiển thị
+        public string? ProductName { get; set; }
     }
 }

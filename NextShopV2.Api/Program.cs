@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NextShopV2.Shared.Extensions.Web;
+using PayOS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,12 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
     )
 );
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opts =>
+{
+    // Ensure DateTime objects are serialized as UTC ISO strings (append Z) to avoid client timezone issues
+    opts.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    opts.JsonSerializerOptions.Converters.Add(new NextShopV2.Shared.Json.DateTimeUtcConverter());
+});
 builder.Services.AddEndpointsApiExplorer();
 
 // CORS: allow local Next.js dev origin so browser preflight succeeds
@@ -208,6 +214,9 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IReviewService, NextShopV2.Application.Services.ReviewService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IReviewRepository, NextShopV2.Infrastructure.Repositories.ReviewRepository>();
 
+// Register DI for PaymentService
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IPaymentService, NextShopV2.Infrastructure.Services.PaymentService>();
+
 // Register DI for Redis Cart Service (from Shared)
 builder.Services.AddScoped<IDatabase>(serviceProvider =>
 {
@@ -216,6 +225,19 @@ builder.Services.AddScoped<IDatabase>(serviceProvider =>
 });
 builder.Services.AddScoped<NextShopV2.Shared.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantCartService>();
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IRedisCartService, NextShopV2.Shared.Services.RedisCartService>();
+
+// Configure PayOS client for payment requests
+builder.Services.AddSingleton<PayOSClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new PayOSClient(new PayOSOptions
+    {
+        ClientId = config["PayOS:ClientId"] ?? Environment.GetEnvironmentVariable("PAYOS_CLIENT_ID"),
+        ApiKey = config["PayOS:ApiKey"] ?? Environment.GetEnvironmentVariable("PAYOS_API_KEY"),
+        ChecksumKey = config["PayOS:ChecksumKey"] ?? Environment.GetEnvironmentVariable("PAYOS_CHECKSUM_KEY"),
+        LogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
+    });
+});
 
 var app = builder.Build();
 

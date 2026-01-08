@@ -18,10 +18,12 @@ namespace NextShopV2.Api.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly NextShopV2.Shared.Interfaces.IRedisCartService _cartService;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, NextShopV2.Shared.Interfaces.IRedisCartService cartService)
         {
             _orderService = orderService;
+            _cartService = cartService;
         }
 
 
@@ -97,6 +99,9 @@ namespace NextShopV2.Api.Controllers
                 return ResponseHelper.Unauthorized(error);
 
             var result = await _orderService.CreateAsync(userId, request);
+            Console.WriteLine($"Order created with OrderId: {result?.OrderId}");
+
+            // Do not clear cart here for ONLINE payments. Cart is cleared when payment is confirmed by webhook.
             return ResponseHelper.Created(result, "Order created successfully");
         }
 

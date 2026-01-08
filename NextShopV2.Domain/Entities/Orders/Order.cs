@@ -15,6 +15,10 @@ namespace NextShopV2.Domain.Entities.Orders
         public decimal SubTotal { get; set; } // Total before discount
         public decimal DiscountAmount { get; set; } = 0; // Total discount applied
         public decimal TotalAmount { get; set; } // Final amount after discount
+
+        // Buyer information (for payment records)
+        public string? BuyerName { get; set; }
+        public string? BuyerPhone { get; set; }
         public string? ShippingAddress { get; set; }
 
         public User User { get; set; } = null!;
