@@ -4,6 +4,7 @@ using PayOS;
 using PayOS.Models.V2.PaymentRequests;
 using NextShopV2.Shared.Interfaces;
 using NextShopV2.Application.DTOs.Request.CreateDto;
+using NextShopV2.Api.Attributes;
 
 namespace NextShopV2.Api.Controllers;
 
@@ -145,6 +146,18 @@ public class PaymentsController : ControllerBase
         // Prevent caching of status responses
         Response.Headers["Cache-Control"] = "no-store";
         return Ok(status);
+    }
+
+    public class CollectPaymentRequest { public string? CollectedBy { get; set; } }
+
+    [HttpPost("{paymentId}/collect")]
+    [AdminOnly]
+    public async Task<IActionResult> CollectPayment(Guid paymentId, [FromBody] CollectPaymentRequest request)
+    {
+        var success = await _paymentService.MarkPaymentAsPaidAsync(paymentId, request?.CollectedBy);
+        if (success)
+            return Ok(new { success = true, message = "Payment marked as collected" });
+        return NotFound(new { success = false, message = "Payment not found" });
     }
 
     [HttpGet("status")]

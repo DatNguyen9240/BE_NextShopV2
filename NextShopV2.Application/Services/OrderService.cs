@@ -47,6 +47,13 @@ namespace NextShopV2.Application.Services
             return orders.Select(MapToResponse).ToList();
         }
 
+        public async Task<(List<OrderResponse> Items, int Total)> GetByUserIdPagedAsync(Guid userId, int page, int pageSize, string? status = null)
+        {
+            var (items, total) = await _orderRepo.GetByUserIdPagedAsync(userId, page, pageSize, status);
+            var mapped = items.Select(MapToResponse).ToList();
+            return (mapped, total);
+        }
+
         public async Task<List<OrderResponse>> GetByStatusAsync(string status)
         {
             var orders = await _orderRepo.GetByStatusAsync(status);
@@ -155,6 +162,20 @@ namespace NextShopV2.Application.Services
                     OrderCoupons = orderCoupons,
                     // Không còn CouponId, coupon
                 };
+
+                // If payment method is COD, create a pending Payment record so collection can be tracked
+                if (!string.IsNullOrEmpty(request.PaymentMethod) && request.PaymentMethod.Equals("COD", StringComparison.OrdinalIgnoreCase))
+                {
+                    order.Payments.Add(new NextShopV2.Domain.Entities.Payments.Payment
+                    {
+                        PaymentId = Guid.NewGuid(),
+                        OrderId = orderId,
+                        Method = "COD",
+                        Amount = finalAmount,
+                        Status = "Pending",
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
 
             try
             {

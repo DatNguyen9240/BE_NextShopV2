@@ -54,11 +54,18 @@ namespace NextShopV2.Api.Controllers
 
         [HttpGet("my-orders")]
         [Authenticated]
-        public async Task<IActionResult> GetMyOrders()
+        public async Task<IActionResult> GetMyOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? status = null)
         {
             var (userId, error) = this.GetCurrentUserId();
             if (error != null)
                 return ResponseHelper.Unauthorized(error);
+
+            // If page/pageSize provided, return paged result (status optional)
+            if (page > 0 && pageSize > 0)
+            {
+                var (items, total) = await _orderService.GetByUserIdPagedAsync(userId, page, pageSize, status);
+                return ResponseHelper.Success(new { items, total, page, pageSize });
+            }
 
             var orders = await _orderService.GetByUserIdAsync(userId);
             return ResponseHelper.Success(orders);
@@ -101,7 +108,22 @@ namespace NextShopV2.Api.Controllers
             var result = await _orderService.CreateAsync(userId, request);
             Console.WriteLine($"Order created with OrderId: {result?.OrderId}");
 
-            // Do not clear cart here for ONLINE payments. Cart is cleared when payment is confirmed by webhook.
+            // If this order is a COD order, clear user's cart immediately on the backend
+            try
+            {
+                if (!string.IsNullOrEmpty(request.PaymentMethod) && request.PaymentMethod.Equals("COD", StringComparison.OrdinalIgnoreCase))
+                {
+                    var cleared = await _cartService.ClearCartAsync(userId);
+                    Console.WriteLine($"Cleared cart for user {userId} after COD order: {cleared}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log but do not fail order creation
+                Console.WriteLine($"Failed to clear cart after COD order for user {userId}: {ex.Message}");
+            }
+
+            // Do not clear cart here for ONLINE payments; cart will be cleared when payment is confirmed by webhook.
             return ResponseHelper.Created(result, "Order created successfully");
         }
 

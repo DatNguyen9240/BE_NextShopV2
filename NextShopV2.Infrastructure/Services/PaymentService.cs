@@ -191,6 +191,39 @@ public class PaymentService : IPaymentService
         };
     }
 
+    public async Task<bool> MarkPaymentAsPaidAsync(Guid paymentId, string? collectedBy)
+    {
+        var payment = _db.Payments.FirstOrDefault(p => p.PaymentId == paymentId);
+        if (payment == null) return false;
+
+        payment.Status = "Paid";
+        // add a simple audit note to ProviderData
+        var note = $"CollectedBy:{collectedBy ?? "system"} at {DateTime.UtcNow:o}";
+        payment.ProviderData = string.IsNullOrEmpty(payment.ProviderData) ? note : payment.ProviderData + "\n" + note;
+
+        _db.Payments.Update(payment);
+
+        var order = _db.Orders.FirstOrDefault(o => o.OrderId == payment.OrderId);
+        if (order != null)
+        {
+            order.Status = "Paid";
+            _db.Orders.Update(order);
+
+            try
+            {
+                var cleared = await _cartService.ClearCartAsync(order.UserId);
+                Console.WriteLine($"Cleared cart for user {order.UserId} after manual collection: {cleared}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to clear cart for user {order.UserId}: {ex.Message}");
+            }
+        }
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<NextShopV2.Shared.Models.PaymentLinkResponse> CreatePaymentForOrderAsync(Guid orderId)
     {
         var order = await _db.Orders

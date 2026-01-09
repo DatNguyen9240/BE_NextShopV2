@@ -52,6 +52,24 @@ namespace NextShopV2.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(List<Order> Items, int TotalCount)> GetByUserIdPagedAsync(Guid userId, int page, int pageSize, string? status = null)
+        {
+            var query = _context.Orders
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Variant)
+                        .ThenInclude(v => v.Product)
+                .Where(o => o.UserId == userId && (string.IsNullOrEmpty(status) || o.Status == status));
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(o => o.OrderDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
         public async Task<List<Order>> GetByStatusAsync(string status)
         {
             return await _context.Orders
