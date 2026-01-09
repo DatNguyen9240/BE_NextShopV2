@@ -15,12 +15,17 @@ public class PaymentService : IPaymentService
     private readonly AppDbContext _db;
     private readonly PayOSClient _payosClient;
     private readonly NextShopV2.Shared.Interfaces.IRedisCartService _cartService;
+    private readonly NextShopV2.Shared.Interfaces.IPushNotificationService _pushService;
 
-    public PaymentService(AppDbContext db, PayOSClient payosClient, NextShopV2.Shared.Interfaces.IRedisCartService cartService)
+    private readonly StackExchange.Redis.IConnectionMultiplexer _redis;
+
+    public PaymentService(AppDbContext db, PayOSClient payosClient, NextShopV2.Shared.Interfaces.IRedisCartService cartService, NextShopV2.Shared.Interfaces.IPushNotificationService pushService, StackExchange.Redis.IConnectionMultiplexer redis)
     {
         _db = db;
         _payosClient = payosClient;
         _cartService = cartService;
+        _pushService = pushService;
+        _redis = redis;
     }
 
     public async Task<bool> HandlePayOSWebhookAsync(string body, string? signature, string checksumKey)
@@ -119,6 +124,7 @@ public class PaymentService : IPaymentService
             }
             else
             {
+                Console.WriteLine($"Cannot process webhook: orderCode={orderCode}, hasOrderId=false");
                 return false; // Cannot process
             }
         }
@@ -152,7 +158,54 @@ public class PaymentService : IPaymentService
                 {
                     Console.WriteLine($"Failed to clear cart for user {order.UserId}: {ex.Message}");
                 }
-            }
+
+                try
+                {
+                    await _pushService.SendToUserAsync(order.UserId, "Thanh toán thành công", $"Đơn hàng {order.OrderId} đã được thanh toán.", new System.Collections.Generic.Dictionary<string, string> { { "orderId", order.OrderId.ToString() } });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send push to user {order.UserId}: {ex.Message}");
+                }
+                // Also publish to Redis notifications channel so SignalR + client will be notified in real-time
+                try
+                {
+                    var sub = _redis.GetSubscriber();
+                    var notif = new {
+                        id = System.Guid.NewGuid().ToString(),
+                        title = "Thanh toán thành công",
+                        body = $"Đơn hàng {order.OrderId} đã được thanh toán.",
+                        url = $"/payment/success?orderId={order.OrderId}",
+                        read = false,
+                        createdAt = System.DateTime.UtcNow
+                    };
+
+                    // Persist notification into Redis (hash + zset + unread) so it'll be available when client fetches /api/notifications
+                    try
+                    {
+                        var db = _redis.GetDatabase();
+                        var userIdStr = order.UserId.ToString();
+                        var id = notif.id;
+                        var notifJson = System.Text.Json.JsonSerializer.Serialize(notif);
+                        await db.HashSetAsync($"notifications:{userIdStr}:hash", id, notifJson);
+                        var score = new DateTimeOffset(notif.createdAt).ToUnixTimeMilliseconds();
+                        await db.SortedSetAddAsync($"notifications:{userIdStr}:zset", id, score);
+                        await db.SetAddAsync($"notifications:{userIdStr}:unread", id);
+                    }
+                    catch (Exception ex2)
+                    {
+                        Console.WriteLine($"Failed to persist payment notification to Redis: {ex2.Message}");
+                    }
+
+                    var payload = System.Text.Json.JsonSerializer.Serialize(new { userId = order.UserId.ToString(), notification = notif });
+                    Console.WriteLine($"Publishing redis notification for user {order.UserId}: {payload}");
+                    await sub.PublishAsync(StackExchange.Redis.RedisChannel.Literal("notifications:published"), payload);
+                    Console.WriteLine($"Published redis notification for user {order.UserId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to publish payment notification to Redis: {ex.Message}");
+                }            }
         }
 
         await _db.SaveChangesAsync();

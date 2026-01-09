@@ -33,6 +33,9 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
 
+        // Push notification tokens (FCM)
+        public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Composite keys
@@ -109,6 +112,13 @@ namespace NextShopV2.Infrastructure.Persistence
                 .Property(pv => pv.PriceAfterDiscount)
                 .HasPrecision(18, 2);
 
+
+            // Configure PushToken
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Notifications.PushToken>(eb => {
+                eb.HasKey(p => p.PushTokenId);
+                eb.Property(p => p.Token).IsRequired();
+                eb.Property(p => p.Platform).HasMaxLength(50).IsRequired();
+            });
 
             base.OnModelCreating(modelBuilder);
         }

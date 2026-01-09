@@ -95,14 +95,17 @@ public class PaymentsController : ControllerBase
 
         var success = await _paymentService.HandlePayOSWebhookAsync(body, signature, checksumKey ?? string.Empty);
         Console.WriteLine($"Webhook processing success: {success}");
-        // Return 200 only if processing succeeded (so provider won't assume success when DB wasn't updated)
+        // If processing failed due to missing mapping (e.g. provider orderCode doesn't match any payment and no orderId supplied),
+        // return 200 to acknowledge delivery while logging details for offline investigation. This avoids repeated 500 retries from providers
+        // when delivery succeeded but the payload cannot be processed yet.
         if (success)
         {
             return Ok(new { success = true, message = "Payment updated successfully" });
         }
         else
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { success = false, message = "Failed to process webhook" });
+            Console.WriteLine("Webhook not processed: no matching payment or missing orderId. Logged for investigation.");
+            return Ok(new { success = false, message = "Webhook received but no matching payment or missing orderId" });
         }
     }
 

@@ -19,14 +19,16 @@ namespace NextShopV2.Application.Services
         private readonly IInventoryService _inventoryService;
         private readonly ICouponService _couponService;
         private readonly IUserRepository _userRepo;
+        private readonly NextShopV2.Shared.Interfaces.IPushNotificationService _pushService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, NextShopV2.Shared.Interfaces.IPushNotificationService pushService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
             _inventoryService = inventoryService;
             _couponService = couponService;
             _userRepo = userRepository;
+            _pushService = pushService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -210,11 +212,26 @@ namespace NextShopV2.Application.Services
         public async Task<bool> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
             var order = await _orderRepo.GetByIdAsync(id);
-            if (order.IsNull()) return false;
+            if (order == null) return false;
 
-            order!.Status = request.Status;
+            var previous = order.Status; 
+            order.Status = request.Status;
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveAsync();
+
+            // Notify user if status is one of interest
+            var notifyStatuses = new[] { "Paid", "Shipped", "Completed", "Cancelled" };
+            if (!string.Equals(previous, order.Status, StringComparison.OrdinalIgnoreCase) && Array.Exists(notifyStatuses, s => s.Equals(order.Status, StringComparison.OrdinalIgnoreCase)))
+            {
+                try
+                {
+                    await _pushService.SendToUserAsync(order.UserId, $"Đơn hàng {order.Status}", $"Đơn hàng {order.OrderId} đã chuyển sang trạng thái: {order.Status}", new System.Collections.Generic.Dictionary<string, string> { { "orderId", order.OrderId.ToString() } });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send status push for order {order.OrderId}: {ex.Message}");
+                }
+            }
 
             return true;
         }

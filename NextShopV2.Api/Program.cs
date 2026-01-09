@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NextShopV2.Shared.Extensions.Web;
 using PayOS;
+using NextShopV2.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,9 +109,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
-        // Reject tokens that are present in Redis blacklist
+
+        // Support passing access_token in query string for SignalR WebSocket requests
         options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"].FirstOrDefault();
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+                {
+                    context.Token = accessToken;
+                }
+                return System.Threading.Tasks.Task.CompletedTask;
+            },
             OnTokenValidated = context =>
             {
                 try
@@ -136,6 +148,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+// Register SignalR
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthorization();
 
@@ -217,12 +232,19 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IRevie
 // Register DI for PaymentService
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IPaymentService, NextShopV2.Infrastructure.Services.PaymentService>();
 
+// Register PushNotificationService (Firebase Admin)
+builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IPushNotificationService, NextShopV2.Infrastructure.Services.PushNotificationService>();
+
 // Register DI for Redis Cart Service (from Shared)
 builder.Services.AddScoped<IDatabase>(serviceProvider =>
 {
     var redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
     return redis.GetDatabase();
 });
+
+// Register notification services (Redis-backed)
+builder.Services.AddSingleton<NextShopV2.Api.Services.INotificationService, NextShopV2.Api.Services.RedisNotificationService>();
+builder.Services.AddHostedService<NextShopV2.Api.Services.NotificationSubscriberHostedService>();
 builder.Services.AddScoped<NextShopV2.Shared.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantCartService>();
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IRedisCartService, NextShopV2.Shared.Services.RedisCartService>();
 
@@ -240,6 +262,8 @@ builder.Services.AddSingleton<PayOSClient>(sp =>
 });
 
 var app = builder.Build();
+
+
 
 // Enable CORS as early as possible so preflight requests are handled
 app.UseCors("AllowLocalDev");
@@ -263,4 +287,8 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// SignalR hub for notifications
+app.MapHub<NotificationHub>("/hubs/notifications");
+
 app.Run();
