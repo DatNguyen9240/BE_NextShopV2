@@ -1,6 +1,9 @@
 using NextShopV2.Shared.Interfaces;
-using NextShopV2.Shared.Models;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.DTOs.Request.CreateDto;
 using NextShopV2.Shared.Helpers;
+using NextShopV2.Application.Interfaces.Services;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -8,15 +11,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace NextShopV2.Shared.Services
+namespace NextShopV2.Infrastructure.Services
 {
     public class RedisCartService : IRedisCartService
     {
         private readonly IDatabase _redisDb;
-        private readonly IProductVariantService _variantService;
+        private readonly IProductVariantCartService _variantService;
         private const int CART_EXPIRE_DAYS = 30;
 
-        public RedisCartService(IDatabase redisDb, IProductVariantService variantService)
+        public RedisCartService(IDatabase redisDb, IProductVariantCartService variantService)
         {
             _redisDb = redisDb;
             _variantService = variantService;
@@ -34,7 +37,9 @@ namespace NextShopV2.Shared.Services
                     CartId = Guid.NewGuid(),
                     UserId = userId,
                     CreatedAt = DateTime.UtcNow,
-                    Items = new List<CartItemDto>()
+                    Items = new List<CartItemDto>(),
+                    TotalAmount = 0,
+                    TotalItems = 0
                 };
             }
 
@@ -56,12 +61,8 @@ namespace NextShopV2.Shared.Services
                             VariantId = redisItem.VariantId,
                             Quantity = redisItem.Quantity,
                             UnitPrice = variantInfo.Price,
-                            ProductName = variantInfo.ProductName,
-                            Color = variantInfo.Color,
-                            Size = variantInfo.Size,
-                            ImageUrl = variantInfo.ImageUrl,
-                            Sku = variantInfo.Sku,
-                            StockQuantity = variantInfo.StockQuantity
+                            TotalPrice = variantInfo.Price * redisItem.Quantity,
+                            VariantInfo = variantInfo
                         });
                     }
                 }
@@ -72,7 +73,9 @@ namespace NextShopV2.Shared.Services
                 CartId = cartId,
                 UserId = userId,
                 CreatedAt = createdAt,
-                Items = cartItems
+                Items = cartItems,
+                TotalAmount = cartItems.Sum(item => item.TotalPrice),
+                TotalItems = cartItems.Sum(item => item.Quantity)
             };
         }
 
@@ -220,21 +223,11 @@ namespace NextShopV2.Shared.Services
         private static string GetCartKey(Guid userId) => $"cart:{userId}";
     }
 
-    // Interface for getting variant info
-    public interface IProductVariantService
+    internal class RedisCartItem
     {
-        Task<VariantInfo?> GetVariantInfoAsync(Guid variantId);
-    }
-
-    // Simplified variant info for cart
-    public class VariantInfo
-    {
-        public decimal Price { get; set; }
-        public string ProductName { get; set; } = string.Empty;
-        public string Color { get; set; } = string.Empty;
-        public string Size { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
-        public string Sku { get; set; } = string.Empty;
-        public int StockQuantity { get; set; }
+        public Guid CartItemId { get; set; }
+        public Guid VariantId { get; set; }
+        public int Quantity { get; set; }
+        public DateTime AddedAt { get; set; }
     }
 }

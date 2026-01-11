@@ -1,6 +1,6 @@
-namespace NextShopV2.Api.Models
+namespace NextShopV2.Application.DTOs.Response
 {
-    public class NotificationDto
+    public class SocketNotificationDto
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Title { get; set; } = string.Empty;

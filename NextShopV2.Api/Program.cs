@@ -8,7 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NextShopV2.Shared.Extensions.Web;
 using PayOS;
-using NextShopV2.Api.Hubs;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,17 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
     )
 );
 
+// Add distributed cache using Redis
+builder.Services.AddSingleton<IDistributedCache>(provider =>
+{
+    var redis = provider.GetRequiredService<IConnectionMultiplexer>();
+    var options = new RedisCacheOptions
+    {
+        Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"
+    };
+    return new RedisCache(options);
+});
+
 builder.Services.AddControllers().AddJsonOptions(opts =>
 {
     // Ensure DateTime objects are serialized as UTC ISO strings (append Z) to avoid client timezone issues
@@ -30,24 +42,12 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 });
 builder.Services.AddEndpointsApiExplorer();
 
-// CORS: allow local Next.js dev origin so browser preflight succeeds
+// CORS: allow local Next.js dev origin and ngrok for testing
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalDev", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
-
-// CORS: allow local Next.js dev origin so browser preflight succeeds
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowLocalDev", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://localhost:3000", "https://a27c13b3a777.ngrok-free.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -229,11 +229,21 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IReviewService, NextShopV2.Application.Services.ReviewService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IReviewRepository, NextShopV2.Infrastructure.Repositories.ReviewRepository>();
 
-// Register DI for PaymentService
-builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IPaymentService, NextShopV2.Infrastructure.Services.PaymentService>();
+// Register Firebase Notification Service
+builder.Services.AddSingleton<NextShopV2.Application.Interfaces.Services.IFirebaseNotificationService, NextShopV2.Infrastructure.Services.FirebaseNotificationService>();
 
-// Register PushNotificationService (Firebase Admin)
-builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IPushNotificationService, NextShopV2.Infrastructure.Services.PushNotificationService>();
+// Register DI for Firebase PushTokenRepository and NotificationHistoryRepository
+builder.Services.AddScoped<NextShopV2.Domain.Repositories.IFirebasePushTokenRepository, NextShopV2.Infrastructure.Repositories.FirebasePushTokenRepository>();
+builder.Services.AddScoped<NextShopV2.Domain.Repositories.INotificationHistoryRepository, NextShopV2.Infrastructure.Repositories.NotificationHistoryRepository>();
+
+// Register Firebase Notification Application Service
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IPushNotificationService, NextShopV2.Application.UseCases.FirebaseNotificationService>();
+
+// Register DI for SocketNotificationService
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.ISocketNotificationService, NextShopV2.Api.Services.SocketNotificationService>();
+
+// Register DI for PaymentService
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IPaymentService, NextShopV2.Infrastructure.Services.PaymentService>();
 
 // Register DI for Redis Cart Service (from Shared)
 builder.Services.AddScoped<IDatabase>(serviceProvider =>
@@ -242,11 +252,8 @@ builder.Services.AddScoped<IDatabase>(serviceProvider =>
     return redis.GetDatabase();
 });
 
-// Register notification services (Redis-backed)
-builder.Services.AddSingleton<NextShopV2.Api.Services.INotificationService, NextShopV2.Api.Services.RedisNotificationService>();
-builder.Services.AddHostedService<NextShopV2.Api.Services.NotificationSubscriberHostedService>();
-builder.Services.AddScoped<NextShopV2.Shared.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantCartService>();
-builder.Services.AddScoped<NextShopV2.Shared.Interfaces.IRedisCartService, NextShopV2.Shared.Services.RedisCartService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductVariantCartService, NextShopV2.Application.UseCases.ProductVariantCartService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IRedisCartService, NextShopV2.Infrastructure.Services.RedisCartService>();
 
 // Configure PayOS client for payment requests
 builder.Services.AddSingleton<PayOSClient>(sp =>
@@ -287,8 +294,7 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
 
 // SignalR hub for notifications
-app.MapHub<NotificationHub>("/hubs/notifications");
-
 app.Run();

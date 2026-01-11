@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using NextShopV2.Api.Models;
+using NextShopV2.Application.DTOs;
 
 namespace NextShopV2.Api.Hubs
 {
     [Authorize]
-    public class NotificationHub : Hub
+    public class SocketNotificationHub : Hub
     {
         // No server methods required for now. Clients connect and receive events from server via hub context.
         public override Task OnConnectedAsync()

@@ -35,6 +35,7 @@ namespace NextShopV2.Infrastructure.Persistence
 
         // Push notification tokens (FCM)
         public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Notifications.NotificationHistory> NotificationHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

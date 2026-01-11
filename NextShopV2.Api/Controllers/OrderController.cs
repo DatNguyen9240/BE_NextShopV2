@@ -18,9 +18,9 @@ namespace NextShopV2.Api.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
-        private readonly NextShopV2.Shared.Interfaces.IRedisCartService _cartService;
+        private readonly IRedisCartService _cartService;
 
-        public OrderController(IOrderService orderService, NextShopV2.Shared.Interfaces.IRedisCartService cartService)
+        public OrderController(IOrderService orderService, IRedisCartService cartService)
         {
             _orderService = orderService;
             _cartService = cartService;

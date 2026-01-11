@@ -1,5 +1,7 @@
-using NextShopV2.Shared.Models;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Shared.Interfaces;
+using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Domain.Entities.Payments;
 using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Infrastructure.Persistence;
@@ -14,18 +16,18 @@ public class PaymentService : IPaymentService
 {
     private readonly AppDbContext _db;
     private readonly PayOSClient _payosClient;
-    private readonly NextShopV2.Shared.Interfaces.IRedisCartService _cartService;
-    private readonly NextShopV2.Shared.Interfaces.IPushNotificationService _pushService;
+    private readonly IRedisCartService _cartService;
+    private readonly ISocketNotificationService _notificationService;
 
     private readonly StackExchange.Redis.IConnectionMultiplexer _redis;
 
-    public PaymentService(AppDbContext db, PayOSClient payosClient, NextShopV2.Shared.Interfaces.IRedisCartService cartService, NextShopV2.Shared.Interfaces.IPushNotificationService pushService, StackExchange.Redis.IConnectionMultiplexer redis)
+    public PaymentService(AppDbContext db, PayOSClient payosClient, IRedisCartService cartService, StackExchange.Redis.IConnectionMultiplexer redis, ISocketNotificationService notificationService)
     {
         _db = db;
         _payosClient = payosClient;
         _cartService = cartService;
-        _pushService = pushService;
         _redis = redis;
+        _notificationService = notificationService;
     }
 
     public async Task<bool> HandlePayOSWebhookAsync(string body, string? signature, string checksumKey)
@@ -161,50 +163,23 @@ public class PaymentService : IPaymentService
 
                 try
                 {
-                    await _pushService.SendToUserAsync(order.UserId, "Thanh toán thành công", $"Đơn hàng {order.OrderId} đã được thanh toán.", new System.Collections.Generic.Dictionary<string, string> { { "orderId", order.OrderId.ToString() } });
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to send push to user {order.UserId}: {ex.Message}");
-                }
-                // Also publish to Redis notifications channel so SignalR + client will be notified in real-time
-                try
-                {
-                    var sub = _redis.GetSubscriber();
-                    var notif = new {
-                        id = System.Guid.NewGuid().ToString(),
-                        title = "Thanh toán thành công",
-                        body = $"Đơn hàng {order.OrderId} đã được thanh toán.",
-                        url = $"/payment/success?orderId={order.OrderId}",
-                        read = false,
-                        createdAt = System.DateTime.UtcNow
+                    // Send socket notification for successful payment
+                    var notification = new SocketNotificationDto
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Thanh toán thành công",
+                        Body = $"Đơn hàng {order.OrderId} đã được thanh toán.",
+                        Url = $"/payment/success?orderId={order.OrderId}",
+                        Read = false,
+                        CreatedAt = DateTime.UtcNow
                     };
 
-                    // Persist notification into Redis (hash + zset + unread) so it'll be available when client fetches /api/notifications
-                    try
-                    {
-                        var db = _redis.GetDatabase();
-                        var userIdStr = order.UserId.ToString();
-                        var id = notif.id;
-                        var notifJson = System.Text.Json.JsonSerializer.Serialize(notif);
-                        await db.HashSetAsync($"notifications:{userIdStr}:hash", id, notifJson);
-                        var score = new DateTimeOffset(notif.createdAt).ToUnixTimeMilliseconds();
-                        await db.SortedSetAddAsync($"notifications:{userIdStr}:zset", id, score);
-                        await db.SetAddAsync($"notifications:{userIdStr}:unread", id);
-                    }
-                    catch (Exception ex2)
-                    {
-                        Console.WriteLine($"Failed to persist payment notification to Redis: {ex2.Message}");
-                    }
-
-                    var payload = System.Text.Json.JsonSerializer.Serialize(new { userId = order.UserId.ToString(), notification = notif });
-                    Console.WriteLine($"Publishing redis notification for user {order.UserId}: {payload}");
-                    await sub.PublishAsync(StackExchange.Redis.RedisChannel.Literal("notifications:published"), payload);
-                    Console.WriteLine($"Published redis notification for user {order.UserId}");
+                    await _notificationService.AddNotificationAsync(order.UserId.ToString(), notification);
+                    Console.WriteLine($"Socket notification sent for successful payment of order {order.OrderId}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to publish payment notification to Redis: {ex.Message}");
+                    Console.WriteLine($"Failed to send socket notification for user {order.UserId}: {ex.Message}");
                 }            }
         }
 
@@ -277,7 +252,7 @@ public class PaymentService : IPaymentService
         return true;
     }
 
-    public async Task<NextShopV2.Shared.Models.PaymentLinkResponse> CreatePaymentForOrderAsync(Guid orderId)
+    public async Task<PaymentLinkResponse> CreatePaymentForOrderAsync(Guid orderId)
     {
         var order = await _db.Orders
             .Include(o => o.Items)
@@ -372,7 +347,7 @@ public class PaymentService : IPaymentService
 
         Console.WriteLine($"Payment link created. QR: {qrUrl}, Checkout: {checkoutUrl}");
 
-        return new NextShopV2.Shared.Models.PaymentLinkResponse
+        return new PaymentLinkResponse
         {
             QrCodeUrl = qrUrl,
             CheckoutUrl = checkoutUrl,

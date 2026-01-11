@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using NextShopV2.Api.Hubs;
-using NextShopV2.Api.Models;
-using NextShopV2.Api.Services;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Shared.Interfaces;
+using NextShopV2.Application.Interfaces.Services;
 using System.Collections.Concurrent;
 
 namespace NextShopV2.Api.Controllers
@@ -11,12 +13,12 @@ namespace NextShopV2.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class NotificationsController : ControllerBase
+    public class SocketNotificationController : ControllerBase
     {
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly INotificationService _notificationService;
+        private readonly IHubContext<SocketNotificationHub> _hubContext;
+        private readonly ISocketNotificationService _notificationService;
 
-        public NotificationsController(IHubContext<NotificationHub> hubContext, INotificationService notificationService)
+        public SocketNotificationController(IHubContext<SocketNotificationHub> hubContext, ISocketNotificationService notificationService)
         {
             _hubContext = hubContext;
             _notificationService = notificationService;
@@ -40,7 +42,7 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPost("send")]
         [AllowAnonymous] // keep for testing; in prod protect this endpoint
-        public async Task<ActionResult> Send([FromBody] NotificationDto payload, [FromQuery] string? userId = null)
+        public async Task<ActionResult> Send([FromBody] SocketNotificationDto payload, [FromQuery] string? userId = null)
         {
             if (!string.IsNullOrWhiteSpace(userId))
             {
@@ -77,7 +79,7 @@ namespace NextShopV2.Api.Controllers
         public async Task<ActionResult> SeedMyNotif()
         {
             var userId = GetUserId();
-            var n = new NotificationDto
+            var n = new SocketNotificationDto
             {
                 Title = "Sample notification",
                 Body = "This is a seeded notification",

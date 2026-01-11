@@ -1,5 +1,6 @@
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,5 +18,6 @@ namespace NextShopV2.Application.Interfaces.Services
         Task<bool> UpdateStockAsync(Guid id, UpdateStockRequest request);
         Task<bool> SetAsDefaultAsync(Guid id);
         Task<bool> DeleteAsync(Guid id);
+        Task<VariantInfo?> GetVariantInfoAsync(Guid variantId);
     }
 }

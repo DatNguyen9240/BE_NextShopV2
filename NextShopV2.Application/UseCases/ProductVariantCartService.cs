@@ -1,12 +1,14 @@
 using NextShopV2.Application.Interfaces.Repositories;
-using NextShopV2.Shared.Services;
+using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Shared.Helpers;
 using System;
 using System.Threading.Tasks;
 
-namespace NextShopV2.Application.Services
+namespace NextShopV2.Application.UseCases
 {
-    public class ProductVariantCartService : IProductVariantService
+    public class ProductVariantCartService : IProductVariantCartService
     {
         private readonly IProductVariantRepository _variantRepository;
 

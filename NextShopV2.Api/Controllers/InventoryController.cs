@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces.Services;
-using NextShopV2.Shared.Models;
+using NextShopV2.Application.DTOs;
 
 namespace NextShopV2.Api.Controllers
 {
