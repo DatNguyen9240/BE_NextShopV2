@@ -31,6 +31,9 @@ obj/
 # Environment files
 .env
 
+# Service account keys and secrets
+**/Config/serviceAccountKey.json
+
 # Dependency files
 packages/
 
