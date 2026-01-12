@@ -11,6 +11,8 @@ namespace NextShopV2.Api.Controllers
     {
         private readonly IPushNotificationService _notificationService;
         private readonly ILogger<FirebaseNotificationController> _logger;
+        private static DateTime _lastTestTime = DateTime.MinValue;
+        private const int TEST_RATE_LIMIT_SECONDS = 10;
 
         public FirebaseNotificationController(
             IPushNotificationService notificationService,
@@ -133,6 +135,20 @@ namespace NextShopV2.Api.Controllers
         {
             try
             {
+                // Rate limiting: 10 seconds between test calls
+                var timeSinceLastTest = DateTime.UtcNow - _lastTestTime;
+                if (timeSinceLastTest.TotalSeconds < TEST_RATE_LIMIT_SECONDS)
+                {
+                    var remainingSeconds = TEST_RATE_LIMIT_SECONDS - (int)timeSinceLastTest.TotalSeconds;
+                    _logger.LogWarning($"Test notification rate limited. Try again in {remainingSeconds} seconds.");
+                    return BadRequest(new { 
+                        message = $"Rate limited. Please wait {remainingSeconds} seconds before testing again.",
+                        rateLimited = true,
+                        retryAfter = remainingSeconds
+                    });
+                }
+
+                _lastTestTime = DateTime.UtcNow;
                 await _notificationService.TestFirebaseAsync();
                 return Ok(new { message = "Test notification sent successfully" });
             }

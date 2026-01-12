@@ -5,6 +5,7 @@ namespace NextShopV2.Domain.Repositories
     public interface IFirebasePushTokenRepository
     {
         Task<PushToken?> GetByTokenAsync(string token);
+        Task<PushToken?> GetByTokenIncludingInactiveAsync(string token);
         Task<IEnumerable<PushToken>> GetActiveTokensAsync();
         Task<IEnumerable<PushToken>> GetTokensByUserIdAsync(Guid userId);
         Task AddAsync(PushToken pushToken);

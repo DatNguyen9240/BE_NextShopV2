@@ -47,7 +47,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalDev", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "https://a27c13b3a777.ngrok-free.app", "https://baf606cf0cfd.ngrok-free.app")
+        policy.WithOrigins("http://localhost:3000", "https://3b1cfe4e17af.ngrok-free.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

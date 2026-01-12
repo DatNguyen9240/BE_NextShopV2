@@ -166,19 +166,34 @@ namespace NextShopV2.Application.UseCases
                 Data = new Dictionary<string, string> { { "test", "true" } }
             };
 
-            await _firebaseService.SendToMultipleAsync(tokenStrings, testNotification);
+            var result = await _firebaseService.SendToMultipleAsync(tokenStrings, testNotification);
+
+            // Disable invalid tokens
+            if (result.InvalidTokens.Any())
+            {
+                foreach (var invalidToken in result.InvalidTokens)
+                {
+                    var tokenEntity = activeTokens.FirstOrDefault(t => t.Token == invalidToken);
+                    if (tokenEntity != null)
+                    {
+                        tokenEntity.IsActive = false;
+                        await _pushTokenRepository.UpdateAsync(tokenEntity);
+                    }
+                }
+            }
 
             // Save history
-            // var testHistory = new NotificationHistory
-            // {
-            //     Title = testNotification.Title,
-            //     Body = testNotification.Body,
-            //     Data = JsonSerializer.Serialize(testNotification.Data),
-            //     RecipientCount = tokenStrings.Count,
-            //     Status = "success",
-            //     SentAt = DateTime.UtcNow
-            // };
-            // await _notificationHistoryRepository.AddAsync(testHistory);
+            var testHistory = new NotificationHistory
+            {
+                Title = testNotification.Title,
+                Body = testNotification.Body,
+                Data = JsonSerializer.Serialize(testNotification.Data),
+                RecipientCount = tokenStrings.Count,
+                Status = result.FailureCount > 0 ? "partial" : "success",
+                ErrorMessage = result.FailureCount > 0 ? $"Failed to send to {result.FailureCount} tokens" : null,
+                SentAt = DateTime.UtcNow
+            };
+            await _notificationHistoryRepository.AddAsync(testHistory);
         }
 
         public async Task ClearTokensAsync()

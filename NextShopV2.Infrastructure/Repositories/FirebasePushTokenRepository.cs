@@ -20,6 +20,12 @@ namespace NextShopV2.Infrastructure.Repositories
                 .FirstOrDefaultAsync(pt => pt.Token == token && pt.IsActive);
         }
 
+        public async Task<PushToken?> GetByTokenIncludingInactiveAsync(string token)
+        {
+            return await _context.PushTokens
+                .FirstOrDefaultAsync(pt => pt.Token == token);
+        }
+
         public async Task<IEnumerable<PushToken>> GetActiveTokensAsync()
         {
             return await _context.PushTokens
