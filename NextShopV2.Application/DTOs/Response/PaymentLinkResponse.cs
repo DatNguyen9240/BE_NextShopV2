@@ -1,4 +1,4 @@
-namespace NextShopV2.Shared.Models
+namespace NextShopV2.Application.DTOs.Response
 {
     public class PaymentLinkResponse
     {

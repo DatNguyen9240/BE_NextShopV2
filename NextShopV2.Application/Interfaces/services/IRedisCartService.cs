@@ -1,8 +1,11 @@
-using NextShopV2.Shared.Models;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.DTOs.Request.CreateDto;
+using NextShopV2.Application.DTOs.Request.UpdateDto;
 using System;
 using System.Threading.Tasks;
 
-namespace NextShopV2.Shared.Interfaces
+namespace NextShopV2.Application.Interfaces.Services
 {
     public interface IRedisCartService
     {

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using NextShopV2.Shared.Interfaces;
-using NextShopV2.Shared.Models;
+using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Application.DTOs;
+using NextShopV2.Application.DTOs.Request.CreateDto;
+using NextShopV2.Application.DTOs.Request.UpdateDto;
+using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Shared.Helpers;
 using NextShopV2.Api.Attributes;
 using NextShopV2.Shared.Extensions.Web;

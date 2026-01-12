@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NextShopV2.Shared\NextShopV2.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

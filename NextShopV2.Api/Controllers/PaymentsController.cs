@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
-using NextShopV2.Shared.Interfaces;
+using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request.CreateDto;
 using NextShopV2.Api.Attributes;
 

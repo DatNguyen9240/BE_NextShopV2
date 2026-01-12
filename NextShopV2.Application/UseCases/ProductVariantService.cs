@@ -6,6 +6,7 @@ using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Domain.Entities.Products;
 using NextShopV2.Shared.Extensions;
 using NextShopV2.Shared.Helpers;
+using NextShopV2.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -345,6 +346,24 @@ namespace NextShopV2.Application.Services
                 variant.IsDefault = false;
                 await _variantRepo.UpdateAsync(variant);
             });
+        }
+
+        public async Task<VariantInfo?> GetVariantInfoAsync(Guid variantId)
+        {
+            var variant = await _variantRepo.GetByIdAsync(variantId);
+            if (variant == null)
+                return null;
+
+            return new VariantInfo
+            {
+                Price = variant.PriceAfterDiscount,
+                ProductName = variant.Product?.Name ?? string.Empty,
+                Color = variant.Color ?? string.Empty,
+                Size = variant.Size ?? string.Empty,
+                ImageUrl = variant.ImageUrl ?? string.Empty,
+                Sku = variant.SKU ?? string.Empty,
+                StockQuantity = variant.StockQuantity
+            };
         }
     }
 }
