@@ -6,7 +6,7 @@ using NextShopV2.Application.DTOs.Request.CreateDto;
 namespace NextShopV2.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/firebase-notifications")]
     public class FirebaseNotificationController : ControllerBase
     {
         private readonly IPushNotificationService _notificationService;
