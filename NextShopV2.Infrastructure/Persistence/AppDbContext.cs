@@ -37,6 +37,9 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; }
         public DbSet<NextShopV2.Domain.Entities.Notifications.NotificationHistory> NotificationHistories { get; set; }
 
+        // Passkeys (WebAuthn)
+        public DbSet<NextShopV2.Domain.Entities.Security.Passkey> Passkeys { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Composite keys
@@ -119,6 +122,17 @@ namespace NextShopV2.Infrastructure.Persistence
                 eb.HasKey(p => p.PushTokenId);
                 eb.Property(p => p.Token).IsRequired();
                 eb.Property(p => p.Platform).HasMaxLength(50).IsRequired();
+            });
+
+            // Configure Passkey
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Security.Passkey>(eb => {
+                eb.HasKey(p => p.Id);
+                eb.Property(p => p.CredentialId).IsRequired();
+                eb.Property(p => p.PublicKey).IsRequired();
+                eb.Property(p => p.Counter).HasDefaultValue(0);
+                eb.Property(p => p.Transports);
+                eb.Property(p => p.CreatedAt);
+                eb.Property(p => p.LastUsedAt);
             });
 
             base.OnModelCreating(modelBuilder);

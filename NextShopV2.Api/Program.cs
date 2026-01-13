@@ -167,6 +167,9 @@ if (httpsPort == 0)
 }
 builder.Services.AddHttpsRedirection(options => { options.HttpsPort = httpsPort; });
 
+// Memory cache for WebAuthn challenges
+builder.Services.AddMemoryCache();
+
 // Register shared cache service
 builder.Services.AddScoped<NextShopV2.Shared.Interfaces.ICacheService>(provider =>
 {
@@ -236,7 +239,10 @@ builder.Services.AddSingleton<NextShopV2.Application.Interfaces.Services.IFireba
 builder.Services.AddScoped<NextShopV2.Domain.Repositories.IFirebasePushTokenRepository, NextShopV2.Infrastructure.Repositories.FirebasePushTokenRepository>();
 builder.Services.AddScoped<NextShopV2.Domain.Repositories.INotificationHistoryRepository, NextShopV2.Infrastructure.Repositories.NotificationHistoryRepository>();
 
-// Register Firebase Notification Application Service
+            // Passkey repository
+            builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IPasskeyRepository, NextShopV2.Infrastructure.Repositories.PasskeyRepository>();
+            // WebAuthn service
+            builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IWebAuthnService, NextShopV2.Infrastructure.Services.WebAuthnService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IPushNotificationService, NextShopV2.Application.UseCases.FirebaseNotificationService>();
 
 // Register DI for SocketNotificationService
