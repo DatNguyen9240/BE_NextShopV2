@@ -108,7 +108,24 @@ namespace NextShopV2.Api.Controllers
                                 attObj = attElem.GetString();
 
                             string? transports = null;
-                            if (credential.TryGetProperty("transports", out var trav) && trav.ValueKind != System.Text.Json.JsonValueKind.Undefined) transports = trav.GetRawText();
+                            // Check top-level transports
+                            if (credential.TryGetProperty("transports", out var trav) && trav.ValueKind != System.Text.Json.JsonValueKind.Undefined)
+                                transports = trav.GetRawText();
+                            else if (credential.TryGetProperty("response", out var respObj) && respObj.ValueKind == System.Text.Json.JsonValueKind.Object)
+                            {
+                                // Some browsers/implementations may include transports under response
+                                if (respObj.TryGetProperty("transports", out var rtrav) && rtrav.ValueKind != System.Text.Json.JsonValueKind.Undefined)
+                                    transports = rtrav.GetRawText();
+
+                                // Or under client extension results
+                                else if (respObj.TryGetProperty("clientExtensionResults", out var cer) && cer.ValueKind == System.Text.Json.JsonValueKind.Object && cer.TryGetProperty("transports", out var ctrav) && ctrav.ValueKind != System.Text.Json.JsonValueKind.Undefined)
+                                    transports = ctrav.GetRawText();
+                            }
+
+                            if (!string.IsNullOrEmpty(transports))
+                                _logger.LogDebug("RegisterVerify: transports for user {UserId}: {Transports}", userId, transports);
+                            else
+                                _logger.LogDebug("RegisterVerify: no transports present in incoming credential for user {UserId}", userId);
 
                             if (!string.IsNullOrEmpty(rawId))
                             {
@@ -262,7 +279,7 @@ namespace NextShopV2.Api.Controllers
                 var user = _userRepository.GetById(passkey.UserId);
                 if (user == null) return BadRequest("User not found");
 
-                var token = JwtHelper.GenerateToken(jwtKey, passkey.UserId, user.Email ?? string.Empty);
+                var token = JwtHelper.GenerateToken(jwtKey, passkey.UserId, user.Email ?? string.Empty, user?.Role);
 
                 // generate and persist refresh token (same approach as password login)
                 var refreshToken = Guid.NewGuid().ToString();
