@@ -235,6 +235,9 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IRevie
 // Register Firebase Notification Service
 builder.Services.AddSingleton<NextShopV2.Application.Interfaces.Services.IFirebaseNotificationService, NextShopV2.Infrastructure.Services.FirebaseNotificationService>();
 
+// Register DI for Email sender service
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IEmailService, NextShopV2.Infrastructure.Services.EmailService>();
+
 // Register DI for Firebase PushTokenRepository and NotificationHistoryRepository
 builder.Services.AddScoped<NextShopV2.Domain.Repositories.IFirebasePushTokenRepository, NextShopV2.Infrastructure.Repositories.FirebasePushTokenRepository>();
 builder.Services.AddScoped<NextShopV2.Domain.Repositories.INotificationHistoryRepository, NextShopV2.Infrastructure.Repositories.NotificationHistoryRepository>();

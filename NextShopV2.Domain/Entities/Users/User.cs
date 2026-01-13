@@ -18,6 +18,11 @@ namespace NextShopV2.Domain.Entities.Users
         public string? Gender { get; set; }
         // Optional avatar URL
         public string? Avatar { get; set; }
+
+        // Multi-factor auth settings
+        public bool MfaEnabled { get; set; } = false;
+        public string? MfaType { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

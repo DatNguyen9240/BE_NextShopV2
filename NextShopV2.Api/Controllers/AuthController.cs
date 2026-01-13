@@ -57,6 +57,93 @@ namespace NextShopV2.Api.Controllers
             return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
         }
 
+        [HttpPost("login/start")]
+        public IActionResult LoginStart([FromBody] NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = _authService.StartEmailOtp(request);
+            if (!result.Success)
+                return ResponseHelper.BadRequest(result.Message ?? "Failed to start MFA");
+
+            // If tokens are returned directly in Data (no MFA), unwrap and return as auth response
+            if (result.Data != null && result.Data is object)
+            {
+                try
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(result.Data);
+                    var doc = System.Text.Json.JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("accessToken", out var at))
+                    {
+                        var access = at.GetString();
+                        var refresh = root.TryGetProperty("refreshToken", out var rt) ? rt.GetString() : null;
+                        return AuthResponseHelper.Success(result.Message ?? string.Empty, access, refresh);
+                    }
+                    if (root.TryGetProperty("requestId", out var rid))
+                    {
+                        return ResponseHelper.Success(new { mfaRequired = true, requestId = rid.GetString() });
+                    }
+                }
+                catch { /* ignore parsing errors and fall through */ }
+            }
+
+            return ResponseHelper.Success(new { mfaRequired = true });
+        }
+
+        [HttpPost("login/verify")]
+        public IActionResult LoginVerify([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
+        {
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = _authService.VerifyEmailOtp(request);
+            if (!result.Success)
+                return ResponseHelper.Unauthorized(result.Message ?? "Verification failed");
+
+            return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
+        }
+
+        [HttpPost("mfa/enable/start")]
+        [Authorize]
+        public IActionResult StartEnableMfa()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return ResponseHelper.Unauthorized("Invalid token");
+
+            var result = _authService.StartEnableEmailMfa(userId);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Failed to send confirmation");
+            return ResponseHelper.Success(result.Data, result.Message ?? "Confirmation sent");
+        }
+
+        [HttpPost("mfa/enable/verify")]
+        [Authorize]
+        public IActionResult VerifyEnableMfa([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return ResponseHelper.Unauthorized("Invalid token");
+
+            var result = _authService.VerifyEnableEmailMfa(request, userId);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Verification failed");
+            return ResponseHelper.Success(null, result.Message ?? "MFA enabled");
+        }
+
+        [HttpPost("mfa/disable")]
+        [Authorize]
+        public IActionResult DisableMfa()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return ResponseHelper.Unauthorized("Invalid token");
+
+            var result = _authService.DisableEmailMfa(userId);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Disable failed");
+            return ResponseHelper.Success(null, result.Message ?? "MFA disabled");
+        }
+
         [HttpPost("refresh")]
         public IActionResult Refresh([FromBody] RefreshTokenRequest request)
         {

@@ -18,5 +18,14 @@ namespace NextShopV2.Application.Interfaces
         AppApiResponse UpdateProfile(Guid userId, UpdateProfileRequest request);
         AddressResponse? UpsertAddress(Guid userId, UpdateAddressRequest request);
         bool DeleteAddress(Guid userId, Guid addressId);
+
+        // Email OTP (MFA) support
+        AppApiResponse StartEmailOtp(NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request);
+        AppAuthResponse VerifyEmailOtp(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request);
+
+        // Enroll/Unenroll MFA for authenticated users
+        AppApiResponse StartEnableEmailMfa(System.Guid userId);
+        AppApiResponse VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId);
+        AppApiResponse DisableEmailMfa(System.Guid userId);
     }
 }

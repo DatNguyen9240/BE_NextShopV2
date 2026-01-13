@@ -12,6 +12,8 @@ namespace NextShopV2.Application.DTOs.Response
         public string Role { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public string? Avatar { get; set; }
+        public bool MfaEnabled { get; set; }
+        public string? MfaType { get; set; }
         public List<AddressResponse>? Addresses { get; set; }
     }
 }

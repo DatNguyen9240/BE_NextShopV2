@@ -17,12 +17,16 @@ namespace NextShopV2.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IDatabase _redisDb;
         private readonly string? _jwtKey;
+        private readonly NextShopV2.Application.Interfaces.Services.IEmailService _emailService;
+        private readonly string? _mfaKey;
 
-        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config)
+        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config, NextShopV2.Application.Interfaces.Services.IEmailService emailService)
         {
             _userRepository = userRepository;
             _redisDb = redis.GetDatabase();
             _jwtKey = config["Jwt:Key"];
+            _emailService = emailService;
+            _mfaKey = config["Mfa:Key"] ?? config["Jwt:Key"];
         }
 
     public AppApiResponse Register(RegisterRequest request)
@@ -57,6 +61,231 @@ namespace NextShopV2.Application.Services
             var refreshToken = Guid.NewGuid().ToString();
             _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
             return new AppAuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
+        }
+
+        // --- Email OTP (MFA) ---
+        public AppApiResponse StartEmailOtp(NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                return new AppApiResponse { Success = false, Message = "Invalid input" };
+
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
+            var user = _userRepository.GetByEmail(request.Email!);
+            if (user == null || user.PasswordHash != passwordHash)
+                return new AppApiResponse { Success = false, Message = "Invalid credentials" };
+
+            // For users without MFA enabled, return tokens directly (backwards compatible)
+            if (!user.MfaEnabled || string.IsNullOrWhiteSpace(user.MfaType) || !user.MfaType.Equals("Email", System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(_jwtKey))
+                    return new AppApiResponse { Success = false, Message = "JWT key is missing in configuration" };
+                var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
+                var refreshToken = Guid.NewGuid().ToString();
+                _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+                return new AppApiResponse { Success = true, Message = "Login successful", Data = new { accessToken, refreshToken } };
+            }
+
+            // Create OTP code
+            var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var bytes = new byte[4];
+            rng.GetBytes(bytes);
+            // 6-digit code (000000 - 999999)
+            var code = (System.BitConverter.ToUInt32(bytes, 0) % 1000000).ToString("D6");
+
+            // Compute hash of code with secret + userId
+            var codeHash = ComputeCodeHash(code, user.Id);
+            var requestId = Guid.NewGuid().ToString();
+
+            var payload = new {
+                userId = user.Id,
+                codeHash = codeHash,
+                attempts = 5
+            };
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            _redisDb.StringSet($"mfa:email:req:{requestId}", json, TimeSpan.FromMinutes(5));
+
+            // Send email (fire-and-forget but await here to surface errors)
+            var subject = "NextShop: Mã xác thực của bạn";
+            var html = LoadOtpTemplate(code, "Đăng nhập", 5);
+            try
+            {
+                _emailService.SendEmailAsync(user.Email, subject, html).GetAwaiter().GetResult();
+            }
+            catch (System.Exception)
+            {
+                // remove the stored request on email failure to avoid orphaned OTPs
+                _redisDb.KeyDelete($"mfa:email:req:{requestId}");
+                return new AppApiResponse { Success = false, Message = "Failed to send OTP email" };
+            }
+
+            return new AppApiResponse { Success = true, Message = "MFA required", Data = new { requestId } };
+        }
+
+        public AppAuthResponse VerifyEmailOtp(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.RequestId) || string.IsNullOrWhiteSpace(request.Code))
+                return new AppAuthResponse { Success = false, Message = "Invalid input" };
+
+            var key = $"mfa:email:req:{request.RequestId}";
+            var json = _redisDb.StringGet(key);
+            if (json.IsNullOrEmpty)
+                return new AppAuthResponse { Success = false, Message = "Invalid or expired request" };
+
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(json.ToString());
+                var root = doc.RootElement;
+                var userId = root.GetProperty("userId").GetGuid();
+                var codeHash = root.GetProperty("codeHash").GetString();
+                var attempts = root.GetProperty("attempts").GetInt32();
+
+                if (attempts <= 0)
+                {
+                    _redisDb.KeyDelete(key);
+                    return new AppAuthResponse { Success = false, Message = "Too many attempts" };
+                }
+
+                var providedHash = ComputeCodeHash(request.Code!, userId);
+                if (!string.Equals(providedHash, codeHash))
+                {
+                    // decrement attempts and update store (keep same TTL)
+                    var newAttempts = attempts - 1;
+                    var updated = new { userId = userId, codeHash = codeHash, attempts = newAttempts };
+                    _redisDb.StringSet(key, System.Text.Json.JsonSerializer.Serialize(updated), _redisDb.KeyTimeToLive(key) ?? TimeSpan.FromMinutes(5));
+                    return new AppAuthResponse { Success = false, Message = "Invalid code" };
+                }
+
+                // success: remove request and issue tokens
+                _redisDb.KeyDelete(key);
+                if (string.IsNullOrWhiteSpace(_jwtKey))
+                    return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
+                var user = _userRepository.GetById(userId);
+                if (user == null) return new AppAuthResponse { Success = false, Message = "User not found" };
+                var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
+                var refreshToken = Guid.NewGuid().ToString();
+                _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+                return new AppAuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
+            }
+            catch (System.Exception)
+            {
+                return new AppAuthResponse { Success = false, Message = "Invalid request payload" };
+            }
+        }
+
+        private string ComputeCodeHash(string code, System.Guid userId)
+        {
+            var combined = System.Text.Encoding.UTF8.GetBytes(code + userId.ToString() + (_mfaKey ?? string.Empty));
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = sha.ComputeHash(combined);
+            return System.Convert.ToBase64String(hash);
+        }
+
+        private string LoadOtpTemplate(string code, string purpose, int expiryMinutes)
+        {
+            try
+            {
+                // Attempt to read template from the output folder where the file was copied
+                var baseDir = System.AppContext.BaseDirectory ?? ".";
+                var path = System.IO.Path.Combine(baseDir, "EmailTemplates", "otp_email_template.html");
+                string template = System.IO.File.Exists(path) ? System.IO.File.ReadAllText(path) : null!;
+                if (string.IsNullOrWhiteSpace(template))
+                {
+                    // fallback simple HTML
+                    template = $"<p>{purpose}: <strong>{code}</strong> (expires in {expiryMinutes} minutes)</p>";
+                }
+
+                template = template.Replace("{{code}}", System.Net.WebUtility.HtmlEncode(code));
+                template = template.Replace("{{siteName}}", "NextShop");
+                template = template.Replace("{{expiryMinutes}}", expiryMinutes.ToString());
+                return template;
+            }
+            catch
+            {
+                return $"<p>{purpose}: <strong>{code}</strong> (expires in {expiryMinutes} minutes)</p>";
+            }
+        }
+
+        public AppApiResponse StartEnableEmailMfa(System.Guid userId)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
+
+            // Generate code
+            var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var bytes = new byte[4];
+            rng.GetBytes(bytes);
+            var code = (System.BitConverter.ToUInt32(bytes, 0) % 1000000).ToString("D6");
+            var codeHash = ComputeCodeHash(code, user.Id);
+            var requestId = System.Guid.NewGuid().ToString();
+
+            var payload = new {
+                userId = user.Id,
+                codeHash = codeHash,
+                attempts = 5
+            };
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            _redisDb.StringSet($"mfa:enable:req:{requestId}", json, TimeSpan.FromMinutes(10));
+
+            var subject = "NextShop: Xác nhận bật 2 lớp";
+            var html = LoadOtpTemplate(code, "Bật xác thực 2 lớp", 10);
+            try
+            {
+                _emailService.SendEmailAsync(user.Email, subject, html).GetAwaiter().GetResult();
+            }
+            catch (System.Exception)
+            {
+                _redisDb.KeyDelete($"mfa:enable:req:{requestId}");
+                return new AppApiResponse { Success = false, Message = "Failed to send confirmation email" };
+            }
+
+            return new AppApiResponse { Success = true, Message = "Confirmation email sent", Data = new { requestId } };
+        }
+
+        public AppApiResponse VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.RequestId) || string.IsNullOrWhiteSpace(request.Code))
+                return new AppApiResponse { Success = false, Message = "Invalid input" };
+
+            var key = $"mfa:enable:req:{request.RequestId}";
+            var json = _redisDb.StringGet(key);
+            if (json.IsNullOrEmpty) return new AppApiResponse { Success = false, Message = "Invalid or expired request" };
+
+            using var doc = System.Text.Json.JsonDocument.Parse(json.ToString());
+            var root = doc.RootElement;
+            var storedUserId = root.GetProperty("userId").GetGuid();
+            var codeHash = root.GetProperty("codeHash").GetString();
+            var attempts = root.GetProperty("attempts").GetInt32();
+
+            if (storedUserId != userId) return new AppApiResponse { Success = false, Message = "Invalid request" };
+            if (attempts <= 0) { _redisDb.KeyDelete(key); return new AppApiResponse { Success = false, Message = "Too many attempts" }; }
+
+            var providedHash = ComputeCodeHash(request.Code!, storedUserId);
+            if (!string.Equals(providedHash, codeHash))
+            {
+                var newAttempts = attempts - 1;
+                var updated = new { userId = storedUserId, codeHash = codeHash, attempts = newAttempts };
+                _redisDb.StringSet(key, System.Text.Json.JsonSerializer.Serialize(updated), _redisDb.KeyTimeToLive(key) ?? TimeSpan.FromMinutes(10));
+                return new AppApiResponse { Success = false, Message = "Invalid code" };
+            }
+
+            // success
+            _redisDb.KeyDelete(key);
+            var user = _userRepository.GetById(userId);
+            if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
+            user.MfaEnabled = true;
+            user.MfaType = "Email";
+            _userRepository.Save();
+            return new AppApiResponse { Success = true, Message = "MFA enabled" };
+        }
+
+        public AppApiResponse DisableEmailMfa(System.Guid userId)
+        {
+            var user = _userRepository.GetById(userId);
+            if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
+            user.MfaEnabled = false;
+            user.MfaType = null;
+            _userRepository.Save();
+            return new AppApiResponse { Success = true, Message = "MFA disabled" };
         }
 
     public AppAuthResponse Refresh(RefreshTokenRequest request)
@@ -143,7 +372,9 @@ namespace NextShopV2.Application.Services
                         IsDefault = a.IsDefault
                     }).ToList(),
                 // include avatar URL if present (allow null)
-                Avatar = user.Avatar
+                Avatar = user.Avatar,
+                MfaEnabled = user.MfaEnabled,
+                MfaType = user.MfaType
             };
         }
 
