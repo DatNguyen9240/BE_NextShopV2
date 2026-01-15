@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Shared.Helpers;
 
 namespace NextShopV2.Api.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
     public class ProductLikeController : ControllerBase
     {
         private readonly IProductLikeService _productLikeService;
@@ -21,8 +24,7 @@ namespace NextShopV2.Api.Controllers
         {
             try
             {
-                // In real app, get userId from JWT token
-                var userId = Guid.NewGuid(); // Temporary - should come from authentication
+                var userId = GetUserId();
 
                 var result = await _productLikeService.LikeProductAsync(userId, request.ProductId);
                 
@@ -56,8 +58,7 @@ namespace NextShopV2.Api.Controllers
         {
             try
             {
-                // In real app, get userId from JWT token
-                var userId = Guid.NewGuid(); // Temporary - should come from authentication
+                var userId = GetUserId();
 
                 var result = await _productLikeService.UnlikeProductAsync(userId, request.ProductId);
                 
@@ -91,8 +92,7 @@ namespace NextShopV2.Api.Controllers
         {
             try
             {
-                // In real app, get userId from JWT token
-                var userId = Guid.NewGuid(); // Temporary - should come from authentication
+                var userId = GetUserId();
 
                 var isLiked = await _productLikeService.ToggleLikeAsync(userId, request.ProductId);
 
@@ -207,6 +207,12 @@ namespace NextShopV2.Api.Controllers
                     Message = ex.Message
                 });
             }
+        }
+
+        private Guid GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.Parse(userIdClaim!);
         }
     }
 }
