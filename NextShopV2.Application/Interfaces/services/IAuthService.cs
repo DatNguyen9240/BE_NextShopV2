@@ -27,5 +27,14 @@ namespace NextShopV2.Application.Interfaces
         AppApiResponse StartEnableEmailMfa(System.Guid userId);
         AppApiResponse VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId);
         AppApiResponse DisableEmailMfa(System.Guid userId);
+
+        // Email verification for registration / Google sign-in
+        AppApiResponse StartEmailVerification(System.Guid userId, string email);
+        AppAuthResponse VerifyEmailToken(string token);
+
+        // Google Sign-In (signin only)
+        AppAuthResponse GoogleSignIn(string idToken);
+        // Google Sign-Up (create account from Google and send verification)
+        AppAuthResponse GoogleRegister(string idToken);
     }
 }

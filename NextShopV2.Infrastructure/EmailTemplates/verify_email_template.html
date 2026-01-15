@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Xác nhận email</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+    color: #0f172a;
+  }
+
+  .wrapper {
+    padding: 40px 12px;
+  }
+
+  .card {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .header {
+    background: linear-gradient(135deg, #2563eb, #0b5fff);
+    color: white;
+    padding: 22px 26px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .content {
+    padding: 28px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #334155;
+  }
+
+  .btn-wrap {
+    text-align: center;
+    margin: 28px 0;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 36px;
+    background: linear-gradient(135deg, #2563eb, #0b5fff);
+    color: white !important;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 999px;
+    letter-spacing: .3px;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+  }
+
+  .small {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 18px;
+  }
+
+  .link-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px;
+    word-break: break-all;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+
+  .footer {
+    background: #f8fafc;
+    text-align: center;
+    font-size: 12px;
+    padding: 18px;
+    color: #94a3b8;
+  }
+
+  a { color:#2563eb; }
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+  <div class="card">
+
+    <div class="header">
+      {{siteName}}
+    </div>
+
+    <div class="content">
+      <p>👋 Xin chào,</p>
+
+      <p>
+        Cảm ơn bạn đã đăng ký tài khoản tại <b>{{siteName}}</b>.
+        Vui lòng xác thực địa chỉ email của bạn bằng cách nhấn nút bên dưới.
+      </p>
+
+      <p>
+        Liên kết này sẽ hết hạn sau <b>{{expiryHours}}</b> giờ để đảm bảo an toàn cho tài khoản của bạn.
+      </p>
+
+      <div class="btn-wrap">
+        <a class="btn" href="{{verificationUrl}}">
+          {{buttonText}}
+        </a>
+      </div>
+
+      <p class="small">
+        Nếu bạn không thực hiện đăng ký, bạn có thể bỏ qua email này một cách an toàn.
+      </p>
+
+      <p class="small">
+        Không nhấn được nút? Sao chép liên kết bên dưới và dán vào trình duyệt:
+      </p>
+
+      <div class="link-box">
+        <a href="{{verificationUrl}}">{{verificationUrl}}</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      Cần hỗ trợ? Liên hệ 
+      <a href="mailto:support@yourdomain.com">support@yourdomain.com</a>
+      <br>
+      © {{year}} {{siteName}}. All rights reserved.
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

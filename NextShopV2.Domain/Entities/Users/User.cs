@@ -19,6 +19,10 @@ namespace NextShopV2.Domain.Entities.Users
         // Optional avatar URL
         public string? Avatar { get; set; }
 
+        // Google sign-in and email verification
+        public string? GoogleId { get; set; }
+        public bool EmailVerified { get; set; } = false;
+
         // Multi-factor auth settings
         public bool MfaEnabled { get; set; } = false;
         public string? MfaType { get; set; }

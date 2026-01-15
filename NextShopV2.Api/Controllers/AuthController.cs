@@ -25,12 +25,32 @@ namespace NextShopV2.Api.Controllers
     private readonly IAuthService _authService;
     private readonly Microsoft.Extensions.Logging.ILogger<AuthController> _logger;
     private readonly Microsoft.Extensions.Hosting.IHostEnvironment _env;
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
 
-        public AuthController(IAuthService authService, Microsoft.Extensions.Logging.ILogger<AuthController> logger, Microsoft.Extensions.Hosting.IHostEnvironment env)
+        public AuthController(IAuthService authService, Microsoft.Extensions.Logging.ILogger<AuthController> logger, Microsoft.Extensions.Hosting.IHostEnvironment env, Microsoft.Extensions.Configuration.IConfiguration config)
         {
             _authService = authService;
             _logger = logger;
             _env = env;
+            _config = config;
+        }
+
+        [HttpGet("verify-email")]
+        public IActionResult VerifyEmail([FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return ResponseHelper.BadRequest("Token is required");
+
+            var result = _authService.VerifyEmailToken(token);
+            var frontendBase = _config["Frontend:BaseUrl"] ?? "http://localhost:3000";
+            if (!result.Success)
+            {
+                var failedUrl = $"{frontendBase.TrimEnd('/')}/auth/verify?status=failed";
+                return Redirect(failedUrl);
+            }
+
+            var redirectUrl = $"{frontendBase.TrimEnd('/')}/auth/verified?accessToken={System.Net.WebUtility.UrlEncode(result.AccessToken)}&refreshToken={System.Net.WebUtility.UrlEncode(result.RefreshToken)}";
+            return Redirect(redirectUrl);
         }
 
         [HttpPost("register")]
@@ -55,6 +75,43 @@ namespace NextShopV2.Api.Controllers
                 return ResponseHelper.Unauthorized(result.Message ?? "Login failed");
             
             return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
+        }
+
+        [HttpPost("google")]
+        public IActionResult Google([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.IdToken))
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = _authService.GoogleSignIn(request.IdToken);
+            if (!result.Success)
+                return ResponseHelper.Unauthorized(result.Message ?? "Google sign-in failed");
+
+            // If tokens are present, return auth response; otherwise indicate verification sent
+            if (!string.IsNullOrWhiteSpace(result.AccessToken))
+            {
+                return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
+            }
+
+            return ResponseHelper.Success(new { verificationSent = true }, result.Message ?? string.Empty);
+        }
+        [HttpPost("google/signup")]
+        public IActionResult GoogleSignup([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.IdToken))
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = _authService.GoogleRegister(request.IdToken);
+            if (!result.Success)
+                return ResponseHelper.Unauthorized(result.Message ?? "Google sign-up failed");
+
+            // If tokens are present, return auth response; otherwise indicate verification sent
+            if (!string.IsNullOrWhiteSpace(result.AccessToken))
+            {
+                return AuthResponseHelper.Success(result.Message ?? string.Empty, result.AccessToken, result.RefreshToken);
+            }
+
+            return ResponseHelper.Success(new { verificationSent = true }, result.Message ?? string.Empty);
         }
 
         [HttpPost("login/start")]
