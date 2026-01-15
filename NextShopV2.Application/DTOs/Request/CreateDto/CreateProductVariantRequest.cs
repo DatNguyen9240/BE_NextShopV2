@@ -32,6 +32,9 @@ namespace NextShopV2.Application.DTOs.Request
 
         public bool IsDefault { get; set; } = false;
 
+        // Whether this variant is active/visible
+        public bool IsActive { get; set; } = true;
+
         [Range(0, int.MaxValue)]
         public int DisplayOrder { get; set; } = 0;
 

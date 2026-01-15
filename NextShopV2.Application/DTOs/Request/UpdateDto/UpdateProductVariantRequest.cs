@@ -21,6 +21,9 @@ namespace NextShopV2.Application.DTOs.Request
         [Range(0, int.MaxValue)]
         public int DisplayOrder { get; set; } = 0;
 
+        // Toggle active state of variant
+        public bool IsActive { get; set; } = true;
+
         // Allow updating base price and discount amount (discount amount takes precedence over percent)
         [Range(0.01, double.MaxValue, ErrorMessage = "Base price must be greater than 0")]
         public decimal? BasePrice { get; set; }

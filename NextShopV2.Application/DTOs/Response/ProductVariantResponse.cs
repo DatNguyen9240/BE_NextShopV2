@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace NextShopV2.Application.DTOs.Response
 {
@@ -17,5 +18,7 @@ namespace NextShopV2.Application.DTOs.Response
         public int DisplayOrder { get; set; }
         public string? ImageUrl { get; set; }
         public string? ImgHover { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? IsActive { get; set; }
     }
 }

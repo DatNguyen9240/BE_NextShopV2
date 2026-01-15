@@ -35,9 +35,19 @@ namespace NextShopV2.Infrastructure.Repositories
 
         public async Task<List<ProductVariant>> GetByProductIdAsync(Guid productId)
         {
-            return await _context.ProductVariants
+            var list = await _context.ProductVariants
                 .Where(v => v.ProductId == productId)
                 .OrderBy(v => v.DisplayOrder)
+                .ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<(Guid VariantId, bool IsActive)>> GetActiveFlagsByProductIdAsync(Guid productId)
+        {
+            return await _context.ProductVariants
+                .Where(v => v.ProductId == productId)
+                .Select(v => new ValueTuple<Guid, bool>(v.VariantId, v.IsActive))
                 .ToListAsync();
         }
 

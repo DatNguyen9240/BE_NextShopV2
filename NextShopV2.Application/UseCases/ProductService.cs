@@ -22,14 +22,39 @@ namespace NextShopV2.Application.Services
             _repo = repo;
             _productCategoryService = productCategoryService;
         }
-        public async Task<List<ProductDto>> GetAllAsync()
+
+        // Interface-compatible methods (default to excluding inactive items for store endpoints)
+        public Task<List<ProductDto>> GetAllAsync()
         {
-            var products = await _repo.GetAllAsync();
-            // For listing endpoints return only the default/representative variant
-            return products.Select(p => p.ToDto(includeVariants: false)).ToList();
+            return GetAllAsync(includeInactive: false);
         }
 
-        public async Task<PagedResult<ProductDto>> GetBySectionAsync(string? section, Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null)
+        public Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null)
+        {
+            return GetPagedAsync(categoryId, page, pageSize, minPrice, maxPrice, sort, includeInactive: false);
+        }
+
+        public Task<ProductDto?> GetByIdAsync(Guid id)
+        {
+            return GetByIdAsync(id, includeInactive: false);
+        }
+
+        // Extended implementations with includeInactive option
+        public async Task<List<ProductDto>> GetAllAsync(bool includeInactive = false)
+        {
+            var products = await _repo.GetAllAsync();
+            if (!includeInactive)
+            {
+                // Only active products
+                products = products.Where(p => p.IsActive).ToList();
+                // Exclude products that have no active variants (public store should not list products without available active variants)
+                products = products.Where(p => (p.Variants ?? new List<ProductVariant>()).Any(v => v.IsActive)).ToList();
+            }
+            // For listing endpoints return only the default/representative variant
+            return products.Select(p => p.ToDto(includeVariants: false, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive)).ToList();
+        }
+
+        public async Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null, bool includeInactive = false)
         {
             // For now, load all and filter in-memory. For large datasets, implement repository queries.
             var products = (await _repo.GetAllAsync()).AsQueryable();
@@ -40,16 +65,16 @@ namespace NextShopV2.Application.Services
                 products = products.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
             }
 
-            // Normalize section param. Treat `section` AS the section name and filter by tag `section:{name}`.
-            var s = section?.Trim().ToLowerInvariant();
-            if (!string.IsNullOrEmpty(s))
+            // Filter out inactive products for public store unless explicitly requested
+            if (!includeInactive)
             {
-                var tagKey = $"section:{s}";
-                var tagged = products.Where(p => (p.Tags ?? new List<string>()).Any(t => t != null && string.Equals(t.Trim(), tagKey, StringComparison.OrdinalIgnoreCase)));
+                products = products.Where(p => p.IsActive);
 
-                // Only return tagged products for the requested section; if none found, return empty result set.
-                products = tagged;
+                // Exclude products that have no active variants after filtering - public store should not list these
+                products = products.Where(p => (p.Variants ?? new List<ProductVariant>()).Any(v => v.IsActive));
             }
+
+
 
             // Price filtering across variants (use PriceAfterDiscount if available)
             if (minPrice.HasValue)
@@ -90,7 +115,7 @@ namespace NextShopV2.Application.Services
 
             return new PagedResult<ProductDto>
             {
-                Items = items.Select(p => p.ToDto(includeVariants: false)).ToList(),
+                Items = items.Select(p => p.ToDto(includeVariants: false, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive)).ToList(),
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = total,
@@ -98,10 +123,12 @@ namespace NextShopV2.Application.Services
             };
         }
 
-        public async Task<ProductDto?> GetByIdAsync(Guid id)
+        public async Task<ProductDto?> GetByIdAsync(Guid id, bool includeInactive = false)
         {
             var product = await _repo.GetByIdAsync(id);
-            return product?.ToDto();
+            if (product == null) return null;
+            if (!includeInactive && !product.IsActive) return null;
+            return product.ToDto(includeVariants: true, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive);
         }
         public async Task<ProductDto> CreateAsync(CreateProductRequest request)
         {
@@ -176,9 +203,13 @@ namespace NextShopV2.Application.Services
     }
     public static class ProductMapping
     {
-        public static ProductDto ToDto(this Product p, bool includeVariants = true)
+        public static ProductDto ToDto(this Product p, bool includeVariants = true, bool includeInactiveVariants = false, bool includeInactiveProducts = false)
         {
             var orderedVariants = p.Variants.IsNullOrEmpty() ? new List<ProductVariant>() : p.Variants.OrderBy(v => v.DisplayOrder).ThenBy(v => v.VariantId).ToList();
+            if (!includeInactiveVariants)
+            {
+                orderedVariants = orderedVariants.Where(v => v.IsActive).ToList();
+            }
             var defaultVariant = orderedVariants.FirstOrDefault(v => v.IsDefault) ?? (orderedVariants.Count > 0 ? orderedVariants[0] : null);
 
             var variantsList = new List<ProductVariantResponse>();
@@ -199,7 +230,8 @@ namespace NextShopV2.Application.Services
                     BasePrice = v.BasePrice,
                     DiscountPercent = v.DiscountPercent,
                     DiscountAmount = v.DiscountAmount,
-                    PriceAfterDiscount = v.PriceAfterDiscount
+                    PriceAfterDiscount = v.PriceAfterDiscount,
+                    IsActive = includeInactiveVariants ? v.IsActive : (v.IsActive ? true : (bool?)null)
                 }).ToList();
             }
             else
@@ -217,6 +249,7 @@ namespace NextShopV2.Application.Services
                         BasePrice = defaultVariant.BasePrice,
                         PriceAfterDiscount = defaultVariant.PriceAfterDiscount,
                         DiscountPercent = defaultVariant.DiscountPercent,
+                        IsActive = includeInactiveVariants ? defaultVariant.IsActive : (defaultVariant.IsActive ? true : (bool?)null),
                         IsDefault = true
                     });
                 }
@@ -227,17 +260,17 @@ namespace NextShopV2.Application.Services
                 ProductId = p.ProductId,
                 Name = p.Name,
                 Description = p.Description,
-                AdditionalInfo = p.AdditionalInfo,
+                AdditionalInfo = string.IsNullOrWhiteSpace(p.AdditionalInfo) ? null : p.AdditionalInfo,
                 GenderTarget = p.GenderTarget,
                 Brand = p.Brand,
                 AverageRating = p.AverageRating,
                 TotalReviews = p.TotalReviews,
                 TotalLikes = p.TotalLikes,
-                IsActive = p.IsActive,
-                Tags = p.Tags ?? new List<string>(),
+                IsActive = includeInactiveProducts ? p.IsActive : (p.IsActive ? true : (bool?)null),
+                Tags = (p.Tags == null || !p.Tags.Any()) ? null : p.Tags,
                 // Total stock across all variants
                 TotalStockQuantity = orderedVariants.Sum(v => v.StockQuantity),
-                Variants = variantsList
+                Variants = variantsList.Count == 0 ? null : variantsList
             };
         }
     }

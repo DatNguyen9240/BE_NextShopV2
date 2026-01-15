@@ -73,15 +73,15 @@ namespace NextShopV2.Infrastructure.Persistence
             // Ví dụ cho Order
             modelBuilder.Entity<Order>()
                 .Property(o => o.TotalAmount)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<Order>()
                 .Property(o => o.SubTotal)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<Order>()
                 .Property(o => o.DiscountAmount)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
             // Các entity khác tương tự:
             modelBuilder.Entity<OrderCoupon>()
@@ -91,6 +91,27 @@ namespace NextShopV2.Infrastructure.Persistence
             modelBuilder.Entity<OrderItem>()
                 .Property(oi => oi.UnitPrice)
                 .HasPrecision(18, 2);
+
+            // Snapshot numeric fields precision
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.DiscountAmount)
+                .HasPrecision(18, 2);
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.TaxAmount)
+                .HasPrecision(18, 2);
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.TaxRate)
+                .HasPrecision(5, 4);
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.TotalAmount)
+                .HasPrecision(18, 2);
+
+            // Make Variant relation optional and set delete behavior to SetNull so orders keep history when variants/products are removed
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Variant)
+                .WithMany()
+                .HasForeignKey(oi => oi.VariantId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Amount)
@@ -102,11 +123,11 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<ProductVariant>()
                 .Property(pv => pv.BasePrice)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<ProductVariant>()
                 .Property(pv => pv.DiscountAmount)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
             modelBuilder.Entity<ProductVariant>()
                 .Property(pv => pv.DiscountPercent)
@@ -114,7 +135,7 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<ProductVariant>()
                 .Property(pv => pv.PriceAfterDiscount)
-                .HasPrecision(18, 2);
+                .HasPrecision(18, 0);
 
 
             // Configure PushToken

@@ -16,5 +16,8 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task UpdateAsync(ProductVariant variant);
         Task DeleteAsync(Guid id);
         Task SaveAsync();
+
+        // Raw lookup for debugging active flags
+        Task<List<(Guid VariantId, bool IsActive)>> GetActiveFlagsByProductIdAsync(Guid productId);
     }
 }

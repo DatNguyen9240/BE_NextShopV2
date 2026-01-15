@@ -86,6 +86,12 @@ namespace NextShopV2.Infrastructure.Services
             if (variantInfo == null)
                 throw new ArgumentException("Product variant not found");
 
+            if (!variantInfo.IsActive)
+                throw new ArgumentException($"Variant {request.VariantId} is inactive");
+
+            if (!variantInfo.ProductIsActive)
+                throw new ArgumentException($"Product {variantInfo.ProductId} is inactive");
+
             if (variantInfo.StockQuantity < request.Quantity)
                 throw new InvalidOperationException($"Insufficient stock. Available: {variantInfo.StockQuantity}");
 
@@ -144,6 +150,12 @@ namespace NextShopV2.Infrastructure.Services
                     var variantInfo = await _variantService.GetVariantInfoAsync(redisItem.VariantId);
                     if (variantInfo == null)
                         throw new ArgumentException("Product variant not found");
+
+                    if (!variantInfo.IsActive)
+                        throw new ArgumentException($"Variant {redisItem.VariantId} is inactive");
+
+                    if (!variantInfo.ProductIsActive)
+                        throw new ArgumentException($"Product {variantInfo.ProductId} is inactive");
 
                     if (variantInfo.StockQuantity < quantity)
                         throw new InvalidOperationException($"Insufficient stock. Available: {variantInfo.StockQuantity}");

@@ -24,7 +24,7 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                        .ThenInclude(v => v.Product)
+                        .ThenInclude(v => v!.Product)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
@@ -35,7 +35,7 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                        .ThenInclude(v => v.Product)
+                        .ThenInclude(v => v!.Product)
                 .Include(o => o.Payments)
                 .Include(o => o.Shipment)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
@@ -46,7 +46,7 @@ namespace NextShopV2.Infrastructure.Repositories
             return await _context.Orders
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                        .ThenInclude(v => v.Product)
+                        .ThenInclude(v => v!.Product)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
@@ -57,7 +57,7 @@ namespace NextShopV2.Infrastructure.Repositories
             var query = _context.Orders
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                        .ThenInclude(v => v.Product)
+                        .ThenInclude(v => v!.Product)
                 .Where(o => o.UserId == userId && (string.IsNullOrEmpty(status) || o.Status == status));
 
             var total = await query.CountAsync();
@@ -76,7 +76,7 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
-                        .ThenInclude(v => v.Product)
+                        .ThenInclude(v => v!.Product)
                 .Where(o => o.Status == status)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();

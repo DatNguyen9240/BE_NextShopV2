@@ -8,7 +8,8 @@ using NextShopV2.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Threading.Tasks; 
 
 namespace NextShopV2.Application.Services
 {
@@ -60,6 +61,8 @@ namespace NextShopV2.Application.Services
             return orders.Select(MapToResponse).ToList();
         }
 
+        private const decimal DefaultTaxRate = 0.10m; // 10% default tax rate
+
         public async Task<OrderResponse> CreateAsync(Guid userId, CreateOrderRequest request)
         {
             // Validate request has items
@@ -80,7 +83,13 @@ namespace NextShopV2.Application.Services
                 if (variant.IsNull())
                     throw new ArgumentException($"Variant {itemRequest.VariantId} not found");
 
-                if (variant!.StockQuantity < itemRequest.Quantity)
+                // Ensure variant and its product are active before allowing ordering
+                if (!variant!.IsActive)
+                    throw new ArgumentException($"Variant {itemRequest.VariantId} is inactive");
+                if (variant.Product != null && !variant.Product.IsActive)
+                    throw new ArgumentException($"Product {variant.Product.ProductId} is inactive");
+
+                if (variant.StockQuantity < itemRequest.Quantity)
                     // throw new ArgumentException($"Insufficient stock for variant {itemRequest.VariantId}");
                     Console.WriteLine($"Warning: Insufficient stock for variant {itemRequest.VariantId}, but proceeding for testing");
 
@@ -89,9 +98,18 @@ namespace NextShopV2.Application.Services
                 {
                     OrderItemId = Guid.NewGuid(),
                     VariantId = itemRequest.VariantId,
+                    ProductId = variant.Product?.ProductId,
                     Quantity = itemRequest.Quantity,
                     UnitPrice = unitPrice,
-                    Variant = variant
+                    Variant = variant,
+                    VariantSku = variant.SKU,
+                    ProductName = variant.Product?.Name,
+                    ProductSku = variant.SKU,
+                    VariantOptionsJson = JsonSerializer.Serialize(new { color = variant.Color, size = variant.Size, imageUrl = variant.ImageUrl }),
+                    DiscountAmount = 0m,
+                    TaxRate = DefaultTaxRate,
+                    TaxAmount = Math.Round(unitPrice * itemRequest.Quantity * DefaultTaxRate, 0),
+                    TotalAmount = Math.Round(unitPrice * itemRequest.Quantity - 0m + Math.Round(unitPrice * itemRequest.Quantity * DefaultTaxRate, 0), 0)
                 };
 
                 orderItems.Add(orderItem);
@@ -107,32 +125,58 @@ namespace NextShopV2.Application.Services
                 inventoryChanges.Add((itemRequest.VariantId, itemRequest.Quantity));
             }
 
-                // Áp dụng nhiều coupon nếu có
-                var orderCoupons = new List<OrderCoupon>();
-                decimal discountAmount = 0;
-                if (request.CouponIds != null && request.CouponIds.Any())
+            // Apply coupons (if any) and compute total discount amount
+            var orderCoupons = new List<OrderCoupon>();
+            decimal discountAmount = 0m;
+            if (request.CouponIds != null && request.CouponIds.Any())
+            {
+                foreach (var couponId in request.CouponIds)
                 {
-                    foreach (var couponId in request.CouponIds)
+                    var coupon = await _couponService.GetByIdAsync(couponId);
+                    if (coupon == null || !coupon.IsValid) continue;
+                    var couponDiscount = await _couponService.CalculateDiscountAsync(coupon.Code, totalAmount - discountAmount);
+                    if (couponDiscount > 0)
                     {
-                        var coupon = await _couponService.GetByIdAsync(couponId);
-                        if (coupon == null || !coupon.IsValid)
-                            continue;
-                        var couponDiscount = await _couponService.CalculateDiscountAsync(coupon.Code, totalAmount - discountAmount);
-                        if (couponDiscount > 0)
+                        discountAmount += couponDiscount;
+                        orderCoupons.Add(new OrderCoupon
                         {
-                            discountAmount += couponDiscount;
-                            orderCoupons.Add(new OrderCoupon
-                            {
-                                OrderId = orderId,
-                                CouponId = coupon.CouponId,
-                                DiscountAmount = couponDiscount,
-                                AppliedAt = DateTime.UtcNow
-                            });
-                        }
+                            OrderId = orderId,
+                            CouponId = coupon.CouponId,
+                            DiscountAmount = couponDiscount,
+                            AppliedAt = DateTime.UtcNow
+                        });
                     }
                 }
+            }
 
-                var finalAmount = Math.Max(0, totalAmount - discountAmount);
+            // Distribute coupon discount amount across items proportionally to their line total
+            if (discountAmount > 0 && totalAmount > 0)
+            {
+                var remaining = discountAmount;
+                for (int i = 0; i < orderItems.Count; i++)
+                {
+                    var item = orderItems[i];
+                    var lineTotal = item.Quantity * item.UnitPrice;
+                    var share = lineTotal / totalAmount;
+                    var itemDiscount = (decimal)Math.Round(discountAmount * share, 0);
+                    // assign remainder to last item to avoid rounding gaps
+                    if (i == orderItems.Count - 1) itemDiscount = remaining;
+                    else remaining -= itemDiscount;
+
+                    item.DiscountAmount = itemDiscount;
+                    item.TotalAmount = Math.Round(lineTotal - item.DiscountAmount + item.TaxAmount, 0);
+                }
+            }
+            else
+            {
+                // Ensure TotalAmount fields are set (tax already computed earlier)
+                foreach (var it in orderItems)
+                {
+                    it.TotalAmount = Math.Round(it.Quantity * it.UnitPrice - it.DiscountAmount + it.TaxAmount, 2);
+                }
+            }
+
+                var finalAmount = Math.Max(0, orderItems.Sum(i => i.TotalAmount) - discountAmount);
 
                 // Fetch user info (name, phone) and default address from DB instead of taking from request
                 var user = _userRepo.GetById(userId);
@@ -238,12 +282,16 @@ namespace NextShopV2.Application.Services
             // Restore stock using inventory service (creates transaction)
             foreach (var item in order.Items)
             {
-                await _inventoryService.UpdateInventoryAsync(
-                    item.VariantId,
-                    item.Quantity,
-                    $"Order #{id} cancelled",
-                    "System"
-                );
+                // If variant was deleted or null, we cannot restore by variant id
+                if (item.VariantId.HasValue)
+                {
+                    await _inventoryService.UpdateInventoryAsync(
+                        item.VariantId.Value,
+                        item.Quantity,
+                        $"Order #{id} cancelled",
+                        "System"
+                    );
+                }
             }
 
             order.Status = "Cancelled";
@@ -272,6 +320,9 @@ namespace NextShopV2.Application.Services
                 var variant = await _variantRepo.GetByIdAsync(itemRequest.VariantId);
                 if (variant != null)
                 {
+                    if (!variant.IsActive || (variant.Product != null && !variant.Product.IsActive))
+                        throw new ArgumentException($"Variant {itemRequest.VariantId} or its product is inactive");
+
                     total += variant.PriceAfterDiscount * itemRequest.Quantity;
                 }
             }
@@ -293,29 +344,40 @@ namespace NextShopV2.Application.Services
                 BuyerName = order.BuyerName,
                 BuyerPhone = order.BuyerPhone,
                 ShippingAddress = order.ShippingAddress,
-                Items = order.Items.Select(item => new OrderItemResponse
+                Items = order.Items.Select(item =>
                 {
-                    OrderItemId = item.OrderItemId,
-                    VariantId = item.VariantId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    Variant = item.Variant.IsNull() ? null : new ProductVariantResponse
+                    var variant = item.Variant;
+                    return new OrderItemResponse
                     {
-                        ProductVariantId = item.Variant.VariantId,
-                        Color = item.Variant.Color,
-                        Size = item.Variant.Size,
-                        BasePrice = item.Variant.BasePrice,
-                        DiscountPercent = item.Variant.DiscountPercent,
-                        DiscountAmount = item.Variant.DiscountAmount,
-                        PriceAfterDiscount = item.Variant.PriceAfterDiscount,
-                        StockQuantity = item.Variant.StockQuantity,
-                        IsDefault = item.Variant.IsDefault,
-                        DisplayOrder = item.Variant.DisplayOrder,
-                        ImageUrl = item.Variant.ImageUrl,
-                        ImgHover = string.IsNullOrEmpty(item.Variant.ImgHover) ? item.Variant.ImageUrl : item.Variant.ImgHover
-                    },
-                    // Gán tên sản phẩm từ relation Variant -> Product nếu có
-                    ProductName = item.Variant?.Product?.Name
+                        OrderItemId = item.OrderItemId,
+                        VariantId = item.VariantId,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        DiscountAmount = item.DiscountAmount,
+                        TaxAmount = item.TaxAmount,
+                        TotalAmount = item.TotalAmount,
+                        Variant = variant == null ? null : new ProductVariantResponse
+                        {
+                            ProductVariantId = variant.VariantId,
+                            Color = variant.Color,
+                            Size = variant.Size,
+                            BasePrice = variant.BasePrice,
+                            DiscountPercent = variant.DiscountPercent,
+                            DiscountAmount = variant.DiscountAmount,
+                            PriceAfterDiscount = variant.PriceAfterDiscount,
+                            StockQuantity = variant.StockQuantity,
+                            IsDefault = variant.IsDefault,
+                            DisplayOrder = variant.DisplayOrder,
+                            ImageUrl = variant.ImageUrl,
+                            ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover
+                        },
+                        // Gán tên sản phẩm từ relation Variant -> Product nếu có, ưu tiên snapshot
+                        ProductName = item.ProductName ?? variant?.Product?.Name,
+                        ProductSku = item.ProductSku,
+                        VariantSku = item.VariantSku,
+                        VariantOptionsJson = item.VariantOptionsJson
+                    };
                 }).ToList(),
                 Coupons = order.OrderCoupons?.Select(oc => new OrderCouponResponse
                 {

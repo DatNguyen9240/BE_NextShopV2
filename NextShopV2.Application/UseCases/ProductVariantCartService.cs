@@ -25,6 +25,7 @@ namespace NextShopV2.Application.UseCases
 
             return new VariantInfo
             {
+                ProductId = variant.ProductId,
                 Price = variant.PriceAfterDiscount,
                 ProductName = variant.Product?.Name ?? string.Empty,
                 Color = variant.Color ?? string.Empty,
@@ -33,7 +34,9 @@ namespace NextShopV2.Application.UseCases
                 Sku = string.IsNullOrEmpty(variant.SKU) 
                     ? CommonHelpers.GenerateSKU("PRD", variant.Color ?? string.Empty, variant.Size ?? string.Empty) 
                     : variant.SKU,
-                StockQuantity = variant.StockQuantity
+                StockQuantity = variant.StockQuantity,
+                IsActive = variant.IsActive,
+                ProductIsActive = variant.Product?.IsActive ?? true
             };
         }
     }

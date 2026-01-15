@@ -51,7 +51,8 @@ namespace NextShopV2.Application.Services
                 BasePrice = v.BasePrice,
                 DiscountPercent = v.DiscountPercent,
                 DiscountAmount = v.DiscountAmount,
-                PriceAfterDiscount = v.PriceAfterDiscount
+                PriceAfterDiscount = v.PriceAfterDiscount,
+                IsActive = v.IsActive
             }).ToList();
         }
 
@@ -78,7 +79,8 @@ namespace NextShopV2.Application.Services
                 BasePrice = variant.BasePrice,
                 DiscountPercent = variant.DiscountPercent,
                 DiscountAmount = variant.DiscountAmount,
-                PriceAfterDiscount = variant.PriceAfterDiscount
+                PriceAfterDiscount = variant.PriceAfterDiscount,
+                IsActive = variant.IsActive
             };
         }
 
@@ -112,7 +114,8 @@ namespace NextShopV2.Application.Services
                 BasePrice = v.BasePrice,
                 DiscountPercent = v.DiscountPercent,
                 DiscountAmount = v.DiscountAmount,
-                PriceAfterDiscount = v.PriceAfterDiscount
+                PriceAfterDiscount = v.PriceAfterDiscount,
+                IsActive = v.IsActive
             }).ToList();
         }
 
@@ -204,7 +207,8 @@ namespace NextShopV2.Application.Services
                 BasePrice = request.BasePrice,
                 DiscountPercent = request.DiscountPercent,
                 DiscountAmount = discountAmount,
-                PriceAfterDiscount = priceAfterDiscount
+                PriceAfterDiscount = priceAfterDiscount,
+                IsActive = request.IsActive
             };
 
             await _variantRepo.AddAsync(variant);
@@ -285,6 +289,7 @@ namespace NextShopV2.Application.Services
             variant.DisplayOrder = resolvedDisplayOrder; // ← Use resolved DisplayOrder
             variant.ImageUrl = request.ImageUrl;
             variant.ImgHover = request.ImgHover;
+            variant.IsActive = request.IsActive;
 
             await _variantRepo.UpdateAsync(variant);
             await _variantRepo.SaveAsync();

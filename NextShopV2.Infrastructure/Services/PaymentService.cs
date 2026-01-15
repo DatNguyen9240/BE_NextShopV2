@@ -257,7 +257,7 @@ public class PaymentService : IPaymentService
         var order = await _db.Orders
             .Include(o => o.Items)
             .ThenInclude(oi => oi.Variant)
-            .ThenInclude(v => v.Product)
+            .ThenInclude(v => v!.Product)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
         if (order == null) throw new Exception("Order not found");
 

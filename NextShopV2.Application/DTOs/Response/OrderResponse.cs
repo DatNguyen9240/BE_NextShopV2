@@ -25,12 +25,19 @@ namespace NextShopV2.Application.DTOs.Response
     public class OrderItemResponse
     {
         public Guid OrderItemId { get; set; }
-        public Guid VariantId { get; set; }
+        public Guid? VariantId { get; set; }
+        public Guid? ProductId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal TotalPrice => Quantity * UnitPrice;
+        public decimal DiscountAmount { get; set; }
+        public decimal TaxAmount { get; set; }
+        public decimal TaxRate { get; set; }
+        public decimal TotalAmount { get; set; }
         public ProductVariantResponse? Variant { get; set; }
         // Thêm tên sản phẩm để frontend hiển thị
         public string? ProductName { get; set; }
+        public string? ProductSku { get; set; }
+        public string? VariantSku { get; set; }
+        public string? VariantOptionsJson { get; set; }
     }
 }

@@ -31,6 +31,8 @@ namespace NextShopV2.Shared.Extensions.Web
             return userRole == "Admin";
         }
 
+
+
         /// <summary>
         /// Get current user role
         /// </summary>
