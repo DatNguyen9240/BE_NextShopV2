@@ -116,6 +116,38 @@ namespace NextShopV2.Api.Controllers
             }
         }
 
+        [HttpGet("can-review/{productId}")]
+        [Authorize]
+        public async Task<IActionResult> CanReviewProduct(string productId)
+        {
+            try
+            {
+                if (!Guid.TryParse(productId, out var guid))
+                {
+                    return BadRequest(new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Invalid productId format"
+                    });
+                }
+                var userId = GetUserId();
+                var canReview = await _reviewService.CanUserReviewProductAsync(userId, guid);
+                return Ok(new ApiResponse
+                {
+                    Success = true,
+                    Data = canReview
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpGet("my-reviews")]
         [Authorize]
         public async Task<IActionResult> GetMyReviews()

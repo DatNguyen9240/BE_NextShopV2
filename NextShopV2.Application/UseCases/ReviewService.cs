@@ -11,11 +11,13 @@ namespace NextShopV2.Application.Services
     {
         private readonly IReviewRepository _reviewRepo;
         private readonly IProductRepository _productRepo;
+        private readonly IOrderRepository _orderRepo;
 
-        public ReviewService(IReviewRepository reviewRepo, IProductRepository productRepo)
+        public ReviewService(IReviewRepository reviewRepo, IProductRepository productRepo, IOrderRepository orderRepo)
         {
             _reviewRepo = reviewRepo;
             _productRepo = productRepo;
+            _orderRepo = orderRepo;
         }
 
         public async Task<List<ReviewResponse>> GetAllAsync()
@@ -120,7 +122,14 @@ namespace NextShopV2.Application.Services
                 return false;
 
             // Check if user hasn't already reviewed this product
-            return !await _reviewRepo.HasUserReviewedProductAsync(userId, productId);
+            if (await _reviewRepo.HasUserReviewedProductAsync(userId, productId))
+                return false;
+
+            // Check if user has purchased this product (order status Completed)
+            var orders = await _orderRepo.GetByUserIdAsync(userId);
+            var hasPurchased = orders.Any(o => o.Status == "Completed" && 
+                                               o.Items.Any(oi => oi.ProductId == productId));
+            return hasPurchased;
         }
 
         public async Task<object> GetProductReviewStatsAsync(Guid productId)
