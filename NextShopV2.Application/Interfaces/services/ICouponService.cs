@@ -15,5 +15,10 @@ namespace NextShopV2.Application.Interfaces.Services
         Task<bool> ValidateCouponAsync(string code);
         Task<decimal> CalculateDiscountAsync(string couponCode, decimal originalAmount);
         Task<bool> CanApplyCouponAsync(string couponCode, decimal orderAmount);
+
+        // Reservation flow
+        Task<bool> CanReserveCouponAsync(Guid couponId);
+        Task<bool> ConfirmCouponUsageForOrderAsync(Guid orderId);
+        Task<bool> ReleaseCouponReservationsForOrderAsync(Guid orderId);
     }
 }

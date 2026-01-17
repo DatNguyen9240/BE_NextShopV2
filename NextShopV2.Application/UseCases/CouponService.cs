@@ -10,28 +10,109 @@ namespace NextShopV2.Application.Services
     public class CouponService : ICouponService
     {
         private readonly ICouponRepository _couponRepo;
+        private readonly IOrderRepository _orderRepo;
 
-        public CouponService(ICouponRepository couponRepo)
+        public CouponService(ICouponRepository couponRepo, IOrderRepository orderRepo)
         {
             _couponRepo = couponRepo;
+            _orderRepo = orderRepo;
         }
 
         public async Task<List<CouponResponse>> GetAllAsync()
         {
             var coupons = await _couponRepo.GetAllAsync();
-            return coupons.Select(MapToResponse).ToList();
+            var tasks = coupons.Select(c => MapToResponseAsync(c));
+            return (await Task.WhenAll(tasks)).ToList();
         }
 
+        public async Task<bool> CanReserveCouponAsync(Guid couponId)
+        {
+            var coupon = await _couponRepo.GetByIdAsync(couponId);
+            if (coupon == null) return false;
+
+            if (!coupon.UsageLimit.HasValue) return true;
+
+            // Count reserved and applied coupons
+            var count = await _orderRepo.CountOrderCouponsByCouponIdAsync(couponId, "Reserved", "Applied");
+            return count < coupon.UsageLimit.Value;
+        }
+
+        public async Task<bool> ConfirmCouponUsageForOrderAsync(Guid orderId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) return false;
+
+            bool anyChanged = false;
+
+            foreach (var oc in order.OrderCoupons.Where(oc => oc.Status == "Reserved").ToList())
+            {
+                var coupon = await _couponRepo.GetByIdAsync(oc.CouponId);
+                if (coupon == null)
+                {
+                    // release reservation
+                    oc.Status = "Released";
+                    anyChanged = true;
+                    continue;
+                }
+
+                // Check usage limit atomically by re-fetching coupon
+                if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
+                {
+                    // cannot apply, release
+                    oc.Status = "Released";
+                    anyChanged = true;
+                    continue;
+                }
+
+                // Apply coupon: increment UsedCount and mark order coupon applied
+                coupon.UsedCount += 1;
+                oc.Status = "Applied";
+                oc.AppliedAt = DateTime.UtcNow;
+
+                await _couponRepo.UpdateAsync(coupon);
+                anyChanged = true;
+            }
+
+            if (anyChanged)
+            {
+                await _orderRepo.UpdateAsync(order);
+                await _couponRepo.SaveAsync();
+                await _orderRepo.SaveAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ReleaseCouponReservationsForOrderAsync(Guid orderId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) return false;
+
+            bool anyChanged = false;
+            foreach (var oc in order.OrderCoupons.Where(oc => oc.Status == "Reserved").ToList())
+            {
+                oc.Status = "Released";
+                anyChanged = true;
+            }
+
+            if (anyChanged)
+            {
+                await _orderRepo.UpdateAsync(order);
+                await _orderRepo.SaveAsync();
+            }
+
+            return true;
+        }
         public async Task<CouponResponse?> GetByIdAsync(Guid id)
         {
             var coupon = await _couponRepo.GetByIdAsync(id);
-            return coupon.IsNull() ? null : MapToResponse(coupon!);
+            return coupon.IsNull() ? null : await MapToResponseAsync(coupon!);
         }
 
         public async Task<CouponResponse?> GetByCodeAsync(string code)
         {
             var coupon = await _couponRepo.GetByCodeAsync(code);
-            return coupon.IsNull() ? null : MapToResponse(coupon!);
+            return coupon.IsNull() ? null : await MapToResponseAsync(coupon!);
         }
 
         public async Task<CouponResponse> CreateAsync(CreateCouponRequest request)
@@ -58,7 +139,7 @@ namespace NextShopV2.Application.Services
             };
 
             await _couponRepo.CreateAsync(coupon);
-            return MapToResponse(coupon);
+            return await MapToResponseAsync(coupon);
         }
 
         public async Task<CouponResponse?> UpdateAsync(Guid id, UpdateCouponRequest request)
@@ -105,7 +186,7 @@ namespace NextShopV2.Application.Services
                 throw new ArgumentException("End date must be after start date");
 
             await _couponRepo.UpdateAsync(coupon);
-            return MapToResponse(coupon);
+            return await MapToResponseAsync(coupon);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -116,7 +197,8 @@ namespace NextShopV2.Application.Services
         public async Task<List<CouponResponse>> GetActiveCouponsAsync()
         {
             var coupons = await _couponRepo.GetActiveCouponsAsync();
-            return coupons.Select(MapToResponse).ToList();
+            var tasks = coupons.Select(c => MapToResponseAsync(c));
+            return (await Task.WhenAll(tasks)).ToList();
         }
 
         public async Task<bool> ValidateCouponAsync(string code)
@@ -179,8 +261,11 @@ namespace NextShopV2.Application.Services
             return true;
         }
 
-        private CouponResponse MapToResponse(Coupon coupon)
+        private async Task<CouponResponse> MapToResponseAsync(Coupon coupon)
         {
+            // Count current reservations for this coupon (status = Reserved)
+            var reservedCount = await _orderRepo.CountOrderCouponsByCouponIdAsync(coupon.CouponId, "Reserved");
+
             return new CouponResponse
             {
                 CouponId = coupon.CouponId,
@@ -192,6 +277,7 @@ namespace NextShopV2.Application.Services
                 EndDate = coupon.EndDate,
                 UsageLimit = coupon.UsageLimit,
                 UsedCount = coupon.UsedCount,
+                ReservedCount = reservedCount,
                 IsActive = coupon.IsActive
             };
         }

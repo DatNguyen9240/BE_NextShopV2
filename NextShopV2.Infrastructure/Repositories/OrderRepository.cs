@@ -38,7 +38,16 @@ namespace NextShopV2.Infrastructure.Repositories
                         .ThenInclude(v => v!.Product)
                 .Include(o => o.Payments)
                 .Include(o => o.Shipment)
+                .Include(o => o.OrderCoupons)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+
+        public async Task<int> CountOrderCouponsByCouponIdAsync(Guid couponId, params string[] statuses)
+        {
+            var query = _context.OrderCoupons.AsQueryable().Where(oc => oc.CouponId == couponId);
+            if (statuses != null && statuses.Length > 0)
+                query = query.Where(oc => statuses.Contains(oc.Status));
+            return await query.CountAsync();
         }
 
         public async Task<List<Order>> GetByUserIdAsync(Guid userId)

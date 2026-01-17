@@ -17,5 +17,8 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task UpdateAsync(Order order);
         Task DeleteAsync(Guid id);
         Task SaveAsync();
+
+        // Count reserved/applied coupons for a given coupon id
+        Task<int> CountOrderCouponsByCouponIdAsync(Guid couponId, params string[] statuses);
     }
 }

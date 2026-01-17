@@ -18,16 +18,18 @@ public class PaymentService : IPaymentService
     private readonly PayOSClient _payosClient;
     private readonly IRedisCartService _cartService;
     private readonly ISocketNotificationService _notificationService;
+    private readonly NextShopV2.Application.Interfaces.Services.ICouponService _couponService;
 
     private readonly StackExchange.Redis.IConnectionMultiplexer _redis;
 
-    public PaymentService(AppDbContext db, PayOSClient payosClient, IRedisCartService cartService, StackExchange.Redis.IConnectionMultiplexer redis, ISocketNotificationService notificationService)
+    public PaymentService(AppDbContext db, PayOSClient payosClient, IRedisCartService cartService, StackExchange.Redis.IConnectionMultiplexer redis, ISocketNotificationService notificationService, NextShopV2.Application.Interfaces.Services.ICouponService couponService)
     {
         _db = db;
         _payosClient = payosClient;
         _cartService = cartService;
         _redis = redis;
         _notificationService = notificationService;
+        _couponService = couponService;
     }
 
     public async Task<bool> HandlePayOSWebhookAsync(string body, string? signature, string checksumKey)
@@ -180,7 +182,18 @@ public class PaymentService : IPaymentService
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed to send socket notification for user {order.UserId}: {ex.Message}");
-                }            }
+                }
+
+                try
+                {
+                    // Confirm coupon usage for this order (convert reservations -> applied and increment UsedCount)
+                    await _couponService.ConfirmCouponUsageForOrderAsync(order.OrderId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to confirm coupon usage for order {order.OrderId}: {ex.Message}");
+                }
+            }
         }
 
         await _db.SaveChangesAsync();

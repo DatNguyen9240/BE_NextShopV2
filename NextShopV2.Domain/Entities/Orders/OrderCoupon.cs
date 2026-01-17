@@ -8,7 +8,11 @@ namespace NextShopV2.Domain.Entities.Orders
         public Guid OrderId { get; set; }
         public Guid CouponId { get; set; }
         public decimal DiscountAmount { get; set; }
-        public DateTime AppliedAt { get; set; } = DateTime.UtcNow;
+
+        // Reservation / application tracking
+        public string Status { get; set; } = "Reserved"; // Reserved | Applied | Released
+        public DateTime? ReservedAt { get; set; }
+        public DateTime? AppliedAt { get; set; }
         
         // Navigation properties
         public Order Order { get; set; } = null!;

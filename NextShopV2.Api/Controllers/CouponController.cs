@@ -263,25 +263,28 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("calculate-discount")]
-        public async Task<IActionResult> CalculateDiscount([FromBody] object request)
+        public async Task<IActionResult> CalculateDiscount([FromBody] System.Text.Json.JsonElement request)
         {
             try
             {
-                // Parse request manually since it has mixed properties
-                var json = System.Text.Json.JsonSerializer.Serialize(request);
-                var data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                
-                if (data == null || !data.ContainsKey("couponCode") || !data.ContainsKey("originalAmount"))
+                if (request.ValueKind != System.Text.Json.JsonValueKind.Object)
                 {
                     return BadRequest(new ApiResponse
                     {
                         Success = false,
-                        Message = "Missing couponCode or originalAmount"
+                        Message = "Invalid payload"
                     });
                 }
 
-                var couponCode = data["couponCode"]?.ToString();
-                if (string.IsNullOrEmpty(couponCode))
+                // Try multiple casing variations
+                string? couponCode = null;
+                if (request.TryGetProperty("couponCode", out var p1) || request.TryGetProperty("CouponCode", out p1))
+                {
+                    if (p1.ValueKind == System.Text.Json.JsonValueKind.String)
+                        couponCode = p1.GetString();
+                }
+
+                if (string.IsNullOrWhiteSpace(couponCode))
                 {
                     return BadRequest(new ApiResponse
                     {
@@ -289,8 +292,31 @@ namespace NextShopV2.Api.Controllers
                         Message = "Invalid coupon code"
                     });
                 }
-                
-                var originalAmount = Convert.ToDecimal(data["originalAmount"]);
+
+                decimal originalAmount = 0m;
+                if (request.TryGetProperty("originalAmount", out var p2) || request.TryGetProperty("OriginalAmount", out p2))
+                {
+                    if (p2.ValueKind == System.Text.Json.JsonValueKind.Number && p2.TryGetDecimal(out var dec))
+                    {
+                        originalAmount = dec;
+                    }
+                    else if (p2.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var s = p2.GetString();
+                        if (!decimal.TryParse(s, out originalAmount))
+                        {
+                            return BadRequest(new ApiResponse { Success = false, Message = "Invalid originalAmount" });
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(new ApiResponse { Success = false, Message = "Invalid originalAmount" });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new ApiResponse { Success = false, Message = "Missing originalAmount" });
+                }
 
                 var discountAmount = await _couponService.CalculateDiscountAsync(couponCode, originalAmount);
                 var finalAmount = originalAmount - discountAmount;

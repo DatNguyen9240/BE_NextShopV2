@@ -134,6 +134,11 @@ namespace NextShopV2.Application.Services
                 {
                     var coupon = await _couponService.GetByIdAsync(couponId);
                     if (coupon == null || !coupon.IsValid) continue;
+
+                    // Check reservation availability
+                    var canReserve = await _couponService.CanReserveCouponAsync(coupon.CouponId);
+                    if (!canReserve) continue;
+
                     var couponDiscount = await _couponService.CalculateDiscountAsync(coupon.Code, totalAmount - discountAmount);
                     if (couponDiscount > 0)
                     {
@@ -143,7 +148,8 @@ namespace NextShopV2.Application.Services
                             OrderId = orderId,
                             CouponId = coupon.CouponId,
                             DiscountAmount = couponDiscount,
-                            AppliedAt = DateTime.UtcNow
+                            Status = "Reserved",
+                            ReservedAt = DateTime.UtcNow
                         });
                     }
                 }
@@ -292,6 +298,16 @@ namespace NextShopV2.Application.Services
                         "System"
                     );
                 }
+            }
+
+            // Release any coupon reservations
+            try
+            {
+                await _couponService.ReleaseCouponReservationsForOrderAsync(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to release coupon reservations for order {id}: {ex.Message}");
             }
 
             order.Status = "Cancelled";

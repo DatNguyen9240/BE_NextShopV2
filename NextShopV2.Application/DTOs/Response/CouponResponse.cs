@@ -13,6 +13,7 @@ namespace NextShopV2.Application.DTOs.Response
         public DateTime EndDate { get; set; }
         public int? UsageLimit { get; set; }
         public int UsedCount { get; set; }
+        public int ReservedCount { get; set; } = 0;
         public bool IsActive { get; set; }
         
         // Computed properties
