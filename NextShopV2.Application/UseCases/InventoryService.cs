@@ -66,6 +66,8 @@ namespace NextShopV2.Application.Services
                 // Update variant stock quantity
                 variant.StockQuantity += changeQty;
                 await _productVariantRepository.UpdateAsync(variant);
+                // Persist variant changes
+                await _productVariantRepository.SaveAsync();
 
                 return true;
             }
