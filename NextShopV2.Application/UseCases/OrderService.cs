@@ -196,6 +196,12 @@ namespace NextShopV2.Application.Services
                 if (defaultAddress != null)
                     shippingAddress = defaultAddress.FullAddress;
 
+                // Validate required profile info
+                if (string.IsNullOrWhiteSpace(buyerPhone))
+                    throw new ArgumentException("Vui lòng cập nhật số điện thoại trong hồ sơ trước khi đặt hàng");
+                if (string.IsNullOrWhiteSpace(shippingAddress))
+                    throw new ArgumentException("Vui lòng cập nhật địa chỉ giao hàng mặc định trong hồ sơ trước khi đặt hàng");
+
                 var order = new Order
                 {
                     OrderId = orderId,
