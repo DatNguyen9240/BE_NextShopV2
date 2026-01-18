@@ -43,10 +43,6 @@ namespace NextShopV2.Api.Controllers
         [AdminOnly]
         public async Task<IActionResult> Create([FromBody] Announcement announcement)
         {
-            if (string.IsNullOrWhiteSpace(announcement.Text))
-            {
-                return ResponseHelper.BadRequest("Text is required");
-            }
             var result = await _announcementService.CreateAsync(announcement);
             return ResponseHelper.Success(result, "Announcement created successfully");
         }
@@ -56,10 +52,6 @@ namespace NextShopV2.Api.Controllers
         [AdminOnly]
         public async Task<IActionResult> Update(Guid id, [FromBody] Announcement announcement)
         {
-            if (string.IsNullOrWhiteSpace(announcement.Text))
-            {
-                return ResponseHelper.BadRequest("Text is required");
-            }
             var success = await _announcementService.UpdateAsync(id, announcement);
             if (!success)
             {

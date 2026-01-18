@@ -2,11 +2,10 @@ using System;
 
 namespace NextShopV2.Domain.Entities.Marketing
 {
-    public class Announcement
+    public class FooterInfo
     {
         public Guid Id { get; set; }
-        public string ClassName { get; set; } = "w-full bg-purple-600 text-white text-center py-1 px-2 text-sm font-semibold";
-        public bool IsActive { get; set; } = true;
+        public string ClassName { get; set; } = "";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

@@ -193,6 +193,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementRepos
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementService, NextShopV2.Application.Services.AnnouncementService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementRepository, NextShopV2.Infrastructure.Repositories.AnnouncementRepository>();
 
+// Register DI for FooterInfoService and FooterInfoRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.IFooterInfoService, NextShopV2.Application.UseCases.FooterInfoService>();
+builder.Services.AddScoped<NextShopV2.Domain.Repositories.IFooterInfoRepository, NextShopV2.Infrastructure.Repositories.FooterInfoRepository>();
+
 
 // Register DI for ProductService and ProductRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductService, NextShopV2.Application.Services.ProductService>();

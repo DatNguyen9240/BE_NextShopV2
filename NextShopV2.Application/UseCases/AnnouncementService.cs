@@ -35,7 +35,6 @@ namespace NextShopV2.Application.Services
             var existing = await _repo.GetByIdAsync(id);
             if (existing == null) return false;
 
-            existing.Text = announcement.Text;
             existing.ClassName = announcement.ClassName;
             existing.IsActive = announcement.IsActive;
             existing.UpdatedAt = DateTime.UtcNow;
