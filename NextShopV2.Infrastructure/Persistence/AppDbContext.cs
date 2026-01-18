@@ -21,6 +21,7 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ProductLike> ProductLikes { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }

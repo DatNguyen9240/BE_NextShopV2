@@ -189,6 +189,10 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.IUserRepository, Ne
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementService, NextShopV2.Application.Services.AdvertisementService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementRepository, NextShopV2.Infrastructure.Repositories.AdvertisementRepository>();
 
+// Register DI for AnnouncementService and AnnouncementRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementService, NextShopV2.Application.Services.AnnouncementService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementRepository, NextShopV2.Infrastructure.Repositories.AnnouncementRepository>();
+
 
 // Register DI for ProductService and ProductRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductService, NextShopV2.Application.Services.ProductService>();
