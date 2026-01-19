@@ -31,6 +31,24 @@ namespace NextShopV2.Shared.Extensions.Web
             return userRole == "Admin";
         }
 
+        /// <summary>
+        /// Check if current user is shipper
+        /// </summary>
+        public static bool IsShipper(this ControllerBase controller)
+        {
+            var userRole = controller.User.FindFirst(ClaimTypes.Role)?.Value;
+            return userRole == "Shipper";
+        }
+
+        /// <summary>
+        /// Check if current user is admin or shipper
+        /// </summary>
+        public static bool IsAdminOrShipper(this ControllerBase controller)
+        {
+            var userRole = controller.User.FindFirst(ClaimTypes.Role)?.Value;
+            return userRole == "Admin" || userRole == "Shipper";
+        }
+
 
 
         /// <summary>

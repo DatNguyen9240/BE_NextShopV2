@@ -40,6 +40,10 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
     opts.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     opts.JsonSerializerOptions.Converters.Add(new NextShopV2.Shared.Json.DateTimeUtcConverter());
 });
+
+// Add SignalR
+builder.Services.AddSignalR();
+
 builder.Services.AddEndpointsApiExplorer();
 
 // CORS: allow local Next.js dev origin and ngrok for testing
@@ -117,7 +121,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 var accessToken = context.Request.Query["access_token"].FirstOrDefault();
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs/notifications") || path.StartsWithSegments("/hubs/shipment-tracking")))
                 {
                     context.Token = accessToken;
                 }
@@ -224,6 +228,16 @@ builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProdu
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IOrderService, NextShopV2.Application.Services.OrderService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IOrderRepository, NextShopV2.Infrastructure.Repositories.OrderRepository>();
 
+// Register DI for ShipmentService and ShipmentRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IShipmentService, NextShopV2.Application.Services.ShipmentService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IShipmentRepository, NextShopV2.Infrastructure.Repositories.ShipmentRepository>();
+
+// Register DI for TrackingService and TrackingEventRepository
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.ITrackingService, NextShopV2.Application.Services.TrackingService>();
+builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.ITrackingEventRepository, NextShopV2.Infrastructure.Repositories.TrackingEventRepository>();
+
+builder.Services.AddHttpClient();
+
 // Register DI for InventoryService and InventoryTransactionRepository
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Services.IInventoryService, NextShopV2.Application.Services.InventoryService>();
 builder.Services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IInventoryTransactionRepository, NextShopV2.Infrastructure.Repositories.InventoryTransactionRepository>();
@@ -312,6 +326,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
+app.MapHub<NextShopV2.Api.Hubs.ShipmentTrackingHub>("/hubs/shipment-tracking");
 
 // SignalR hub for notifications
 app.Run();

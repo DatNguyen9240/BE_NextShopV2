@@ -408,6 +408,15 @@ namespace NextShopV2.Application.Services
                     DiscountAmount = oc.DiscountAmount,
                     AppliedAt = oc.AppliedAt
                 }).ToList() ?? new List<OrderCouponResponse>(),
+                Shipment = order.Shipment == null ? null : new ShipmentResponse
+                {
+                    ShipmentId = order.Shipment.ShipmentId,
+                    OrderId = order.Shipment.OrderId,
+                    Carrier = order.Shipment.Carrier,
+                    TrackingNumber = order.Shipment.TrackingNumber,
+                    Status = order.Shipment.Status,
+                    CreatedAt = order.Shipment.CreatedAt
+                }
             };
         }
     }

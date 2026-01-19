@@ -3,7 +3,9 @@ using NextShopV2.Application.Interfaces;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Infrastructure.Persistence;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NextShopV2.Infrastructure.Repositories
 {
@@ -68,6 +70,31 @@ namespace NextShopV2.Infrastructure.Repositories
         public void Save()
         {
             _context.SaveChanges();
+        }
+
+        // Async methods
+        public async Task<List<User>> GetAllAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Addresses)
+                .ToListAsync();
+        }
+
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.Addresses)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -31,6 +31,7 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Shipment> Shipments { get; set; }
+        public DbSet<TrackingEvent> TrackingEvents { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }

@@ -14,6 +14,28 @@ namespace NextShopV2.Api.Attributes
     }
 
     /// <summary>
+    /// Shipper only access
+    /// </summary>
+    public class ShipperOnlyAttribute : AuthorizeAttribute
+    {
+        public ShipperOnlyAttribute()
+        {
+            Roles = "Shipper";
+        }
+    }
+
+    /// <summary>
+    /// Admin or Shipper access
+    /// </summary>
+    public class AdminOrShipperAttribute : AuthorizeAttribute
+    {
+        public AdminOrShipperAttribute()
+        {
+            Roles = "Admin,Shipper";
+        }
+    }
+
+    /// <summary>
     /// Admin or User access
     /// </summary>
     public class AdminOrUserAttribute : AuthorizeAttribute
