@@ -4,7 +4,7 @@ using NextShopV2.Application.Interfaces;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Request.UpdateDto;
 using NextShopV2.Application.DTOs.Response;
-using NextShopV2.Domain.Entities.Payments;
+using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Shared.Extensions;
 using System;
 using System.Collections.Generic;
@@ -106,6 +106,9 @@ namespace NextShopV2.Application.Services
                 Carrier = request.Carrier,
                 TrackingNumber = request.TrackingNumber ?? string.Empty,
                 Status = request.Status,
+                DeliveryAddress = order.ShippingAddress,
+                DeliveryLat = order.ShippingLat,
+                DeliveryLng = order.ShippingLng,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -274,9 +277,9 @@ namespace NextShopV2.Application.Services
                 shipper = _authService.GetMe(shipment.ShipperId.Value);
             }
 
-            // Get order to retrieve delivery address
+            // Get order to retrieve delivery address if shipment doesn't have it
             var order = await _orderRepo.GetByIdAsync(shipment.OrderId);
-            var deliveryAddress = order?.ShippingAddress;
+            var deliveryAddress = shipment.DeliveryAddress ?? order?.ShippingAddress;
 
             return new ShipmentResponse
             {
@@ -291,7 +294,9 @@ namespace NextShopV2.Application.Services
                 CurrentLat = shipment.CurrentLat,
                 CurrentLng = shipment.CurrentLng,
                 LastLocationUpdate = shipment.LastLocationUpdate,
-                DeliveryAddress = deliveryAddress
+                DeliveryAddress = deliveryAddress,
+                DeliveryLat = shipment.DeliveryLat,
+                DeliveryLng = shipment.DeliveryLng
             };
         }
 

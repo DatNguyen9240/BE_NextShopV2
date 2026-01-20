@@ -1,5 +1,5 @@
 using NextShopV2.Application.Interfaces.Repositories;
-using NextShopV2.Domain.Entities.Payments;
+using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;

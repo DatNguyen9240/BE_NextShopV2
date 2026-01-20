@@ -1,7 +1,7 @@
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces.Repositories;
 using NextShopV2.Application.Interfaces.Services;
-using NextShopV2.Domain.Entities.Payments;
+using NextShopV2.Domain.Entities.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;

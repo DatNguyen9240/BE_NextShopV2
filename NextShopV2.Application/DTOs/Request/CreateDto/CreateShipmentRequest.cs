@@ -8,6 +8,8 @@ namespace NextShopV2.Application.DTOs.Request
         [Required]
         public Guid OrderId { get; set; }
 
+        public Guid? ShipperId { get; set; }
+
         [Required]
         [StringLength(100)]
         public string Carrier { get; set; } = "GHN";
@@ -18,5 +20,12 @@ namespace NextShopV2.Application.DTOs.Request
         [Required]
         [StringLength(50)]
         public string Status { get; set; } = "Preparing";
+
+        [StringLength(500)]
+        public string? DeliveryAddress { get; set; }
+
+        public double? DeliveryLat { get; set; }
+
+        public double? DeliveryLng { get; set; }
     }
 }
