@@ -19,6 +19,10 @@ namespace NextShopV2.Application.DTOs.Request
         [StringLength(500)]
         public string? ShippingAddress { get; set; }
 
+        public double? ShippingLat { get; set; }
+
+        public double? ShippingLng { get; set; }
+
         // Payment method (e.g., "ONLINE", "COD").
         [StringLength(50)]
         public string? PaymentMethod { get; set; }

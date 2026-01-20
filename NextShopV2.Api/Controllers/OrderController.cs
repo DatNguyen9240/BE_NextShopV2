@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace NextShopV2.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/orders")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -29,7 +29,6 @@ namespace NextShopV2.Api.Controllers
 
 
         [HttpGet]
-        [AdminOnly]
         public async Task<IActionResult> GetAll()
         {
             var orders = await _orderService.GetAllAsync();

@@ -17,9 +17,12 @@ namespace NextShopV2.Application.DTOs.Response
         public string? BuyerName { get; set; }
         public string? BuyerPhone { get; set; }
 
-    public List<OrderCouponResponse> Coupons { get; set; } = new List<OrderCouponResponse>();
+        public List<OrderCouponResponse> Coupons { get; set; } = new List<OrderCouponResponse>();
         public string? ShippingAddress { get; set; }
+        public double? ShippingLat { get; set; }
+        public double? ShippingLng { get; set; }
         public List<OrderItemResponse> Items { get; set; } = new List<OrderItemResponse>();
+        public ShipmentResponse? Shipment { get; set; }
     }
     
     public class OrderItemResponse

@@ -30,7 +30,8 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Payment> Payments { get; set; }
-        public DbSet<Shipment> Shipments { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Orders.Shipment> Shipments { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Orders.TrackingEvent> TrackingEvents { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }

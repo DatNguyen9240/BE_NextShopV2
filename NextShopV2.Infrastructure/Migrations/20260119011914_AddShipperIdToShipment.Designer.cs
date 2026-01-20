@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NextShopV2.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using NextShopV2.Infrastructure.Persistence;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260119011914_AddShipperIdToShipment")]
+    partial class AddShipperIdToShipment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -343,12 +346,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("ShippingLat")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("ShippingLng")
-                        .HasColumnType("float");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -459,94 +456,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Shipment", b =>
-                {
-                    b.Property<Guid>("ShipmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Carrier")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double?>("CurrentLat")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("CurrentLng")
-                        .HasColumnType("float");
-
-                    b.Property<string>("DeliveryAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("DeliveryLat")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("DeliveryLng")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("LastLocationUpdate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ShipperId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TrackingNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ShipmentId");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.HasIndex("ShipperId");
-
-                    b.ToTable("Shipments");
-                });
-
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.TrackingEvent", b =>
-                {
-                    b.Property<Guid>("TrackingEventId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EventTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ShipmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TrackingEventId");
-
-                    b.HasIndex("ShipmentId");
-
-                    b.ToTable("TrackingEvents");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Payment", b =>
                 {
                     b.Property<Guid>("PaymentId")
@@ -582,6 +491,83 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Shipment", b =>
+                {
+                    b.Property<Guid>("ShipmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Carrier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("CurrentLat")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("CurrentLng")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("LastLocationUpdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ShipperId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrackingNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ShipmentId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Shipments");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.TrackingEvent", b =>
+                {
+                    b.Property<Guid>("TrackingEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EventTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ShipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TrackingEventId");
+
+                    b.HasIndex("ShipmentId");
+
+                    b.ToTable("TrackingEvents");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
@@ -1013,34 +999,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("Variant");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Shipment", b =>
-                {
-                    b.HasOne("NextShopV2.Domain.Entities.Orders.Order", "Order")
-                        .WithOne("Shipment")
-                        .HasForeignKey("NextShopV2.Domain.Entities.Orders.Shipment", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NextShopV2.Domain.Entities.Users.User", "Shipper")
-                        .WithMany()
-                        .HasForeignKey("ShipperId");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Shipper");
-                });
-
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.TrackingEvent", b =>
-                {
-                    b.HasOne("NextShopV2.Domain.Entities.Orders.Shipment", "Shipment")
-                        .WithMany("TrackingEvents")
-                        .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Shipment");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Payment", b =>
                 {
                     b.HasOne("NextShopV2.Domain.Entities.Orders.Order", null)
@@ -1048,6 +1006,26 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Shipment", b =>
+                {
+                    b.HasOne("NextShopV2.Domain.Entities.Orders.Order", null)
+                        .WithOne("Shipment")
+                        .HasForeignKey("NextShopV2.Domain.Entities.Payments.Shipment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.TrackingEvent", b =>
+                {
+                    b.HasOne("NextShopV2.Domain.Entities.Payments.Shipment", "Shipment")
+                        .WithMany("TrackingEvents")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Shipment");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
@@ -1138,7 +1116,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("Shipment");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Shipment", b =>
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Shipment", b =>
                 {
                     b.Navigation("TrackingEvents");
                 });

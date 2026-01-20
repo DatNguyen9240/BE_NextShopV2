@@ -20,6 +20,8 @@ namespace NextShopV2.Domain.Entities.Orders
         public string? BuyerName { get; set; }
         public string? BuyerPhone { get; set; }
         public string? ShippingAddress { get; set; }
+        public double? ShippingLat { get; set; }
+        public double? ShippingLng { get; set; }
 
         public User User { get; set; } = null!;
         public ICollection<OrderCoupon> OrderCoupons { get; set; } = new List<OrderCoupon>();

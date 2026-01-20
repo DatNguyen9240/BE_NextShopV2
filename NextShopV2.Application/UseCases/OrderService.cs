@@ -192,9 +192,23 @@ namespace NextShopV2.Application.Services
                 var buyerName = user.FullName;
                 var buyerPhone = user.Phone;
                 string? shippingAddress = null;
+                double? shippingLat = null;
+                double? shippingLng = null;
                 var defaultAddress = user.Addresses?.FirstOrDefault(a => a.IsDefault) ?? user.Addresses?.FirstOrDefault();
                 if (defaultAddress != null)
+                {
                     shippingAddress = defaultAddress.FullAddress;
+                    shippingLat = defaultAddress.Latitude;
+                    shippingLng = defaultAddress.Longitude;
+                }
+
+                // Override with request values if provided
+                if (!string.IsNullOrWhiteSpace(request.ShippingAddress))
+                    shippingAddress = request.ShippingAddress;
+                if (request.ShippingLat.HasValue)
+                    shippingLat = request.ShippingLat.Value;
+                if (request.ShippingLng.HasValue)
+                    shippingLng = request.ShippingLng.Value;
 
                 // Validate required profile info
                 if (string.IsNullOrWhiteSpace(buyerPhone))
@@ -214,6 +228,8 @@ namespace NextShopV2.Application.Services
                     BuyerName = buyerName,
                     BuyerPhone = buyerPhone,
                     ShippingAddress = shippingAddress,
+                    ShippingLat = shippingLat,
+                    ShippingLng = shippingLng,
                     Items = orderItems,
                     OrderCoupons = orderCoupons,
                     // Không còn CouponId, coupon
@@ -366,6 +382,8 @@ namespace NextShopV2.Application.Services
                 BuyerName = order.BuyerName,
                 BuyerPhone = order.BuyerPhone,
                 ShippingAddress = order.ShippingAddress,
+                ShippingLat = order.ShippingLat,
+                ShippingLng = order.ShippingLng,
                 Items = order.Items.Select(item =>
                 {
                     var variant = item.Variant;
@@ -408,6 +426,15 @@ namespace NextShopV2.Application.Services
                     DiscountAmount = oc.DiscountAmount,
                     AppliedAt = oc.AppliedAt
                 }).ToList() ?? new List<OrderCouponResponse>(),
+                Shipment = order.Shipment == null ? null : new ShipmentResponse
+                {
+                    ShipmentId = order.Shipment.ShipmentId,
+                    OrderId = order.Shipment.OrderId,
+                    Carrier = order.Shipment.Carrier,
+                    TrackingNumber = order.Shipment.TrackingNumber,
+                    Status = order.Shipment.Status,
+                    CreatedAt = order.Shipment.CreatedAt
+                }
             };
         }
     }
