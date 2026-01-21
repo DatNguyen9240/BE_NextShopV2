@@ -12,6 +12,10 @@ namespace NextShopV2.Domain.Entities.Orders
         public Guid UserId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public string Status { get; set; } = "Pending"; // Pending, Paid, Shipped, Completed, Cancelled
+        public string? CancelReason { get; set; }
+        public string? AdminCancelReason { get; set; }
+        public string? CancelledBy { get; set; }
+        public DateTime? CancelledAt { get; set; }
         public decimal SubTotal { get; set; } // Total before discount
         public decimal DiscountAmount { get; set; } = 0; // Total discount applied
         public decimal TotalAmount { get; set; } // Final amount after discount

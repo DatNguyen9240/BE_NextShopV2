@@ -299,13 +299,13 @@ namespace NextShopV2.Application.Services
             return true;
         }
 
-        public async Task<bool> CancelOrderAsync(Guid id)
+        public async Task<bool> CancelOrderAsync(Guid id, string? reason = null, string? adminReason = null, bool isAdmin = false)
         {
             var order = await _orderRepo.GetByIdAsync(id);
             if (order.IsNull()) return false;
 
-            if (order!.Status == "Completed" || order.Status == "Shipped")
-                throw new InvalidOperationException("Cannot cancel completed or shipped orders");
+            if (order!.Status != "Pending")
+                throw new InvalidOperationException("Cannot cancel orders that are not in Pending status");
 
             // Restore stock using inventory service (creates transaction)
             foreach (var item in order.Items)
@@ -333,6 +333,18 @@ namespace NextShopV2.Application.Services
             }
 
             order.Status = "Cancelled";
+            if (isAdmin)
+            {
+                // Admin should not overwrite user's CancelReason; only save AdminCancelReason for audit.
+                order.AdminCancelReason = adminReason;
+                order.CancelledBy = "Admin";
+            }
+            else
+            {
+                order.CancelReason = reason;
+                order.CancelledBy = "User";
+            }
+            order.CancelledAt = DateTime.UtcNow;
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveAsync();
 
@@ -434,7 +446,10 @@ namespace NextShopV2.Application.Services
                     TrackingNumber = order.Shipment.TrackingNumber,
                     Status = order.Shipment.Status,
                     CreatedAt = order.Shipment.CreatedAt
-                }
+                },
+                CancelReason = order.CancelReason,
+                AdminCancelReason = order.AdminCancelReason,
+                CancelledBy = order.CancelledBy
             };
         }
     }
