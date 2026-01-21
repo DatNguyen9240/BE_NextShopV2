@@ -23,6 +23,11 @@ namespace NextShopV2.Application.DTOs.Response
         public double? ShippingLng { get; set; }
         public List<OrderItemResponse> Items { get; set; } = new List<OrderItemResponse>();
         public ShipmentResponse? Shipment { get; set; }
+
+        // Cancel info
+        public string? CancelReason { get; set; }
+        public string? AdminCancelReason { get; set; }
+        public string? CancelledBy { get; set; }
     }
     
     public class OrderItemResponse

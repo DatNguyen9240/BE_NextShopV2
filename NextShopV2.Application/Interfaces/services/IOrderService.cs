@@ -15,7 +15,7 @@ namespace NextShopV2.Application.Interfaces.Services
         Task<List<OrderResponse>> GetByStatusAsync(string status);
         Task<OrderResponse> CreateAsync(Guid userId, CreateOrderRequest request);
         Task<bool> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request);
-        Task<bool> CancelOrderAsync(Guid id);
+        Task<bool> CancelOrderAsync(Guid id, string? reason = null, string? adminReason = null, bool isAdmin = false);
         Task<bool> DeleteAsync(Guid id);
         Task<decimal> CalculateOrderTotalAsync(CreateOrderRequest request);
     }

@@ -141,21 +141,31 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPut("{id}/cancel")]
         [AdminOrUser]
-        public async Task<IActionResult> CancelOrder(Guid id)
+        public async Task<IActionResult> CancelOrder(Guid id, [FromBody] CancelOrderRequest? request = null)
         {
+            var order = await _orderService.GetByIdAsync(id);
+            if (order is null)
+                return ResponseHelper.NotFound("Order not found");
+
             // For non-admin users, check ownership before cancelling
             if (!this.IsAdmin())
             {
-                var order = await _orderService.GetByIdAsync(id);
-                if (order is null)
-                    return ResponseHelper.NotFound("Order not found");
-
                 var ownershipCheck = this.CheckResourceOwnership(order.UserId);
                 if (ownershipCheck != null)
                     return ownershipCheck;
+
+                // Reject if non-admin tries to provide admin reason
+                if (request?.AdminReason != null)
+                    return ResponseHelper.BadRequest("Admin reason is reserved for admin users");
+            }
+            else
+            {
+                // Admin must provide an admin reason when cancelling
+                if (string.IsNullOrWhiteSpace(request?.AdminReason))
+                    return ResponseHelper.BadRequest("Admin reason is required when cancelling as admin");
             }
 
-            var success = await _orderService.CancelOrderAsync(id);
+            var success = await _orderService.CancelOrderAsync(id, request?.Reason, request?.AdminReason, this.IsAdmin());
             return success ? 
                 ResponseHelper.Success("Order cancelled successfully") :
                 ResponseHelper.NotFound("Order not found or cannot be cancelled");
