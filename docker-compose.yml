@@ -10,6 +10,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Redis=redis:6379
+    volumes:
+      - ./data/dataprotection-keys:/root/.aspnet/DataProtection-Keys
     depends_on:
       - redis
 

@@ -11,8 +11,20 @@ using PayOS;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using DotNetEnv;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure DataProtection for Docker/Railway
+if (builder.Environment.IsProduction())
+{
+    var dataProtectionPath = "/mnt/data/dataprotection-keys";
+    if (Directory.Exists(dataProtectionPath))
+    {
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath));
+    }
+}
 
 // Load .env file based on environment
 var environment = builder.Environment.EnvironmentName;
