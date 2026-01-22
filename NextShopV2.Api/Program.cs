@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NextShopV2.Infrastructure.Persistence;
+using Npgsql;
 using StackExchange.Redis;
 using NextShopV2.Application.Services;
 using Microsoft.OpenApi.Models;
@@ -33,7 +34,36 @@ if (File.Exists(envPath))
 // Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    // Ưu tiên PostgreSQL nếu đủ biến môi trường
+    // Support Railway/Template DATABASE_URL (e.g. postgres://user:pass@host:port/db)
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
+                      ?? builder.Configuration["DATABASE_URL"]
+                      ?? Environment.GetEnvironmentVariable("Postgres.DATABASE_URL")
+                      ?? builder.Configuration["Postgres:DATABASE_URL"];
+
+    if (!string.IsNullOrWhiteSpace(databaseUrl))
+    {
+        try
+        {
+            var uri = new Uri(databaseUrl);
+            var userInfo = uri.UserInfo.Split(':', 2);
+            var npgBuilder = new NpgsqlConnectionStringBuilder
+            {
+                Host = uri.Host,
+                Port = uri.Port > 0 ? uri.Port : 5432,
+                Database = uri.AbsolutePath.TrimStart('/'),
+                Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
+                Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
+                SslMode = SslMode.Require
+            };
+            options.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        }
+        catch
+        {
+            // If parsing fails, fall back to environment variables below
+        }
+    }
+
+    // Ưu tiên PostgreSQL nếu đủ biến môi trường (fallback when DATABASE_URL not provided or parse failed)
     var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
     var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
     var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
