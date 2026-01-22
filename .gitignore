@@ -59,6 +59,3 @@ TestResults/
 
 # Ignore migrations if needed
 # Migrations/
-
-# DataProtection keys (do NOT commit)
-data/dataprotection-keys/
