@@ -10,12 +10,40 @@ using NextShopV2.Shared.Extensions.Web;
 using PayOS;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext
+// Load .env file based on environment
+var environment = builder.Environment.EnvironmentName;
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environment.ToLower()}");
+
+// Fallback to .env if environment-specific file doesn't exist
+if (!File.Exists(envPath))
+{
+    envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+}
+
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+}
+
+// Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (builder.Environment.IsProduction())
+    {
+        // PostgreSQL for Production (Railway)
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        // SQL Server for Development
+        options.UseSqlServer(connectionString);
+    }
+});
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(
