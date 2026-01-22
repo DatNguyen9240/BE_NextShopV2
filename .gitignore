@@ -28,8 +28,10 @@ obj/
 *.sqlite
 *.pdb
 
-# Environment files
+# Environment files - NEVER commit sensitive credentials
 .env
+.env.*
+!.env.example
 
 # Service account keys and secrets
 **/Config/serviceAccountKey.json
