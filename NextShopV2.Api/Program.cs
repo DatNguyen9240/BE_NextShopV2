@@ -93,12 +93,20 @@ builder.Services.AddSignalR();
 
 builder.Services.AddEndpointsApiExplorer();
 
-// CORS: allow local Next.js dev origin and ngrok for testing
+// CORS: allow local Next.js dev origin and production frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalDev", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://3b1cfe4e17af.ngrok-free.app")
+        var frontendUrl = builder.Configuration["Frontend:BaseUrl"] ?? Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "";
+        var origins = new List<string> { "http://localhost:3000" };
+        
+        if (!string.IsNullOrEmpty(frontendUrl))
+        {
+            origins.Add(frontendUrl);
+        }
+        
+        policy.WithOrigins(origins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
