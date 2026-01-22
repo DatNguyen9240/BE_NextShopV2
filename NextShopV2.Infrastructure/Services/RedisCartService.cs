@@ -44,12 +44,12 @@ namespace NextShopV2.Infrastructure.Services
             }
 
             var cartItems = new List<CartItemDto>();
-            var cartId = Guid.Parse(cartData.FirstOrDefault(x => x.Name == "cartId").Value!);
+            var cartId = Guid.Parse(cartData.FirstOrDefault(x => x.Name == "cartId").Value.ToString());
             var createdAt = DateTime.Parse(cartData.FirstOrDefault(x => x.Name == "createdAt").Value!);
 
             foreach (var item in cartData.Where(x => x.Name.ToString().StartsWith("item:")))
             {
-                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value!);
+                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value.ToString());
                 if (redisItem != null)
                 {
                     var variantInfo = await _variantService.GetVariantInfoAsync(redisItem.VariantId);
@@ -105,7 +105,7 @@ namespace NextShopV2.Infrastructure.Services
             var existingItemJson = await _redisDb.HashGetAsync(cartKey, itemKey);
             if (existingItemJson.HasValue)
             {
-                var existingItem = JsonSerializer.Deserialize<RedisCartItem>(existingItemJson!);
+                var existingItem = JsonSerializer.Deserialize<RedisCartItem>(existingItemJson.ToString());
                 if (existingItem != null)
                 {
                     var newQuantity = existingItem.Quantity + request.Quantity;
@@ -143,7 +143,7 @@ namespace NextShopV2.Infrastructure.Services
 
             foreach (var item in cartData.Where(x => x.Name.ToString().StartsWith("item:")))
             {
-                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value!);
+                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value.ToString());
                 if (redisItem?.CartItemId == cartItemId)
                 {
                     // Validate stock
@@ -180,7 +180,7 @@ namespace NextShopV2.Infrastructure.Services
 
             foreach (var item in cartData.Where(x => x.Name.ToString().StartsWith("item:")))
             {
-                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value!);
+                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value.ToString());
                 if (redisItem?.CartItemId == cartItemId)
                 {
                     await _redisDb.HashDeleteAsync(cartKey, item.Name!);
@@ -206,7 +206,7 @@ namespace NextShopV2.Infrastructure.Services
             var totalCount = 0;
             foreach (var item in cartData.Where(x => x.Name.ToString().StartsWith("item:")))
             {
-                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value!);
+                var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value.ToString());
                 if (redisItem != null)
                 {
                     totalCount += redisItem.Quantity;

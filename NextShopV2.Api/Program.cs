@@ -44,17 +44,38 @@ if (File.Exists(envPath))
 // Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    // Prefer a single full connection string from env: DEFAULT_CONNECTION
+    var connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
+
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        // Fallback: build connection string from individual DB_* env vars (or appsettings placeholders)
+        var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? builder.Configuration["ConnectionStrings:DefaultConnection"] ?? "localhost";
+        var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "NextShopDB";
+        var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
+        var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+        connectionString = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
+    }
+
     if (builder.Environment.IsProduction())
     {
         // PostgreSQL for Production (Railway)
-        options.UseNpgsql(connectionString);
+        options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     }
     else
     {
         // SQL Server for Development
-        options.UseSqlServer(connectionString);
+        options.UseSqlServer(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     }
+
+    // Configure global EF Core warnings handling:
+    // - Use split queries to avoid expensive single-query includes of multiple collections.
+    // - Suppress FirstWithoutOrderBy warning when queries intentionally rely on single-record lookups.
+    options.ConfigureWarnings(w =>
+    {
+        w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.FirstWithoutOrderByAndFilterWarning);
+        w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.MultipleCollectionIncludeWarning);
+    });
 });
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
