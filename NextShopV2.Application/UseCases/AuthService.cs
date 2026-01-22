@@ -25,7 +25,7 @@ namespace NextShopV2.Application.Services
         {
             _userRepository = userRepository;
             _redisDb = redis.GetDatabase();
-            _jwtKey = config["Jwt:Key"];
+            _jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? config["Jwt:Key"];
             _emailService = emailService;
             _mfaKey = config["Mfa:Key"] ?? config["Jwt:Key"];
             _config = config;

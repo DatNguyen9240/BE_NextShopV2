@@ -44,28 +44,29 @@ if (File.Exists(envPath))
 // Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    // Prefer a single full connection string from env: DEFAULT_CONNECTION
-    var connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
+    // Ưu tiên PostgreSQL nếu đủ biến môi trường
+    var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
+    var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
+    var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
+    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD") ?? builder.Configuration["PGPASSWORD"];
+    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? builder.Configuration["PGPORT"] ?? "5432";
 
-    if (string.IsNullOrWhiteSpace(connectionString))
+    bool hasPostgres = !string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword);
+
+    if (hasPostgres)
     {
-        // Fallback: build connection string from individual DB_* env vars (or appsettings placeholders)
+        var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Disable;";
+        options.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+    }
+    else
+    {
+        // Fallback: SQL Server
         var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? builder.Configuration["ConnectionStrings:DefaultConnection"] ?? "localhost";
         var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "NextShopDB";
         var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
         var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
-        connectionString = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
-    }
-
-    if (builder.Environment.IsProduction())
-    {
-        // PostgreSQL for Production (Railway)
-        options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-    }
-    else
-    {
-        // SQL Server for Development
-        options.UseSqlServer(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        var sqlConn = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
+        options.UseSqlServer(sqlConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     }
 
     // Configure global EF Core warnings handling:
@@ -80,24 +81,53 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var redisConfig = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-    
-    // Ensure AbortOnConnectFail=false to prevent crash when Redis is unavailable
-    if (!redisConfig.Contains("AbortOnConnectFail"))
+    var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+
+    // Expand placeholders like ${REDIS_CONNECTION} using environment variables
+    var placeholderMatch = System.Text.RegularExpressions.Regex.Match(redisConfig, @"\$\{(?<name>[A-Za-z0-9_]+)\}");
+    if (placeholderMatch.Success)
     {
-        redisConfig += ",AbortOnConnectFail=false";
+        var name = placeholderMatch.Groups["name"].Value;
+        var envVal = Environment.GetEnvironmentVariable(name);
+        if (!string.IsNullOrEmpty(envVal))
+        {
+            redisConfig = envVal;
+        }
     }
-    
-    return ConnectionMultiplexer.Connect(redisConfig);
+
+    try
+    {
+        var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConfig);
+        options.AbortOnConnectFail = false;
+        return ConnectionMultiplexer.Connect(options);
+    }
+    catch
+    {
+        // Fallback: remove any unknown tokens like AbortOnConnectFail and retry
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(redisConfig, @"(?i)\bAbortOnConnectFail=[^,;]+[,;]?", "");
+        cleaned = cleaned.Trim().TrimEnd(',', ';');
+        var options = StackExchange.Redis.ConfigurationOptions.Parse(cleaned);
+        options.AbortOnConnectFail = false;
+        return ConnectionMultiplexer.Connect(options);
+    }
 });
 
 // Add distributed cache using Redis
 builder.Services.AddSingleton<IDistributedCache>(provider =>
 {
     var redis = provider.GetRequiredService<IConnectionMultiplexer>();
+    var redisConfiguration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    // If Redis configuration is a placeholder like ${REDIS_CONNECTION}, expand it
+    var ph = System.Text.RegularExpressions.Regex.Match(redisConfiguration, @"\$\{(?<name>[A-Za-z0-9_]+)\}");
+    if (ph.Success)
+    {
+        var env = Environment.GetEnvironmentVariable(ph.Groups["name"].Value);
+        if (!string.IsNullOrEmpty(env)) redisConfiguration = env;
+    }
+
     var options = new RedisCacheOptions
     {
-        Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"
+        Configuration = redisConfiguration
     };
     return new RedisCache(options);
 });
@@ -186,9 +216,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
+
+        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? builder.Configuration["Jwt:Key"] ?? "";
+        options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
         // Support passing access_token in query string for SignalR WebSocket requests
         options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
@@ -376,8 +408,6 @@ builder.Services.AddSingleton<PayOSClient>(sp =>
 });
 
 var app = builder.Build();
-
-
 
 // Enable CORS as early as possible so preflight requests are handled
 app.UseCors("AllowLocalDev");
