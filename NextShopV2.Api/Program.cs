@@ -45,11 +45,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     }
 });
 
-builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect(
-        builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"
-    )
-);
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var redisConfig = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    
+    // Ensure AbortOnConnectFail=false to prevent crash when Redis is unavailable
+    if (!redisConfig.Contains("AbortOnConnectFail"))
+    {
+        redisConfig += ",AbortOnConnectFail=false";
+    }
+    
+    return ConnectionMultiplexer.Connect(redisConfig);
+});
 
 // Add distributed cache using Redis
 builder.Services.AddSingleton<IDistributedCache>(provider =>
