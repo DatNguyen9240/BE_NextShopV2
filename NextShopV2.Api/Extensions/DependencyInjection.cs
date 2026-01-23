@@ -119,7 +119,7 @@ namespace NextShopV2.Api.Extensions
 
             var dpBuilder = services.AddDataProtection()
                 .SetApplicationName("NextShopV2")
-                .PersistKeysToStackExchangeRedis(redisMultiplexer, "DataProtection-Keys-V2");
+                .PersistKeysToStackExchangeRedis(redisMultiplexer, "DataProtection-Keys-V3");
 
             try
             {
