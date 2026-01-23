@@ -31,29 +31,7 @@ if (File.Exists(envPath))
     DotNetEnv.Env.Load(envPath);
 }
 
-// Configure DataProtection keys persistence (use persistent mount in production)
-try
-{
-    var dataProtectionPath = Environment.GetEnvironmentVariable("DATA_PROTECTION_PATH")
-                             ?? builder.Configuration["DataProtection:Path"]
-                             ?? "/mnt/data/dataprotection-keys";
-
-    if (!string.IsNullOrWhiteSpace(dataProtectionPath))
-    {
-        var dpDir = new DirectoryInfo(dataProtectionPath);
-        if (!dpDir.Exists)
-        {
-            dpDir.Create();
-        }
-
-        builder.Services.AddDataProtection()
-            .PersistKeysToFileSystem(dpDir);
-    }
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Warning: DataProtection persistence setup failed: {ex.Message}");
-}
+// DataProtection is configured later after Redis IConnectionMultiplexer is registered
 
 // Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -147,32 +125,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     });
 });
 
-// Register IConnectionMultiplexer as a Singleton
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+// --- Redis Configuration ---
+var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION")
+                  ?? builder.Configuration.GetConnectionString("Redis")
+                  ?? "localhost:6379";
+
+// Standardize connection string: remove problematic 'AbortOnConnectFail' or 'abortConnect' 
+redisConfig = System.Text.RegularExpressions.Regex.Replace(redisConfig, @"(?i)\b(AbortOnConnectFail|abortConnect)=[^,;]+[,;]?", "");
+redisConfig = redisConfig.Trim().TrimEnd(',', ';');
+
+IConnectionMultiplexer redisMultiplexer;
+try
 {
-    var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
-    if (string.IsNullOrWhiteSpace(redisConfig)) redisConfig = builder.Configuration.GetConnectionString("Redis");
-    if (string.IsNullOrWhiteSpace(redisConfig)) redisConfig = "localhost:6379";
+    var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConfig);
+    options.AbortOnConnectFail = false;
+    options.ConnectTimeout = 10000; // Increase timeout for production stability
+    redisMultiplexer = ConnectionMultiplexer.Connect(options);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Warning: Strict Redis parsing failed ({ex.Message}). Retrying with lenient options.");
+    redisMultiplexer = ConnectionMultiplexer.Connect(redisConfig);
+}
 
-    // Standardize connection string: remove problematic 'AbortOnConnectFail' or 'abortConnect' 
-    // because we set it manually in ConfigurationOptions to ensure stability.
-    redisConfig = System.Text.RegularExpressions.Regex.Replace(redisConfig, @"(?i)\b(AbortOnConnectFail|abortConnect)=[^,;]+[,;]?", "");
-    redisConfig = redisConfig.Trim().TrimEnd(',', ';');
+// Register IConnectionMultiplexer as a Singleton
+builder.Services.AddSingleton<IConnectionMultiplexer>(redisMultiplexer);
 
-    try
-    {
-        var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConfig);
-        options.AbortOnConnectFail = false;
-        options.ConnectTimeout = 10000; // Increase timeout for production stability
-        return ConnectionMultiplexer.Connect(options);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Warning: Strict Redis parsing failed ({ex.Message}). Retrying with lenient options.");
-        // If parsing fails (e.g. due to other keywords), try to connect with just the host/port part
-        return ConnectionMultiplexer.Connect(redisConfig);
-    }
-});
+// Configure DataProtection to use Redis for key persistence
+builder.Services.AddDataProtection()
+    .PersistKeysToStackExchangeRedis(redisMultiplexer, "DataProtection-Keys");
 
 // Register IDistributedCache using the common IConnectionMultiplexer
 builder.Services.AddSingleton<IDistributedCache>(provider =>
