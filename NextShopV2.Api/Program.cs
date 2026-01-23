@@ -71,6 +71,8 @@ app.UseSwaggerUI(c =>
 
 app.UseGlobalExceptionHandler();
 
+app.UseWebSockets();
+
 if (app.Environment.IsProduction()) app.UseHttpsRedirection();
 
 app.UseAuthentication();
