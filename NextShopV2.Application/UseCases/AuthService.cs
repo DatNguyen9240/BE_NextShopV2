@@ -33,9 +33,12 @@ namespace NextShopV2.Application.Services
 
     public async Task<AppApiResponse> Register(RegisterRequest request)
         {
-            var passwordHash = PasswordHelper.HashPassword(request.Password!);
-            if (await _userRepository.ExistsByEmailAsync(request.Email!))
+            // check existence first to respond immediately if email taken
+            var existingUser = await _userRepository.GetByEmailAsync(request.Email!);
+            if (existingUser != null)
                 return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
+
+            var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = new User
             {
                 Id = Guid.NewGuid(),
