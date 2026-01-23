@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,14 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
 
+// Forwarded Headers for Reverse Proxy (Production)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -42,10 +51,14 @@ builder.Services.AddCors(options =>
 
 // Configure Https redirection port
 var httpsPortEnv = builder.Configuration["ASPNETCORE_HTTPS_PORT"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
-if (!int.TryParse(httpsPortEnv, out int httpsPort) || httpsPort == 0) httpsPort = 7264;
-builder.Services.AddHttpsRedirection(options => { options.HttpsPort = httpsPort; });
+if (int.TryParse(httpsPortEnv, out int httpsPort) && httpsPort != 0)
+{
+    builder.Services.AddHttpsRedirection(options => { options.HttpsPort = httpsPort; });
+}
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // 3. Configure Middleware Pipeline
 app.UseCors("AllowLocalDev");
