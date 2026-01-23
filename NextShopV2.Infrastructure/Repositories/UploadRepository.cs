@@ -16,9 +16,9 @@ namespace NextShopV2.Infrastructure.Repositories
         public UploadRepository(IConfiguration config)
         {
             var account = new Account(
-                config["Cloudinary:CloudName"],
-                config["Cloudinary:ApiKey"],
-                config["Cloudinary:ApiSecret"]
+                config["Cloudinary:CloudName"] ?? System.Environment.GetEnvironmentVariable("CLOUDINARY_NAME"),
+                config["Cloudinary:ApiKey"] ?? System.Environment.GetEnvironmentVariable("CLOUDINARY_KEY"),
+                config["Cloudinary:ApiSecret"] ?? System.Environment.GetEnvironmentVariable("CLOUDINARY_SECRET")
             );
             _cloudinary = new Cloudinary(account);
         }

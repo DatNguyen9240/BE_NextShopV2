@@ -20,12 +20,12 @@ namespace NextShopV2.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            var smtpHost = _configuration["Smtp:Host"] ?? "";
-            var smtpPort = int.TryParse(_configuration["Smtp:Port"], out var p) ? p : 25;
-            var smtpUser = _configuration["Smtp:Username"] ?? string.Empty;
-            var smtpPass = _configuration["Smtp:Password"] ?? string.Empty;
-            var fromEmail = _configuration["Smtp:FromEmail"] ?? "no-reply@example.com";
-            var fromName = _configuration["Smtp:FromName"] ?? "NextShop";
+            var smtpHost = _configuration["Smtp:Host"] ?? System.Environment.GetEnvironmentVariable("SMTP_HOST") ?? "";
+            var smtpPort = int.TryParse(_configuration["Smtp:Port"] ?? System.Environment.GetEnvironmentVariable("SMTP_PORT"), out var p) ? p : 587;
+            var smtpUser = _configuration["Smtp:Username"] ?? System.Environment.GetEnvironmentVariable("SMTP_USER") ?? string.Empty;
+            var smtpPass = _configuration["Smtp:Password"] ?? System.Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? string.Empty;
+            var fromEmail = _configuration["Smtp:FromEmail"] ?? System.Environment.GetEnvironmentVariable("SMTP_USER") ?? "no-reply@nextshop.com";
+            var fromName = _configuration["Smtp:FromName"] ?? System.Environment.GetEnvironmentVariable("SMTP_FROM_NAME") ?? "NextShop";
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromEmail));
