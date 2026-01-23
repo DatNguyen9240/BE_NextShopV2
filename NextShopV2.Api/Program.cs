@@ -64,6 +64,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                       ?? Environment.GetEnvironmentVariable("Postgres.DATABASE_URL")
                       ?? builder.Configuration["Postgres:DATABASE_URL"];
 
+    bool isPostgresConfigured = false;
+
     if (!string.IsNullOrWhiteSpace(databaseUrl))
     {
         try
@@ -81,6 +83,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                 TrustServerCertificate = true
             };
             options.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            isPostgresConfigured = true;
         }
         catch
         {
@@ -88,29 +91,39 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         }
     }
 
-    // Ưu tiên PostgreSQL nếu đủ biến môi trường (fallback when DATABASE_URL not provided or parse failed)
-    var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
-    var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
-    var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
-    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD") ?? builder.Configuration["PGPASSWORD"];
-    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? builder.Configuration["PGPORT"] ?? "5432";
-
-    bool hasPostgres = !string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword);
-
-    if (hasPostgres)
+    if (!isPostgresConfigured)
     {
-        var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Disable;";
-        options.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-    }
-    else
-    {
-        // Fallback: SQL Server
-        var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? builder.Configuration["ConnectionStrings:DefaultConnection"] ?? "localhost";
-        var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "NextShopDB";
-        var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
-        var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
-        var sqlConn = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
-        options.UseSqlServer(sqlConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        // Ưu tiên PostgreSQL nếu đủ biến môi trường (fallback when DATABASE_URL not provided or parse failed)
+        var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
+        var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
+        var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
+        var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD") ?? builder.Configuration["PGPASSWORD"];
+        var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? builder.Configuration["PGPORT"] ?? "5432";
+
+        bool hasPostgres = !string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword);
+
+        if (hasPostgres)
+        {
+            var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Prefer;Trust Server Certificate=true";
+            options.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        }
+        else
+        {
+            // Fallback: SQL Server
+            var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? builder.Configuration["ConnectionStrings:DefaultConnection"] ?? "localhost";
+            var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "NextShopDB";
+            var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
+            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+            
+            // If DB_HOST is localhost and no connection string, assume local SQL Server default
+            var sqlConn = builder.Configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(sqlConn))
+            {
+                 sqlConn = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
+            }
+            
+            options.UseSqlServer(sqlConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        }
     }
 
     // Configure global EF Core warnings handling:
