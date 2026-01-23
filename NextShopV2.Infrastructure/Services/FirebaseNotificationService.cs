@@ -31,9 +31,26 @@ namespace NextShopV2.Infrastructure.Services
                     if (!string.IsNullOrEmpty(firebaseJson))
                     {
                         _logger.LogInformation("Initializing Firebase using environment variable FIREBASE_SERVICE_ACCOUNT_JSON");
+                        
+                        // Nếu chuỗi không bắt đầu bằng '{', thử giải mã Base64
+                        string jsonToUse = firebaseJson.Trim();
+                        if (!jsonToUse.StartsWith("{"))
+                        {
+                            try
+                            {
+                                var base64Bytes = Convert.FromBase64String(jsonToUse);
+                                jsonToUse = System.Text.Encoding.UTF8.GetString(base64Bytes);
+                                _logger.LogInformation("Firebase JSON successfully decoded from Base64");
+                            }
+                            catch (FormatException)
+                            {
+                                _logger.LogWarning("FIREBASE_SERVICE_ACCOUNT_JSON does not start with '{' and is not a valid Base64 string.");
+                            }
+                        }
+
                         FirebaseApp.Create(new AppOptions()
                         {
-                            Credential = GoogleCredential.FromJson(firebaseJson)
+                            Credential = GoogleCredential.FromJson(jsonToUse)
                         });
                     }
                     else
