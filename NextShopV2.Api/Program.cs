@@ -94,11 +94,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     if (!isPostgresConfigured)
     {
         // Prioritize PostgreSQL if environment variables exist
-        var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
-        var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
-        var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
-        var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD") ?? builder.Configuration["PGPASSWORD"];
-        var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? builder.Configuration["PGPORT"] ?? "5432";
+        var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+        if (string.IsNullOrWhiteSpace(pgHost)) pgHost = builder.Configuration["PGHOST"];
+        
+        var pgDb = Environment.GetEnvironmentVariable("PGDATABASE");
+        if (string.IsNullOrWhiteSpace(pgDb)) pgDb = builder.Configuration["PGDATABASE"];
+        
+        var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+        if (string.IsNullOrWhiteSpace(pgUser)) pgUser = builder.Configuration["PGUSER"];
+        
+        var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
+        if (string.IsNullOrWhiteSpace(pgPassword)) pgPassword = builder.Configuration["PGPASSWORD"];
+        
+        var pgPort = Environment.GetEnvironmentVariable("PGPORT");
+        if (string.IsNullOrWhiteSpace(pgPort)) pgPort = builder.Configuration["PGPORT"];
+        if (string.IsNullOrWhiteSpace(pgPort)) pgPort = "5432";
 
         bool hasPostgres = !string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword);
 
