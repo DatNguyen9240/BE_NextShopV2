@@ -274,7 +274,7 @@ namespace NextShopV2.Application.Services
             UserResponse? shipper = null;
             if (shipment.ShipperId.HasValue)
             {
-                shipper = _authService.GetMe(shipment.ShipperId.Value);
+                shipper = await _authService.GetMe(shipment.ShipperId.Value);
             }
 
             // Get order to retrieve delivery address if shipment doesn't have it

@@ -79,8 +79,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                 Database = uri.AbsolutePath.TrimStart('/'),
                 Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
                 Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
-                SslMode = SslMode.Prefer,
-                TrustServerCertificate = true
+                SslMode = SslMode.Prefer
             };
             options.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             isPostgresConfigured = true;
