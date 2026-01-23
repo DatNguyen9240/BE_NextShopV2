@@ -31,6 +31,30 @@ if (File.Exists(envPath))
     DotNetEnv.Env.Load(envPath);
 }
 
+// Configure DataProtection keys persistence (use persistent mount in production)
+try
+{
+    var dataProtectionPath = Environment.GetEnvironmentVariable("DATA_PROTECTION_PATH")
+                             ?? builder.Configuration["DataProtection:Path"]
+                             ?? "/mnt/data/dataprotection-keys";
+
+    if (!string.IsNullOrWhiteSpace(dataProtectionPath))
+    {
+        var dpDir = new DirectoryInfo(dataProtectionPath);
+        if (!dpDir.Exists)
+        {
+            dpDir.Create();
+        }
+
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(dpDir);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Warning: DataProtection persistence setup failed: {ex.Message}");
+}
+
 // Add DbContext with dynamic provider selection
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -454,4 +478,21 @@ app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
 app.MapHub<NextShopV2.Api.Hubs.ShipmentTrackingHub>("/hubs/shipment-tracking");
 
 // SignalR hub for notifications
+
+// Automatically apply database migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("✅ Database migration completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Database migration failed: {ex.Message}");
+    }
+}
+
 app.Run();
