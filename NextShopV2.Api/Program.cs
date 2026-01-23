@@ -288,7 +288,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
                 return System.Threading.Tasks.Task.CompletedTask;
             },
-            OnTokenValidated = context =>
+            OnTokenValidated = async context =>
             {
                 try
                 {
@@ -296,20 +296,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     var token = context.SecurityToken as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
                     if (db != null && token != null)
                     {
-                        var key = $"blacklist:{context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim()}";
-                        var exists = db.StringGet(key);
-                        if (!exists.IsNullOrEmpty)
+                        var authHeader = context.Request.Headers["Authorization"].ToString();
+                        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                         {
-                            // token is blacklisted
-                            context.Fail("Token is blacklisted");
+                            var key = $"blacklist:{authHeader.Substring(7).Trim()}";
+                            var exists = await db.StringGetAsync(key);
+                            if (!exists.IsNullOrEmpty)
+                            {
+                                context.Fail("Token is blacklisted");
+                            }
                         }
                     }
                 }
                 catch
                 {
-                    // ignore Redis issues and allow token (or you can fail)
+                    // ignore Redis issues and allow token
                 }
-                return System.Threading.Tasks.Task.CompletedTask;
             }
         };
     });

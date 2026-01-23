@@ -15,7 +15,9 @@ namespace NextShopV2.Application.Interfaces
 
         // Async methods
         Task<List<User>> GetAllAsync();
+        Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByIdAsync(Guid id);
+        Task<bool> ExistsByEmailAsync(string email);
         Task UpdateAsync(User user);
         Task SaveAsync();
 

@@ -190,21 +190,21 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPost("mfa/disable")]
         [Authorize]
-        public IActionResult DisableMfa()
+        public async Task<IActionResult> DisableMfa()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var result = _authService.DisableEmailMfa(userId);
+            var result = await _authService.DisableEmailMfa(userId);
             if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Disable failed");
             return ResponseHelper.Success(null, result.Message ?? "MFA disabled");
         }
 
         [HttpPost("refresh")]
-        public IActionResult Refresh([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            var result = _authService.Refresh(request);
+            var result = await _authService.Refresh(request);
             
             if (!result.Success)
                 return ResponseHelper.Unauthorized(result.Message ?? "Token refresh failed");
@@ -213,7 +213,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("logout")]
-        public IActionResult Logout([FromBody] NextShopV2.Application.DTOs.Request.LogoutRequest request)
+        public async Task<IActionResult> Logout([FromBody] NextShopV2.Application.DTOs.Request.LogoutRequest request)
         {
             // Prefer access token from Authorization header: "Bearer <token>", fallback to body.AccessToken
             var authHeader = Request.Headers["Authorization"].FirstOrDefault();
@@ -230,7 +230,7 @@ namespace NextShopV2.Api.Controllers
             if (string.IsNullOrWhiteSpace(accessToken))
                 return ResponseHelper.BadRequest("Access token is required either in Authorization header or request body");
 
-            var result = _authService.Logout(accessToken, request?.RefreshToken ?? string.Empty);
+            var result = await _authService.Logout(accessToken, request?.RefreshToken ?? string.Empty);
             if (!result.Success)
                 return ResponseHelper.BadRequest(result.Message ?? "Logout failed");
             return ResponseHelper.Success(result.Message ?? "Logged out");
@@ -238,14 +238,14 @@ namespace NextShopV2.Api.Controllers
 
         [HttpGet("me")]
         [Authorize]
-        public IActionResult GetMe()
+        public async Task<IActionResult> GetMe()
         {
             // Get userId from JWT token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var user = _authService.GetMe(userId);
+            var user = await _authService.GetMe(userId);
             if (user is null)
                 return ResponseHelper.NotFound("User not found");
 
@@ -254,13 +254,13 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPut("me")]
         [Authorize]
-        public IActionResult UpdateProfile([FromBody] NextShopV2.Application.DTOs.Request.UpdateProfileRequest request)
+        public async Task<IActionResult> UpdateProfile([FromBody] NextShopV2.Application.DTOs.Request.UpdateProfileRequest request)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var result = _authService.UpdateProfile(userId, request);
+            var result = await _authService.UpdateProfile(userId, request);
             if (!result.Success)
                 return ResponseHelper.BadRequest(result.Message ?? "Update failed");
             return ResponseHelper.Success(result.Message ?? "Updated");
@@ -268,7 +268,7 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPut("me/address")]
         [Authorize]
-        public IActionResult UpsertAddress([FromBody] NextShopV2.Application.DTOs.Request.UpdateAddressRequest request)
+        public async Task<IActionResult> UpsertAddress([FromBody] NextShopV2.Application.DTOs.Request.UpdateAddressRequest request)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
@@ -285,7 +285,7 @@ namespace NextShopV2.Api.Controllers
             // If request.AddressId is present but not a GUID, we treat it as "create new address" (client may send place_id)
             try
             {
-                var addr = _authService.UpsertAddress(userId, request);
+                var addr = await _authService.UpsertAddress(userId, request);
                 if (addr is null)
                     return ResponseHelper.NotFound("User not found");
 
@@ -312,13 +312,13 @@ namespace NextShopV2.Api.Controllers
 
         [HttpDelete("me/address/{addressId}")]
         [Authorize]
-        public IActionResult DeleteAddress(Guid addressId)
+        public async Task<IActionResult> DeleteAddress(Guid addressId)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var ok = _authService.DeleteAddress(userId, addressId);
+            var ok = await _authService.DeleteAddress(userId, addressId);
             if (!ok) return ResponseHelper.NotFound("Address not found");
             return ResponseHelper.Success("Deleted");
         }

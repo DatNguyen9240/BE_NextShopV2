@@ -34,7 +34,7 @@ namespace NextShopV2.Application.Services
     public async Task<AppApiResponse> Register(RegisterRequest request)
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
-            if (_userRepository.ExistsByEmail(request.Email!))
+            if (await _userRepository.ExistsByEmailAsync(request.Email!))
                 return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
             var user = new User
             {
@@ -47,7 +47,7 @@ namespace NextShopV2.Application.Services
                 CreatedAt = DateTime.UtcNow
             };
             _userRepository.Add(user);
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
 
             // Send verification email after successful registration
             var sent = await StartEmailVerification(user.Id, user.Email);
@@ -62,14 +62,14 @@ namespace NextShopV2.Application.Services
     public async Task<AppAuthResponse> Login(LoginRequest request)
         {
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
-            var user = _userRepository.GetByEmail(request.Email!);
+            var user = await _userRepository.GetByEmailAsync(request.Email!);
             if (user == null || user.PasswordHash != passwordHash)
                 return new AppAuthResponse { Success = false, Message = "Thông tin đăng nhập không hợp lệ" };
 
             // Require email verification before issuing tokens
             if (!user.EmailVerified)
             {
-                // Send verification email (fire-and-forget style)
+                // Send verification email
                 await StartEmailVerification(user.Id, user.Email);
                 return new AppAuthResponse { Success = false, Message = "Email chưa được xác thực. Đã gửi email xác thực" };
             }
@@ -78,7 +78,7 @@ namespace NextShopV2.Application.Services
                 return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
             var refreshToken = Guid.NewGuid().ToString();
-            _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+            await _redisDb.StringSetAsync($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
             return new AppAuthResponse { Success = true, Message = "Login successful", AccessToken = accessToken, RefreshToken = refreshToken };
         }
 
@@ -89,7 +89,7 @@ namespace NextShopV2.Application.Services
                 return new AppApiResponse { Success = false, Message = "Dữ liệu không hợp lệ" };
 
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
-            var user = _userRepository.GetByEmail(request.Email!);
+            var user = await _userRepository.GetByEmailAsync(request.Email!);
             if (user == null || user.PasswordHash != passwordHash)
                 return new AppApiResponse { Success = false, Message = "Invalid credentials" };
 
@@ -100,7 +100,7 @@ namespace NextShopV2.Application.Services
                     return new AppApiResponse { Success = false, Message = "JWT key is missing in configuration" };
                 var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
                 var refreshToken = Guid.NewGuid().ToString();
-                _redisDb.StringSet($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+                await _redisDb.StringSetAsync($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));
                 return new AppApiResponse { Success = true, Message = "Login successful", Data = new { accessToken, refreshToken } };
             }
 
@@ -121,7 +121,7 @@ namespace NextShopV2.Application.Services
                 attempts = 5
             };
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
-            _redisDb.StringSet($"mfa:email:req:{requestId}", json, TimeSpan.FromMinutes(5));
+            await _redisDb.StringSetAsync($"mfa:email:req:{requestId}", json, TimeSpan.FromMinutes(5));
 
             // Send email (await here to surface errors)
             var subject = "NextShop: Mã xác thực của bạn";
@@ -133,7 +133,7 @@ namespace NextShopV2.Application.Services
             catch (System.Exception)
             {
                 // remove the stored request on email failure to avoid orphaned OTPs
-                _redisDb.KeyDelete($"mfa:email:req:{requestId}");
+                await _redisDb.KeyDeleteAsync($"mfa:email:req:{requestId}");
                 return new AppApiResponse { Success = false, Message = "Gửi email OTP thất bại" };
             }
 
@@ -179,7 +179,7 @@ namespace NextShopV2.Application.Services
                 await _redisDb.KeyDeleteAsync(key);
                 if (string.IsNullOrWhiteSpace(_jwtKey))
                     return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
-                var user = _userRepository.GetById(userId);
+                var user = await _userRepository.GetByIdAsync(userId);
                 if (user == null) return new AppAuthResponse { Success = false, Message = "User not found" };
                 var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
                 var refreshToken = Guid.NewGuid().ToString();
@@ -227,7 +227,7 @@ namespace NextShopV2.Application.Services
 
         public async Task<AppApiResponse> StartEnableEmailMfa(System.Guid userId)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
 
             // Generate code
@@ -291,21 +291,21 @@ namespace NextShopV2.Application.Services
 
             // success
             await _redisDb.KeyDeleteAsync(key);
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
             user.MfaEnabled = true;
             user.MfaType = "Email";
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
             return new AppApiResponse { Success = true, Message = "Đã bật xác thực 2 lớp" };
         }
 
-        public AppApiResponse DisableEmailMfa(System.Guid userId)
+        public async Task<AppApiResponse> DisableEmailMfa(System.Guid userId)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
             user.MfaEnabled = false;
             user.MfaType = null;
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
             return new AppApiResponse { Success = true, Message = "Đã tắt xác thực 2 lớp" };
         }
 
@@ -343,11 +343,11 @@ namespace NextShopV2.Application.Services
             if (val.IsNullOrEmpty) return new AppAuthResponse { Success = false, Message = "Token không hợp lệ hoặc đã hết hạn" };
 
             if (!System.Guid.TryParse(val.ToString(), out var userId)) return new AppAuthResponse { Success = false, Message = "Dữ liệu token không hợp lệ" };
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppAuthResponse { Success = false, Message = "User not found" };
 
             user.EmailVerified = true;
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
             await _redisDb.KeyDeleteAsync(key);
 
             if (string.IsNullOrWhiteSpace(_jwtKey)) return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
@@ -370,7 +370,7 @@ namespace NextShopV2.Application.Services
                 if (string.IsNullOrWhiteSpace(email))
                     return new AppAuthResponse { Success = false, Message = "Google token did not contain email" };
 
-                var user = _userRepository.GetByEmail(email);
+                var user = await _userRepository.GetByEmailAsync(email);
                 if (user == null)
                 {
                     return new AppAuthResponse { Success = false, Message = "User not found" };
@@ -378,7 +378,7 @@ namespace NextShopV2.Application.Services
 
                 // link google id if not present
                 if (string.IsNullOrWhiteSpace(user.GoogleId)) user.GoogleId = googleId;
-                _userRepository.Save();
+                await _userRepository.SaveAsync();
 
                 // Require verification before issuing tokens
                 if (!user.EmailVerified)
@@ -412,7 +412,7 @@ namespace NextShopV2.Application.Services
                 if (string.IsNullOrWhiteSpace(email))
                     return new AppAuthResponse { Success = false, Message = "Google token did not contain email" };
 
-                var existing = _userRepository.GetByEmail(email);
+                var existing = await _userRepository.GetByEmailAsync(email);
                 if (existing != null)
                 {
                     // If user already exists, behave like sign-in attempt
@@ -431,7 +431,7 @@ namespace NextShopV2.Application.Services
                     CreatedAt = DateTime.UtcNow
                 };
                 _userRepository.Add(newUser);
-                _userRepository.Save();
+                await _userRepository.SaveAsync();
 
                 await StartEmailVerification(newUser.Id, newUser.Email);
                 return new AppAuthResponse { Success = true, Message = "Đã gửi email xác thực" };
@@ -466,22 +466,22 @@ namespace NextShopV2.Application.Services
             }
         }
 
-    public AppAuthResponse Refresh(RefreshTokenRequest request)
+        public async Task<AppAuthResponse> Refresh(RefreshTokenRequest request)
         {
-            var storedToken = _redisDb.StringGet($"refresh:{request.UserId}");
+            var storedToken = await _redisDb.StringGetAsync($"refresh:{request.UserId}");
             if (storedToken != request.RefreshToken)
                 return new AppAuthResponse { Success = false, Message = "Refresh token không hợp lệ" };
             if (string.IsNullOrWhiteSpace(_jwtKey))
                 return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             // Include user's role in refreshed token so role-based authorization continues to work
-            var user = _userRepository.GetById(request.UserId);
+            var user = await _userRepository.GetByIdAsync(request.UserId);
             var role = user?.Role ?? string.Empty;
             var email = user?.Email ?? string.Empty;
             var accessToken = JwtHelper.GenerateToken(_jwtKey, request.UserId, email, role);
             return new AppAuthResponse { Success = true, Message = "Làm mới token thành công", AccessToken = accessToken };
         }
 
-        public AppApiResponse Logout(string accessToken, string refreshToken)
+        public async Task<AppApiResponse> Logout(string accessToken, string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(accessToken))
                 return new AppApiResponse { Success = false, Message = "Yêu cầu access token" };
@@ -496,7 +496,7 @@ namespace NextShopV2.Application.Services
                 {
                     var ttl = exp - now;
                     var key = $"blacklist:access:{accessToken}";
-                    _redisDb.StringSet(key, "1", ttl);
+                    await _redisDb.StringSetAsync(key, "1", ttl);
                 }
 
                 // Invalidate refresh token stored in redis
@@ -505,14 +505,14 @@ namespace NextShopV2.Application.Services
                 if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
                 {
                     // remove stored refresh token for the user
-                    _redisDb.KeyDelete($"refresh:{userId}");
+                    await _redisDb.KeyDeleteAsync($"refresh:{userId}");
                 }
 
                 // Optionally blacklist the refresh token string if provided
                 if (!string.IsNullOrWhiteSpace(refreshToken))
                 {
                     // we don't have expiry for refresh token here, set a reasonable TTL (7 days) or remove if stored
-                    _redisDb.StringSet($"blacklist:refresh:{refreshToken}", "1", TimeSpan.FromDays(7));
+                    await _redisDb.StringSetAsync($"blacklist:refresh:{refreshToken}", "1", TimeSpan.FromDays(7));
                 }
 
                 return new AppApiResponse { Success = true, Message = "Đã đăng xuất" };
@@ -523,9 +523,9 @@ namespace NextShopV2.Application.Services
             }
         }
 
-        public UserResponse? GetMe(Guid userId)
+        public async Task<UserResponse?> GetMe(Guid userId)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) 
                 return null; 
 
@@ -556,9 +556,9 @@ namespace NextShopV2.Application.Services
             };
         }
 
-        public AppApiResponse UpdateProfile(Guid userId, UpdateProfileRequest request)
+        public async Task<AppApiResponse> UpdateProfile(Guid userId, UpdateProfileRequest request)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return new AppApiResponse { Success = false, Message = "User not found" }; 
 
@@ -579,14 +579,14 @@ namespace NextShopV2.Application.Services
             }
 
             user.UpdatedAt = DateTime.UtcNow;
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
 
             return new AppApiResponse { Success = true, Message = "Cập nhật hồ sơ thành công" };
         }
 
-        public AddressResponse? UpsertAddress(Guid userId, UpdateAddressRequest request)
+        public async Task<AddressResponse?> UpsertAddress(Guid userId, UpdateAddressRequest request)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return null; 
 
@@ -629,7 +629,7 @@ namespace NextShopV2.Application.Services
 
                 try
                 {
-                    _userRepository.Save();
+                    await _userRepository.SaveAsync();
 
                     return new AddressResponse
                     {
@@ -678,7 +678,7 @@ namespace NextShopV2.Application.Services
 
                 try
                 {
-                    _userRepository.Save();
+                    await _userRepository.SaveAsync();
 
                     return new AddressResponse
                     {
@@ -700,9 +700,9 @@ namespace NextShopV2.Application.Services
             throw new InvalidOperationException("Unexpected state in UpsertAddress");
         }
 
-        public bool DeleteAddress(Guid userId, Guid addressId)
+        public async Task<bool> DeleteAddress(Guid userId, Guid addressId)
         {
-            var user = _userRepository.GetById(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return false;
 
             var address = user.Addresses.FirstOrDefault(a => a.AddressId == addressId);
@@ -720,7 +720,7 @@ namespace NextShopV2.Application.Services
                 next.IsDefault = true;
             }
 
-            _userRepository.Save();
+            await _userRepository.SaveAsync();
             return true;
         }
     }

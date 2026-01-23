@@ -105,6 +105,16 @@ namespace NextShopV2.Infrastructure.Repositories
             _context.Users.Update(user);
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.Users.AnyAsync(u => u.Email == email);
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

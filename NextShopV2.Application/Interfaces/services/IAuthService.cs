@@ -10,14 +10,14 @@ namespace NextShopV2.Application.Interfaces
     {
         Task<AppApiResponse> Register(RegisterRequest request);
         Task<AppAuthResponse> Login(LoginRequest request);
-        AppAuthResponse Refresh(RefreshTokenRequest request);
-        AppApiResponse Logout(string accessToken, string refreshToken);
-        UserResponse? GetMe(Guid userId);
+        Task<AppAuthResponse> Refresh(RefreshTokenRequest request);
+        Task<AppApiResponse> Logout(string accessToken, string refreshToken);
+        Task<UserResponse?> GetMe(Guid userId);
 
         // Profile & address management
-        AppApiResponse UpdateProfile(Guid userId, UpdateProfileRequest request);
-        AddressResponse? UpsertAddress(Guid userId, UpdateAddressRequest request);
-        bool DeleteAddress(Guid userId, Guid addressId);
+        Task<AppApiResponse> UpdateProfile(Guid userId, UpdateProfileRequest request);
+        Task<AddressResponse?> UpsertAddress(Guid userId, UpdateAddressRequest request);
+        Task<bool> DeleteAddress(Guid userId, Guid addressId);
 
         // Email OTP (MFA) support
         Task<AppApiResponse> StartEmailOtp(NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request);
@@ -26,7 +26,7 @@ namespace NextShopV2.Application.Interfaces
         // Enroll/Unenroll MFA for authenticated users
         Task<AppApiResponse> StartEnableEmailMfa(System.Guid userId);
         Task<AppApiResponse> VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId);
-        AppApiResponse DisableEmailMfa(System.Guid userId);
+        Task<AppApiResponse> DisableEmailMfa(System.Guid userId);
 
         // Email verification for registration / Google sign-in
         Task<AppApiResponse> StartEmailVerification(System.Guid userId, string email);
