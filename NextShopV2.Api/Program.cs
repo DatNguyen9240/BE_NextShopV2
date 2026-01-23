@@ -152,18 +152,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 
-    // Expand placeholders like ${REDIS_CONNECTION} using environment variables
-    var placeholderMatch = System.Text.RegularExpressions.Regex.Match(redisConfig, @"\$\{(?<name>[A-Za-z0-9_]+)\}");
-    if (placeholderMatch.Success)
-    {
-        var name = placeholderMatch.Groups["name"].Value;
-        var envVal = Environment.GetEnvironmentVariable(name);
-        if (!string.IsNullOrEmpty(envVal))
-        {
-            redisConfig = envVal;
-        }
-    }
-
     try
     {
         var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConfig);
@@ -184,15 +172,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 // Add distributed cache using Redis
 builder.Services.AddSingleton<IDistributedCache>(provider =>
 {
-    var redis = provider.GetRequiredService<IConnectionMultiplexer>();
-    var redisConfiguration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-    // If Redis configuration is a placeholder like ${REDIS_CONNECTION}, expand it
-    var ph = System.Text.RegularExpressions.Regex.Match(redisConfiguration, @"\$\{(?<name>[A-Za-z0-9_]+)\}");
-    if (ph.Success)
-    {
-        var env = Environment.GetEnvironmentVariable(ph.Groups["name"].Value);
-        if (!string.IsNullOrEmpty(env)) redisConfiguration = env;
-    }
+    var redisConfiguration = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 
     var options = new RedisCacheOptions
     {
