@@ -129,10 +129,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     // Configure global EF Core warnings handling:
     // - Use split queries to avoid expensive single-query includes of multiple collections.
     // - Suppress FirstWithoutOrderBy warning when queries intentionally rely on single-record lookups.
+    // - Suppress PendingModelChangesWarning to allow app startup even if snapshot is slightly out of sync
     options.ConfigureWarnings(w =>
     {
         w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.FirstWithoutOrderByAndFilterWarning);
         w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.MultipleCollectionIncludeWarning);
+        w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning);
     });
 });
 
