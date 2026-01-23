@@ -24,14 +24,27 @@ namespace NextShopV2.Infrastructure.Services
             // Khởi tạo Firebase Admin SDK
             if (FirebaseApp.DefaultInstance == null)
             {
-                var keyPath = _configuration["Firebase:ServiceAccountKeyPath"] ?? "Config/serviceAccountKey.json";
-                _logger.LogInformation($"Initializing Firebase with key path: {keyPath}");
+                var firebaseJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+                
                 try
                 {
-                    FirebaseApp.Create(new AppOptions()
+                    if (!string.IsNullOrEmpty(firebaseJson))
                     {
-                        Credential = GoogleCredential.FromFile(keyPath)
-                    });
+                        _logger.LogInformation("Initializing Firebase using environment variable FIREBASE_SERVICE_ACCOUNT_JSON");
+                        FirebaseApp.Create(new AppOptions()
+                        {
+                            Credential = GoogleCredential.FromJson(firebaseJson)
+                        });
+                    }
+                    else
+                    {
+                        var keyPath = _configuration["Firebase:ServiceAccountKeyPath"] ?? "Config/serviceAccountKey.json";
+                        _logger.LogInformation($"Initializing Firebase with key path: {keyPath}");
+                        FirebaseApp.Create(new AppOptions()
+                        {
+                            Credential = GoogleCredential.FromFile(keyPath)
+                        });
+                    }
                     _logger.LogInformation("Firebase Admin SDK initialized successfully");
                 }
                 catch (Exception ex)
