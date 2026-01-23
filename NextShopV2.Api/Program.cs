@@ -93,7 +93,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
     if (!isPostgresConfigured)
     {
-        // Ưu tiên PostgreSQL nếu đủ biến môi trường (fallback when DATABASE_URL not provided or parse failed)
+        // Prioritize PostgreSQL if environment variables exist
         var pgHost = Environment.GetEnvironmentVariable("PGHOST") ?? builder.Configuration["PGHOST"];
         var pgDb = Environment.GetEnvironmentVariable("PGDATABASE") ?? builder.Configuration["PGDATABASE"];
         var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? builder.Configuration["PGUSER"];
