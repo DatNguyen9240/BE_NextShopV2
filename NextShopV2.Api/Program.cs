@@ -493,7 +493,7 @@ app.UseGlobalExceptionHandler();
 
 // Only use HTTPS redirection when not in Development to avoid redirecting
 // local HTTP dev requests to an HTTPS port that may not be listening.
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
