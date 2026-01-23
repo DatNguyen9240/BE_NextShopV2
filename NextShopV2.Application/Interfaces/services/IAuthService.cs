@@ -8,8 +8,8 @@ namespace NextShopV2.Application.Interfaces
 {
     public interface IAuthService
     {
-        AppApiResponse Register(RegisterRequest request);
-        AppAuthResponse Login(LoginRequest request);
+        Task<AppApiResponse> Register(RegisterRequest request);
+        Task<AppAuthResponse> Login(LoginRequest request);
         AppAuthResponse Refresh(RefreshTokenRequest request);
         AppApiResponse Logout(string accessToken, string refreshToken);
         UserResponse? GetMe(Guid userId);
@@ -20,21 +20,21 @@ namespace NextShopV2.Application.Interfaces
         bool DeleteAddress(Guid userId, Guid addressId);
 
         // Email OTP (MFA) support
-        AppApiResponse StartEmailOtp(NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request);
-        AppAuthResponse VerifyEmailOtp(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request);
+        Task<AppApiResponse> StartEmailOtp(NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request);
+        Task<AppAuthResponse> VerifyEmailOtp(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request);
 
         // Enroll/Unenroll MFA for authenticated users
-        AppApiResponse StartEnableEmailMfa(System.Guid userId);
-        AppApiResponse VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId);
+        Task<AppApiResponse> StartEnableEmailMfa(System.Guid userId);
+        Task<AppApiResponse> VerifyEnableEmailMfa(NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request, System.Guid userId);
         AppApiResponse DisableEmailMfa(System.Guid userId);
 
         // Email verification for registration / Google sign-in
-        AppApiResponse StartEmailVerification(System.Guid userId, string email);
-        AppAuthResponse VerifyEmailToken(string token);
+        Task<AppApiResponse> StartEmailVerification(System.Guid userId, string email);
+        Task<AppAuthResponse> VerifyEmailToken(string token);
 
         // Google Sign-In (signin only)
-        AppAuthResponse GoogleSignIn(string idToken);
+        Task<AppAuthResponse> GoogleSignIn(string idToken);
         // Google Sign-Up (create account from Google and send verification)
-        AppAuthResponse GoogleRegister(string idToken);
+        Task<AppAuthResponse> GoogleRegister(string idToken);
     }
 }

@@ -36,12 +36,12 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpGet("verify-email")]
-        public IActionResult VerifyEmail([FromQuery] string token)
+        public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return ResponseHelper.BadRequest("Token is required");
 
-            var result = _authService.VerifyEmailToken(token);
+            var result = await _authService.VerifyEmailToken(token);
             var frontendBase = _config["Frontend:BaseUrl"] ?? "http://localhost:3000";
             if (!result.Success)
             {
@@ -54,22 +54,22 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
-            var result = _authService.Register(request);
+            var result = await _authService.Register(request);
             if (!result.Success)
                 return ResponseHelper.BadRequest(result.Message ?? string.Empty);
             return ResponseHelper.Success(result.Message ?? string.Empty);
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
-            var result = _authService.Login(request);
+            var result = await _authService.Login(request);
             
             if (!result.Success)
                 return ResponseHelper.Unauthorized(result.Message ?? "Login failed");
@@ -78,12 +78,12 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("google")]
-        public IActionResult Google([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
+        public async Task<IActionResult> Google([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.IdToken))
                 return ResponseHelper.BadRequest("Invalid input");
 
-            var result = _authService.GoogleSignIn(request.IdToken);
+            var result = await _authService.GoogleSignIn(request.IdToken);
             if (!result.Success)
                 return ResponseHelper.Unauthorized(result.Message ?? "Google sign-in failed");
 
@@ -96,12 +96,12 @@ namespace NextShopV2.Api.Controllers
             return ResponseHelper.Success(new { verificationSent = true }, result.Message ?? string.Empty);
         }
         [HttpPost("google/signup")]
-        public IActionResult GoogleSignup([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
+        public async Task<IActionResult> GoogleSignup([FromBody] NextShopV2.Application.DTOs.Request.GoogleLoginRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.IdToken))
                 return ResponseHelper.BadRequest("Invalid input");
 
-            var result = _authService.GoogleRegister(request.IdToken);
+            var result = await _authService.GoogleRegister(request.IdToken);
             if (!result.Success)
                 return ResponseHelper.Unauthorized(result.Message ?? "Google sign-up failed");
 
@@ -115,12 +115,12 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("login/start")]
-        public IActionResult LoginStart([FromBody] NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request)
+        public async Task<IActionResult> LoginStart([FromBody] NextShopV2.Application.DTOs.Request.StartEmailOtpRequest request)
         {
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
 
-            var result = _authService.StartEmailOtp(request);
+            var result = await _authService.StartEmailOtp(request);
             if (!result.Success)
                 return ResponseHelper.BadRequest(result.Message ?? "Failed to start MFA");
 
@@ -150,12 +150,12 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("login/verify")]
-        public IActionResult LoginVerify([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
+        public async Task<IActionResult> LoginVerify([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
         {
             if (!ModelState.IsValid)
                 return ResponseHelper.BadRequest("Invalid input");
 
-            var result = _authService.VerifyEmailOtp(request);
+            var result = await _authService.VerifyEmailOtp(request);
             if (!result.Success)
                 return ResponseHelper.Unauthorized(result.Message ?? "Verification failed");
 
@@ -164,26 +164,26 @@ namespace NextShopV2.Api.Controllers
 
         [HttpPost("mfa/enable/start")]
         [Authorize]
-        public IActionResult StartEnableMfa()
+        public async Task<IActionResult> StartEnableMfa()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var result = _authService.StartEnableEmailMfa(userId);
+            var result = await _authService.StartEnableEmailMfa(userId);
             if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Failed to send confirmation");
             return ResponseHelper.Success(result.Data, result.Message ?? "Confirmation sent");
         }
 
         [HttpPost("mfa/enable/verify")]
         [Authorize]
-        public IActionResult VerifyEnableMfa([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
+        public async Task<IActionResult> VerifyEnableMfa([FromBody] NextShopV2.Application.DTOs.Request.VerifyEmailOtpRequest request)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 return ResponseHelper.Unauthorized("Invalid token");
 
-            var result = _authService.VerifyEnableEmailMfa(request, userId);
+            var result = await _authService.VerifyEnableEmailMfa(request, userId);
             if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Verification failed");
             return ResponseHelper.Success(null, result.Message ?? "MFA enabled");
         }
