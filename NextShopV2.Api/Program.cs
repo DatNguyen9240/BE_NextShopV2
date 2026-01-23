@@ -148,37 +148,41 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     });
 });
 
+// Register IConnectionMultiplexer as a Singleton
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    var redisConfig = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+    if (string.IsNullOrWhiteSpace(redisConfig)) redisConfig = builder.Configuration.GetConnectionString("Redis");
+    if (string.IsNullOrWhiteSpace(redisConfig)) redisConfig = "localhost:6379";
+
+    // Standardize connection string: remove problematic 'AbortOnConnectFail' or 'abortConnect' 
+    // because we set it manually in ConfigurationOptions to ensure stability.
+    redisConfig = System.Text.RegularExpressions.Regex.Replace(redisConfig, @"(?i)\b(AbortOnConnectFail|abortConnect)=[^,;]+[,;]?", "");
+    redisConfig = redisConfig.Trim().TrimEnd(',', ';');
 
     try
     {
         var options = StackExchange.Redis.ConfigurationOptions.Parse(redisConfig);
         options.AbortOnConnectFail = false;
+        options.ConnectTimeout = 10000; // Increase timeout for production stability
         return ConnectionMultiplexer.Connect(options);
     }
-    catch
+    catch (Exception ex)
     {
-        // Fallback: remove any unknown tokens like AbortOnConnectFail and retry
-        var cleaned = System.Text.RegularExpressions.Regex.Replace(redisConfig, @"(?i)\bAbortOnConnectFail=[^,;]+[,;]?", "");
-        cleaned = cleaned.Trim().TrimEnd(',', ';');
-        var options = StackExchange.Redis.ConfigurationOptions.Parse(cleaned);
-        options.AbortOnConnectFail = false;
-        return ConnectionMultiplexer.Connect(options);
+        Console.WriteLine($"Warning: Strict Redis parsing failed ({ex.Message}). Retrying with lenient options.");
+        // If parsing fails (e.g. due to other keywords), try to connect with just the host/port part
+        return ConnectionMultiplexer.Connect(redisConfig);
     }
 });
 
-// Add distributed cache using Redis
+// Register IDistributedCache using the common IConnectionMultiplexer
 builder.Services.AddSingleton<IDistributedCache>(provider =>
 {
-    var redisConfiguration = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-
-    var options = new RedisCacheOptions
+    var multiplexer = provider.GetRequiredService<IConnectionMultiplexer>();
+    return new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache(new RedisCacheOptions
     {
-        Configuration = redisConfiguration
-    };
-    return new RedisCache(options);
+        ConnectionMultiplexerFactory = () => Task.FromResult(multiplexer)
+    });
 });
 
 builder.Services.AddControllers().AddJsonOptions(opts =>
