@@ -159,6 +159,12 @@ namespace NextShopV2.Infrastructure.Persistence
                 eb.Property(p => p.LastUsedAt);
             });
 
+            modelBuilder.Entity<User>(eb => {
+                eb.HasIndex(u => u.Phone)
+                  .IsUnique()
+                  .HasFilter("[Phone] IS NOT NULL");
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }

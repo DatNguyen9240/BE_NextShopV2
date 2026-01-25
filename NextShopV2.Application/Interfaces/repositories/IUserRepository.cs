@@ -19,6 +19,7 @@ namespace NextShopV2.Application.Interfaces
         Task<User?> GetByIdAsync(Guid id);
         Task<bool> ExistsByEmailAsync(string email);
         Task UpdateAsync(User user);
+        Task<User?> GetByPhoneAsync(string phone);
         Task SaveAsync();
 
         // Unset default flag for user's addresses; if excludeAddressId is provided, leave that address alone

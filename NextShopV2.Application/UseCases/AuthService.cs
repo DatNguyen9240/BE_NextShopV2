@@ -568,7 +568,14 @@ namespace NextShopV2.Application.Services
             if (!string.IsNullOrWhiteSpace(request.FullName))
                 user.FullName = request.FullName!;
             if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                var existingUser = await _userRepository.GetByPhoneAsync(request.Phone);
+                if (existingUser != null && existingUser.Id != userId)
+                {
+                    return new AppApiResponse { Success = false, Message = "Số điện thoại đã tồn tại" };
+                }
                 user.Phone = request.Phone;
+            }
             if (!string.IsNullOrWhiteSpace(request.Gender))
                 user.Gender = request.Gender;
             // Support explicit clearing of avatar by passing null, or updating when non-empty value provided

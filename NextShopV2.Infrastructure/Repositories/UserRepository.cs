@@ -110,6 +110,11 @@ namespace NextShopV2.Infrastructure.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<User?> GetByPhoneAsync(string phone)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Phone == phone);
+        }
+
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
