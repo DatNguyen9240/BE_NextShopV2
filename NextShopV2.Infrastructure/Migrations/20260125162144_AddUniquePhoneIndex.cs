@@ -10,13 +10,15 @@ namespace NextShopV2.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            var isSqlServer = migrationBuilder.ActiveProvider == "Microsoft.EntityFrameworkCore.SqlServer";
+
             migrationBuilder.AlterColumn<string>(
                 name: "Phone",
                 table: "Users",
-                type: "nvarchar(450)",
+                type: isSqlServer ? "nvarchar(450)" : "varchar(450)",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: isSqlServer ? "nvarchar(max)" : "text",
                 oldNullable: true);
 
             migrationBuilder.CreateIndex(
@@ -24,12 +26,14 @@ namespace NextShopV2.Infrastructure.Migrations
                 table: "Users",
                 column: "Phone",
                 unique: true,
-                filter: "[Phone] IS NOT NULL");
+                filter: isSqlServer ? "[Phone] IS NOT NULL" : "\"Phone\" IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            var isSqlServer = migrationBuilder.ActiveProvider == "Microsoft.EntityFrameworkCore.SqlServer";
+
             migrationBuilder.DropIndex(
                 name: "IX_Users_Phone",
                 table: "Users");
@@ -37,10 +41,10 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Phone",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: isSqlServer ? "nvarchar(max)" : "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
+                oldType: isSqlServer ? "nvarchar(450)" : "varchar(450)",
                 oldNullable: true);
         }
     }
