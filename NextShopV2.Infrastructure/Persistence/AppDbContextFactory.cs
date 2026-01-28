@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System.IO;
@@ -29,12 +29,6 @@ namespace NextShopV2.Infrastructure.Persistence
                 DotNetEnv.Env.Load(envPath);
             }
 
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 

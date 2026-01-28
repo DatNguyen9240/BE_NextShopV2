@@ -14,40 +14,40 @@ namespace NextShopV2.Infrastructure.Persistence
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<ProductCategory> ProductCategories { get; set; }
-        public DbSet<Review> Reviews { get; set; }
-        public DbSet<ProductLike> ProductLikes { get; set; }
-        public DbSet<Advertisement> Advertisements { get; set; }
-        public DbSet<Announcement> Announcements { get; set; }
-        public DbSet<FooterInfo> FooterInfos { get; set; }
-        public DbSet<ProductVariant> ProductVariants { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
-        public DbSet<Cart> Carts { get; set; }
-        public DbSet<CartItem> CartItems { get; set; }
-        public DbSet<Address> Addresses { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Orders.Shipment> Shipments { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Orders.TrackingEvent> TrackingEvents { get; set; }
-        public DbSet<Coupon> Coupons { get; set; }
-        public DbSet<OrderCoupon> OrderCoupons { get; set; }
-        public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
+        public DbSet<Review> Reviews { get; set; } = null!;
+        public DbSet<ProductLike> ProductLikes { get; set; } = null!;
+        public DbSet<Advertisement> Advertisements { get; set; } = null!;
+        public DbSet<Announcement> Announcements { get; set; } = null!;
+        public DbSet<FooterInfo> FooterInfos { get; set; } = null!;
+        public DbSet<ProductVariant> ProductVariants { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<Cart> Carts { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
+        public DbSet<Address> Addresses { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Orders.Shipment> Shipments { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Orders.TrackingEvent> TrackingEvents { get; set; } = null!;
+        public DbSet<Coupon> Coupons { get; set; } = null!;
+        public DbSet<OrderCoupon> OrderCoupons { get; set; } = null!;
+        public DbSet<InventoryTransaction> InventoryTransactions { get; set; } = null!;
 
         // Product attributes and values
-        public DbSet<NextShopV2.Domain.Entities.Products.ProductAttribute> ProductAttributes { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Products.AttributeValue> AttributeValues { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Products.VariantAttributeValue> VariantAttributeValues { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Products.CategoryAttribute> CategoryAttributes { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Products.ProductAttribute> ProductAttributes { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Products.AttributeValue> AttributeValues { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Products.VariantAttributeValue> VariantAttributeValues { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Products.CategoryAttribute> CategoryAttributes { get; set; } = null!;
 
         // Push notification tokens (FCM)
-        public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; }
-        public DbSet<NextShopV2.Domain.Entities.Notifications.NotificationHistory> NotificationHistories { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; } = null!;
+        public DbSet<NextShopV2.Domain.Entities.Notifications.NotificationHistory> NotificationHistories { get; set; } = null!;
 
         // Passkeys (WebAuthn)
-        public DbSet<NextShopV2.Domain.Entities.Security.Passkey> Passkeys { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Security.Passkey> Passkeys { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
