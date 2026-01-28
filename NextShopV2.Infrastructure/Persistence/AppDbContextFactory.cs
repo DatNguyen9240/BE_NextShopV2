@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System.IO;
 using System;
+using System.Collections.Generic;
 using DotNetEnv;
 
 namespace NextShopV2.Infrastructure.Persistence
@@ -13,18 +14,30 @@ namespace NextShopV2.Infrastructure.Persistence
         {
             // Set environment to Development for design-time
             var environment = "Development";
-            
-            // Get root directory (where .sln and .env files are located)
+
+            // Walk up the directory tree to find .env files (allows running from different CWDs)
             var currentDir = Directory.GetCurrentDirectory();
             var envName = $".env.{environment.ToLower()}";
-            
-            // Try current dir, then parent dir
-            var envPath = Path.Combine(currentDir, envName);
-            if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, "..", envName);
-            if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, ".env");
-            if (!File.Exists(envPath)) envPath = Path.Combine(currentDir, "..", ".env");
-            
-            if (File.Exists(envPath))
+            string? envPath = null;
+            DirectoryInfo? dirInfo = new DirectoryInfo(currentDir);
+            while (dirInfo != null)
+            {
+                var candidate1 = Path.Combine(dirInfo.FullName, envName);
+                var candidate2 = Path.Combine(dirInfo.FullName, ".env");
+                if (File.Exists(candidate1))
+                {
+                    envPath = candidate1;
+                    break;
+                }
+                if (File.Exists(candidate2))
+                {
+                    envPath = candidate2;
+                    break;
+                }
+                dirInfo = dirInfo.Parent;
+            }
+
+            if (!string.IsNullOrEmpty(envPath))
             {
                 DotNetEnv.Env.Load(envPath);
             }
@@ -46,6 +59,54 @@ namespace NextShopV2.Infrastructure.Persistence
 
                     var uri = new Uri(raw);
                     var userInfo = uri.UserInfo.Split(':', 2);
+
+                    // Parse query params (e.g., sslmode=require, trustServerCertificate=true)
+                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    if (!string.IsNullOrEmpty(uri.Query))
+                    {
+                        var q = uri.Query.TrimStart('?');
+                        foreach (var pair in q.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var kv = pair.Split(new[] { '=' }, 2);
+                            var key = Uri.UnescapeDataString(kv[0]);
+                            var val = kv.Length > 1 ? Uri.UnescapeDataString(kv[1]) : string.Empty;
+                            queryParams[key] = val;
+                        }
+                    }
+
+                    // Map sslmode if present, fallback to environment PGSSLMODE, otherwise Require for cloud hosts
+                    Npgsql.SslMode sslMode = Npgsql.SslMode.Require;
+                    if (queryParams.TryGetValue("sslmode", out var sslModeVal) && !string.IsNullOrWhiteSpace(sslModeVal))
+                    {
+                        switch (sslModeVal.ToLowerInvariant())
+                        {
+                            case "disable": sslMode = Npgsql.SslMode.Disable; break;
+                            case "prefer": sslMode = Npgsql.SslMode.Prefer; break;
+                            case "require": sslMode = Npgsql.SslMode.Require; break;
+                            case "verify-ca": sslMode = Npgsql.SslMode.VerifyCA; break;
+                            case "verify-full": sslMode = Npgsql.SslMode.VerifyFull; break;
+                            default: sslMode = Npgsql.SslMode.Require; break;
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PGSSLMODE")))
+                    {
+                        var envSsl = Environment.GetEnvironmentVariable("PGSSLMODE");
+                        if (!string.IsNullOrEmpty(envSsl))
+                        {
+                            if (envSsl.Equals("disable", StringComparison.OrdinalIgnoreCase)) sslMode = Npgsql.SslMode.Disable;
+                        }
+                    }
+
+                    var trustServerCertificate = false;
+                    if (queryParams.TryGetValue("trustservercertificate", out var trustVal) && !string.IsNullOrWhiteSpace(trustVal))
+                    {
+                        bool.TryParse(trustVal, out trustServerCertificate);
+                    }
+                    else if (queryParams.TryGetValue("trustServerCertificate", out var trustVal2) && !string.IsNullOrWhiteSpace(trustVal2))
+                    {
+                        bool.TryParse(trustVal2, out trustServerCertificate);
+                    }
+
                     var npgBuilder = new Npgsql.NpgsqlConnectionStringBuilder
                     {
                         Host = uri.Host,
@@ -53,9 +114,13 @@ namespace NextShopV2.Infrastructure.Persistence
                         Database = uri.AbsolutePath.TrimStart('/'),
                         Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
                         Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
-                        // Railway requires SSL for internal/private endpoints
-                        SslMode = Npgsql.SslMode.Require
+                        SslMode = sslMode
                     };
+
+                    // Mask password for logs
+                    var maskedUser = !string.IsNullOrEmpty(npgBuilder.Username) ? npgBuilder.Username : "unknown";
+                    var maskedLog = $"{maskedUser}:****@{npgBuilder.Host}:{npgBuilder.Port}/{npgBuilder.Database}";
+                    Console.WriteLine($"🔧 Design-time using Postgres: {maskedLog} (sslmode={npgBuilder.SslMode}, trustServerCert={trustServerCertificate})");
 
                     optionsBuilder.UseNpgsql(npgBuilder.ConnectionString, o =>
                     {
