@@ -20,7 +20,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            // Provider-specific identity configuration removed to keep snapshot provider-agnostic.
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
                 {

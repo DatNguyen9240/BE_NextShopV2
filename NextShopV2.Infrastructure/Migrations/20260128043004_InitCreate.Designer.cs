@@ -12,7 +12,7 @@ using NextShopV2.Infrastructure.Persistence;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260128033406_InitCreate")]
+    [Migration("20260128043004_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
