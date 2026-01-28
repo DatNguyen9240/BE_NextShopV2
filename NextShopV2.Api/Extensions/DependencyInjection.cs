@@ -156,9 +156,16 @@ namespace NextShopV2.Api.Extensions
                     dpBuilder.ProtectKeysWithDpapi();
                     Console.WriteLine("🛡️ DataProtection is protected with Windows DPAPI.");
                 }
-                else 
+                else
                 {
-                    Console.WriteLine("ℹ️ DataProtection is using default protection (no certificate found). To protect keys in Linux, set DP_CERT_PATH or DP_KEYS_PATH.");
+                    if (!string.IsNullOrEmpty(keysPath))
+                    {
+                        Console.WriteLine("🗄️ DataProtection keys persisted to filesystem (un-encrypted). Consider setting DP_CERT_PATH to protect them with a certificate.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("ℹ️ DataProtection is using default protection (no certificate found). To protect keys in Linux, set DP_CERT_PATH or DP_KEYS_PATH.");
+                    }
                 }
             }
             catch (Exception ex)
