@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260128063930_InitCreate")]
+    [Migration("20260128064705_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
