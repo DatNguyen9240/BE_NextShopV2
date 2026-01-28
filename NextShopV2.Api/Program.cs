@@ -89,8 +89,23 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
-        context.Database.Migrate();
-        Console.WriteLine("✅ Database migration completed successfully.");
+        // Only run automatic EF migrations for SQL Server in dev environments.
+        // For Postgres (production), migrations are applied via the pre-deploy SQL script `scripts/db/init_postgres.sql`.
+        if (context.Database.IsSqlServer())
+        {
+            context.Database.Migrate();
+            Console.WriteLine("✅ Database migration completed successfully (SQL Server).");
+        }
+        else if (context.Database.IsNpgsql())
+        {
+            Console.WriteLine("ℹ️ Skipping automatic EF migrations for Postgres. Run scripts/db/init_postgres.sql in pre-deploy to initialize schema.");
+        }
+        else
+        {
+            // Fallback: attempt migrate for other providers
+            context.Database.Migrate();
+            Console.WriteLine("✅ Database migration completed successfully.");
+        }
     }
     catch (Exception ex)
     {
