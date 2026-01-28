@@ -205,18 +205,7 @@ namespace NextShopV2.Infrastructure.Persistence
             });
 
             modelBuilder.Entity<User>(eb => {
-                var index = eb.HasIndex(u => u.Phone).IsUnique();
-                
-                if (Database.IsSqlServer())
-                {
-                    index.HasFilter("[Phone] IS NOT NULL");
-                }
-                else if (Database.IsNpgsql())
-                {
-                    // Postgres allows multiple NULLs in unique index by default, 
-                    // but we can be explicit if needed.
-                    index.HasFilter("\"Phone\" IS NOT NULL");
-                }
+                eb.HasIndex(u => u.Phone).IsUnique();
             });
 
             base.OnModelCreating(modelBuilder);

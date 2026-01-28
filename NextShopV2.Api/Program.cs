@@ -89,32 +89,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
-
-        // Only run automatic EF migrations when explicitly allowed by the environment.
-        // This prevents applying SQL Server-specific migrations against a Postgres server.
-        var autoMigrate = (Environment.GetEnvironmentVariable("AUTO_MIGRATE") ?? app.Configuration["AUTO_MIGRATE"])?.ToLowerInvariant();
-        if (autoMigrate != "true")
-        {
-            Console.WriteLine("ℹ️ Automatic migrations are disabled (set AUTO_MIGRATE=true to enable). Skipping Database.Migrate().");
-        }
-        else
-        {
-            if (context.Database.IsSqlServer())
-            {
-                context.Database.Migrate();
-                Console.WriteLine("✅ Database migration completed successfully (SQL Server).");
-            }
-            else if (context.Database.IsNpgsql())
-            {
-                Console.WriteLine("ℹ️ AUTO_MIGRATE=true is set, but Postgres is used; prefer running scripts/db/init_postgres.sql in pre-deploy to initialize schema.");
-            }
-            else
-            {
-                // Fallback: attempt migrate for other providers
-                context.Database.Migrate();
-                Console.WriteLine("✅ Database migration completed successfully.");
-            }
-        }
+        context.Database.Migrate();
+        Console.WriteLine("✅ Database migration completed successfully.");
     }
     catch (Exception ex)
     {

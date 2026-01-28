@@ -11,17 +11,19 @@ namespace NextShopV2.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            var isSqlServer = migrationBuilder.ActiveProvider == "Microsoft.EntityFrameworkCore.SqlServer";
+
             migrationBuilder.CreateTable(
                 name: "Advertisements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SortOrder = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    PublicId = table.Column<string>(nullable: false),
+                    Title = table.Column<string>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: false),
+                    Type = table.Column<string>(nullable: false),
+                    SortOrder = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,11 +34,11 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Announcements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ClassName = table.Column<string>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,12 +49,12 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Icon = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CategoryId = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    ParentId = table.Column<Guid>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: true),
+                    Icon = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -68,16 +70,16 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Coupons",
                 columns: table => new
                 {
-                    CouponId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DiscountPercent = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    MinOrderAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
-                    MaxDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UsageLimit = table.Column<int>(type: "int", nullable: true),
-                    UsedCount = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    CouponId = table.Column<Guid>(nullable: false),
+                    Code = table.Column<string>(nullable: false),
+                    DiscountPercent = table.Column<decimal>(precision: 10, scale: 2, nullable: false),
+                    MinOrderAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: true),
+                    MaxDiscountAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: true),
+                    StartDate = table.Column<DateTime>(nullable: false),
+                    EndDate = table.Column<DateTime>(nullable: false),
+                    UsageLimit = table.Column<int>(nullable: true),
+                    UsedCount = table.Column<int>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,10 +90,10 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "FooterInfos",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    ClassName = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,20 +104,20 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "NotificationHistories",
                 columns: table => new
                 {
-                    NotificationHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TargetToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsSuccessful = table.Column<bool>(type: "bit", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FirebaseResponse = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Data = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RecipientCount = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    NotificationHistoryId = table.Column<Guid>(nullable: false),
+                    Title = table.Column<string>(nullable: false),
+                    Body = table.Column<string>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: true),
+                    TargetToken = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true),
+                    IsSuccessful = table.Column<bool>(nullable: false),
+                    ErrorMessage = table.Column<string>(nullable: true),
+                    FirebaseResponse = table.Column<string>(nullable: true),
+                    Data = table.Column<string>(nullable: true),
+                    RecipientCount = table.Column<int>(nullable: false),
+                    Status = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    SentAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -126,10 +128,10 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "ProductAttributes",
                 columns: table => new
                 {
-                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    InputType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    AttributeId = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    InputType = table.Column<string>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,19 +142,19 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AdditionalInfo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GenderTarget = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AverageRating = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    TotalReviews = table.Column<int>(type: "int", nullable: false),
-                    TotalLikes = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    TagsJson = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ProductId = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    AdditionalInfo = table.Column<string>(nullable: true),
+                    GenderTarget = table.Column<string>(nullable: true),
+                    Brand = table.Column<string>(nullable: true),
+                    AverageRating = table.Column<decimal>(precision: 5, scale: 2, nullable: false),
+                    TotalReviews = table.Column<int>(nullable: false),
+                    TotalLikes = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false),
+                    TagsJson = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -163,14 +165,14 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "PushTokens",
                 columns: table => new
                 {
-                    PushTokenId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Platform = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    DeviceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastSeenAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    PushTokenId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: true),
+                    Token = table.Column<string>(nullable: false),
+                    Platform = table.Column<string>(maxLength: 50, nullable: false),
+                    DeviceId = table.Column<string>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastSeenAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -181,20 +183,20 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GoogleId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailVerified = table.Column<bool>(type: "bit", nullable: false),
-                    MfaEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    MfaType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<Guid>(nullable: false),
+                    FullName = table.Column<string>(nullable: false),
+                    Email = table.Column<string>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: false),
+                    Phone = table.Column<string>(maxLength: 450, nullable: true),
+                    Role = table.Column<string>(nullable: false),
+                    Gender = table.Column<string>(nullable: true),
+                    Avatar = table.Column<string>(nullable: true),
+                    GoogleId = table.Column<string>(nullable: true),
+                    EmailVerified = table.Column<bool>(nullable: false),
+                    MfaEnabled = table.Column<bool>(nullable: false),
+                    MfaType = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -205,11 +207,11 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "AttributeValues",
                 columns: table => new
                 {
-                    AttributeValueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    AttributeValueId = table.Column<Guid>(nullable: false),
+                    AttributeId = table.Column<Guid>(nullable: false),
+                    Value = table.Column<string>(nullable: false),
+                    DisplayOrder = table.Column<int>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -226,9 +228,9 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "CategoryAttributes",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CategoryId = table.Column<Guid>(nullable: false),
+                    AttributeId = table.Column<Guid>(nullable: false),
+                    AssignedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -251,9 +253,9 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "ProductCategories",
                 columns: table => new
                 {
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ProductId = table.Column<Guid>(nullable: false),
+                    CategoryId = table.Column<Guid>(nullable: false),
+                    AssignedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -276,20 +278,20 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "ProductVariants",
                 columns: table => new
                 {
-                    VariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SKU = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BasePrice = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    DiscountPercent = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    DiscountAmount = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    PriceAfterDiscount = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    StockQuantity = table.Column<int>(type: "int", nullable: false),
-                    IsDefault = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImgHover = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    VariantId = table.Column<Guid>(nullable: false),
+                    ProductId = table.Column<Guid>(nullable: false),
+                    SKU = table.Column<string>(nullable: false),
+                    BasePrice = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    DiscountPercent = table.Column<decimal>(precision: 10, scale: 2, nullable: false),
+                    DiscountAmount = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    PriceAfterDiscount = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    StockQuantity = table.Column<int>(nullable: false),
+                    IsDefault = table.Column<bool>(nullable: false),
+                    DisplayOrder = table.Column<int>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: true),
+                    ImgHover = table.Column<string>(nullable: true),
+                    ThumbnailUrl = table.Column<string>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -306,13 +308,13 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Addresses",
                 columns: table => new
                 {
-                    AddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RecipientName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FullAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Latitude = table.Column<double>(type: "float", nullable: true),
-                    Longitude = table.Column<double>(type: "float", nullable: true),
-                    IsDefault = table.Column<bool>(type: "bit", nullable: false)
+                    AddressId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    RecipientName = table.Column<string>(nullable: false),
+                    FullAddress = table.Column<string>(nullable: false),
+                    Latitude = table.Column<double>(nullable: true),
+                    Longitude = table.Column<double>(nullable: true),
+                    IsDefault = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -329,9 +331,9 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Carts",
                 columns: table => new
                 {
-                    CartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CartId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -348,22 +350,22 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CancelReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AdminCancelReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CancelledBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    SubTotal = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    DiscountAmount = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,0)", precision: 18, scale: 0, nullable: false),
-                    BuyerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BuyerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ShippingAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ShippingLat = table.Column<double>(type: "float", nullable: true),
-                    ShippingLng = table.Column<double>(type: "float", nullable: true)
+                    OrderId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    OrderDate = table.Column<DateTime>(nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    CancelReason = table.Column<string>(nullable: true),
+                    AdminCancelReason = table.Column<string>(nullable: true),
+                    CancelledBy = table.Column<string>(nullable: true),
+                    CancelledAt = table.Column<DateTime>(nullable: true),
+                    SubTotal = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    DiscountAmount = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    TotalAmount = table.Column<decimal>(precision: 18, scale: 0, nullable: false),
+                    BuyerName = table.Column<string>(nullable: true),
+                    BuyerPhone = table.Column<string>(nullable: true),
+                    ShippingAddress = table.Column<string>(nullable: true),
+                    ShippingLat = table.Column<double>(nullable: true),
+                    ShippingLng = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -380,14 +382,14 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Passkeys",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CredentialId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PublicKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Counter = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
-                    Transports = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<string>(maxLength: 450, nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CredentialId = table.Column<string>(nullable: false),
+                    PublicKey = table.Column<string>(nullable: false),
+                    Counter = table.Column<long>(nullable: false, defaultValue: 0L),
+                    Transports = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    LastUsedAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -404,9 +406,9 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "ProductLikes",
                 columns: table => new
                 {
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ProductId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -429,12 +431,12 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Reviews",
                 columns: table => new
                 {
-                    ReviewId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ReviewId = table.Column<Guid>(nullable: false),
+                    ProductId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    Rating = table.Column<int>(nullable: false),
+                    Comment = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -457,12 +459,12 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "InventoryTransactions",
                 columns: table => new
                 {
-                    TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ChangeQty = table.Column<int>(type: "int", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TransactionId = table.Column<Guid>(nullable: false),
+                    VariantId = table.Column<Guid>(nullable: false),
+                    ChangeQty = table.Column<int>(nullable: false),
+                    Reason = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -479,8 +481,8 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "VariantAttributeValues",
                 columns: table => new
                 {
-                    VariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttributeValueId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    VariantId = table.Column<Guid>(nullable: false),
+                    AttributeValueId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -503,10 +505,10 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "CartItems",
                 columns: table => new
                 {
-                    CartItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    CartItemId = table.Column<Guid>(nullable: false),
+                    CartId = table.Column<Guid>(nullable: false),
+                    VariantId = table.Column<Guid>(nullable: false),
+                    Quantity = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -529,12 +531,12 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "OrderCoupons",
                 columns: table => new
                 {
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CouponId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ReservedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AppliedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    OrderId = table.Column<Guid>(nullable: false),
+                    CouponId = table.Column<Guid>(nullable: false),
+                    DiscountAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    ReservedAt = table.Column<DateTime>(nullable: true),
+                    AppliedAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -557,20 +559,20 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "OrderItems",
                 columns: table => new
                 {
-                    OrderItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    TaxAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    TaxRate = table.Column<decimal>(type: "decimal(5,4)", precision: 5, scale: 4, nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProductSku = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VariantSku = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VariantOptionsJson = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    OrderItemId = table.Column<Guid>(nullable: false),
+                    OrderId = table.Column<Guid>(nullable: false),
+                    VariantId = table.Column<Guid>(nullable: true),
+                    ProductId = table.Column<Guid>(nullable: true),
+                    Quantity = table.Column<int>(nullable: false),
+                    UnitPrice = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    DiscountAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    TaxAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    TaxRate = table.Column<decimal>(precision: 5, scale: 4, nullable: false),
+                    TotalAmount = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    ProductName = table.Column<string>(nullable: true),
+                    ProductSku = table.Column<string>(nullable: true),
+                    VariantSku = table.Column<string>(nullable: true),
+                    VariantOptionsJson = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -593,14 +595,14 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Method = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProviderPaymentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProviderData = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    PaymentId = table.Column<Guid>(nullable: false),
+                    OrderId = table.Column<Guid>(nullable: false),
+                    Method = table.Column<string>(nullable: false),
+                    Amount = table.Column<decimal>(precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    ProviderPaymentId = table.Column<string>(nullable: true),
+                    ProviderData = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -617,19 +619,19 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Shipments",
                 columns: table => new
                 {
-                    ShipmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipperId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Carrier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CurrentLat = table.Column<double>(type: "float", nullable: true),
-                    CurrentLng = table.Column<double>(type: "float", nullable: true),
-                    LastLocationUpdate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeliveryAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeliveryLat = table.Column<double>(type: "float", nullable: true),
-                    DeliveryLng = table.Column<double>(type: "float", nullable: true)
+                    ShipmentId = table.Column<Guid>(nullable: false),
+                    OrderId = table.Column<Guid>(nullable: false),
+                    ShipperId = table.Column<Guid>(nullable: true),
+                    Carrier = table.Column<string>(nullable: false),
+                    TrackingNumber = table.Column<string>(nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    CurrentLat = table.Column<double>(nullable: true),
+                    CurrentLng = table.Column<double>(nullable: true),
+                    LastLocationUpdate = table.Column<DateTime>(nullable: true),
+                    DeliveryAddress = table.Column<string>(nullable: true),
+                    DeliveryLat = table.Column<double>(nullable: true),
+                    DeliveryLng = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -651,13 +653,13 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "TrackingEvents",
                 columns: table => new
                 {
-                    TrackingEventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShipmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EventTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    TrackingEventId = table.Column<Guid>(nullable: false),
+                    ShipmentId = table.Column<Guid>(nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: false),
+                    Location = table.Column<string>(nullable: true),
+                    EventTime = table.Column<DateTime>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -781,12 +783,23 @@ namespace NextShopV2.Infrastructure.Migrations
                 table: "TrackingEvents",
                 column: "ShipmentId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Phone",
-                table: "Users",
-                column: "Phone",
-                unique: true,
-                filter: "[Phone] IS NOT NULL");
+            if (isSqlServer)
+            {
+                migrationBuilder.CreateIndex(
+                    name: "IX_Users_Phone",
+                    table: "Users",
+                    column: "Phone",
+                    unique: true,
+                    filter: "[Phone] IS NOT NULL");
+            }
+            else
+            {
+                migrationBuilder.CreateIndex(
+                    name: "IX_Users_Phone",
+                    table: "Users",
+                    column: "Phone",
+                    unique: true);
+            }
 
             migrationBuilder.CreateIndex(
                 name: "IX_VariantAttributeValues_AttributeValueId",
@@ -797,6 +810,8 @@ namespace NextShopV2.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            var isSqlServer = migrationBuilder.ActiveProvider == "Microsoft.EntityFrameworkCore.SqlServer";
+
             migrationBuilder.DropTable(
                 name: "Addresses");
 

@@ -10,7 +10,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Redis=redis:6379
-      - AUTO_MIGRATE=true  # enable EF automatic migrations for dev (SQL Server)
     volumes:
       - ./data/dataprotection-keys:/root/.aspnet/DataProtection-Keys
     depends_on:
