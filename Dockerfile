@@ -23,8 +23,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=builder /app/publish .
 
-# Lắng nghe biến PORT của Render
+# Copy entrypoint script and listen on the configured port
+COPY scripts/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 ENV ASPNETCORE_URLS=http://+:${PORT:-5000}
 EXPOSE ${PORT:-5000}
 
-ENTRYPOINT ["dotnet", "NextShopV2.Api.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]
