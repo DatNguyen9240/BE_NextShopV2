@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace NextShopV2.Application.DTOs.Response
 {
@@ -11,13 +12,13 @@ namespace NextShopV2.Application.DTOs.Response
         public decimal PriceAfterDiscount { get; set; }
         public Guid ProductVariantId { get; set; }
         public string Sku { get; set; } = null!;
-        public string? Color { get; set; }
-        public string? Size { get; set; }
         public int StockQuantity { get; set; }
         public bool IsDefault { get; set; }
         public int DisplayOrder { get; set; }
         public string? ImageUrl { get; set; }
         public string? ImgHover { get; set; }
+        // attribute name -> value map for dynamic variant attributes
+        public Dictionary<string, string>? Attributes { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? IsActive { get; set; }
     }

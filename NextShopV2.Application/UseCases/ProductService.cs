@@ -17,10 +17,12 @@ namespace NextShopV2.Application.Services
     {
         private readonly IProductRepository _repo;
         private readonly IProductCategoryService _productCategoryService;
-        public ProductService(IProductRepository repo, IProductCategoryService productCategoryService)
+        private readonly IProductAttributeService _attributeService;
+        public ProductService(IProductRepository repo, IProductCategoryService productCategoryService, IProductAttributeService attributeService)
         {
             _repo = repo;
             _productCategoryService = productCategoryService;
+            _attributeService = attributeService;
         }
 
         // Interface-compatible methods (default to excluding inactive items for store endpoints)
@@ -128,7 +130,27 @@ namespace NextShopV2.Application.Services
             var product = await _repo.GetByIdAsync(id);
             if (product == null) return null;
             if (!includeInactive && !product.IsActive) return null;
-            return product.ToDto(includeVariants: true, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive);
+
+            var dto = product.ToDto(includeVariants: true, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive);
+
+            // populate variant attributes for frontend convenience (may result in N+1 queries for variants)
+            if (dto?.Variants != null && dto.Variants.Count > 0)
+            {
+                foreach (var v in dto.Variants)
+                {
+                    try
+                    {
+                        var map = await _attributeService.GetVariantAttributeMapAsync(v.ProductVariantId);
+                        if (map != null && map.Count > 0) v.Attributes = map;
+                    }
+                    catch
+                    {
+                        // ignore errors and continue
+                    }
+                }
+            }
+
+            return dto;
         }
         public async Task<ProductDto> CreateAsync(CreateProductRequest request)
         {
@@ -220,8 +242,6 @@ namespace NextShopV2.Application.Services
                 {
                     ProductVariantId = v.VariantId,
                     Sku = v.SKU,
-                    Color = v.Color,
-                    Size = v.Size,
                     StockQuantity = v.StockQuantity,
                     IsDefault = v.IsDefault,
                     DisplayOrder = v.DisplayOrder,
@@ -241,8 +261,6 @@ namespace NextShopV2.Application.Services
                     variantsList.Add(new ProductVariantResponse
                     {
                         ProductVariantId = defaultVariant.VariantId,
-                        Color = defaultVariant.Color,
-                        Size = defaultVariant.Size,
                         ImageUrl = defaultVariant.ImageUrl,
                         ImgHover = string.IsNullOrEmpty(defaultVariant.ImgHover) ? defaultVariant.ImageUrl : defaultVariant.ImgHover,
                         StockQuantity = defaultVariant.StockQuantity,

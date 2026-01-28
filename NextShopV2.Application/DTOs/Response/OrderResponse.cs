@@ -44,8 +44,5 @@ namespace NextShopV2.Application.DTOs.Response
         public ProductVariantResponse? Variant { get; set; }
         // Thêm tên sản phẩm để frontend hiển thị
         public string? ProductName { get; set; }
-        public string? ProductSku { get; set; }
-        public string? VariantSku { get; set; }
-        public string? VariantOptionsJson { get; set; }
     }
 }

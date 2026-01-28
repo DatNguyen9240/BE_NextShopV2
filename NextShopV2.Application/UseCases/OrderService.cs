@@ -20,14 +20,16 @@ namespace NextShopV2.Application.Services
         private readonly IInventoryService _inventoryService;
         private readonly ICouponService _couponService;
         private readonly IUserRepository _userRepo;
+        private readonly IProductAttributeService _attributeService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, IProductAttributeService attributeService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
             _inventoryService = inventoryService;
             _couponService = couponService;
             _userRepo = userRepository;
+            _attributeService = attributeService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -105,7 +107,7 @@ namespace NextShopV2.Application.Services
                     VariantSku = variant.SKU,
                     ProductName = variant.Product?.Name,
                     ProductSku = variant.SKU,
-                    VariantOptionsJson = JsonSerializer.Serialize(new { color = variant.Color, size = variant.Size, imageUrl = variant.ImageUrl }),
+                    VariantOptionsJson = JsonSerializer.Serialize(new { attributes = await _attributeService.GetVariantAttributeMapAsync(variant.VariantId), imageUrl = variant.ImageUrl }),
                     DiscountAmount = 0m,
                     TaxRate = DefaultTaxRate,
                     TaxAmount = Math.Round(unitPrice * itemRequest.Quantity * DefaultTaxRate, 0),
@@ -409,26 +411,9 @@ namespace NextShopV2.Application.Services
                         DiscountAmount = item.DiscountAmount,
                         TaxAmount = item.TaxAmount,
                         TotalAmount = item.TotalAmount,
-                        Variant = variant == null ? null : new ProductVariantResponse
-                        {
-                            ProductVariantId = variant.VariantId,
-                            Color = variant.Color,
-                            Size = variant.Size,
-                            BasePrice = variant.BasePrice,
-                            DiscountPercent = variant.DiscountPercent,
-                            DiscountAmount = variant.DiscountAmount,
-                            PriceAfterDiscount = variant.PriceAfterDiscount,
-                            StockQuantity = variant.StockQuantity,
-                            IsDefault = variant.IsDefault,
-                            DisplayOrder = variant.DisplayOrder,
-                            ImageUrl = variant.ImageUrl,
-                            ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover
-                        },
+                        Variant = variant == null ? null : BuildVariantResponse(variant, item.VariantOptionsJson),
                         // Gán tên sản phẩm từ relation Variant -> Product nếu có, ưu tiên snapshot
-                        ProductName = item.ProductName ?? variant?.Product?.Name,
-                        ProductSku = item.ProductSku,
-                        VariantSku = item.VariantSku,
-                        VariantOptionsJson = item.VariantOptionsJson
+                        ProductName = item.ProductName ?? variant?.Product?.Name
                     };
                 }).ToList(),
                 Coupons = order.OrderCoupons?.Select(oc => new OrderCouponResponse
@@ -451,6 +436,57 @@ namespace NextShopV2.Application.Services
                 AdminCancelReason = order.AdminCancelReason,
                 CancelledBy = order.CancelledBy
             };
+        }
+
+        private static ProductVariantResponse BuildVariantResponse(Domain.Entities.Products.ProductVariant variant, string? variantOptionsJson)
+        {
+            var resp = new ProductVariantResponse
+            {
+                ProductVariantId = variant.VariantId,
+                BasePrice = variant.BasePrice,
+                DiscountPercent = variant.DiscountPercent,
+                DiscountAmount = variant.DiscountAmount,
+                PriceAfterDiscount = variant.PriceAfterDiscount,
+                StockQuantity = variant.StockQuantity,
+                IsDefault = variant.IsDefault,
+                DisplayOrder = variant.DisplayOrder,
+                ImageUrl = variant.ImageUrl,
+                ImgHover = string.IsNullOrEmpty(variant.ImgHover) ? variant.ImageUrl : variant.ImgHover,
+                Sku = variant.SKU
+            };
+
+            if (!string.IsNullOrWhiteSpace(variantOptionsJson))
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(variantOptionsJson);
+                    if (doc.RootElement.TryGetProperty("attributes", out var attrsElem) && attrsElem.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        var dict = new Dictionary<string, string>();
+                        foreach (var prop in attrsElem.EnumerateObject())
+                        {
+                            var key = prop.Name;
+                            var lk = key.ToLowerInvariant();
+                            if (lk == "imageurl" || lk == "image" || lk == "url") continue;
+                            var val = prop.Value.GetString();
+                            if (!string.IsNullOrWhiteSpace(val)) dict[key] = val!;
+                        }
+                        if (dict.Any()) resp.Attributes = dict;
+                    }
+
+                    if (resp.ImageUrl == null && doc.RootElement.TryGetProperty("imageUrl", out var imageElem) && imageElem.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        var v = imageElem.GetString();
+                        if (!string.IsNullOrWhiteSpace(v)) resp.ImageUrl = v;
+                    }
+                }
+                catch
+                {
+                    // ignore parse errors
+                }
+            }
+
+            return resp;
         }
     }
 }

@@ -596,6 +596,32 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.AttributeValue", b =>
+                {
+                    b.Property<Guid>("AttributeValueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AttributeValueId");
+
+                    b.HasIndex("AttributeId");
+
+                    b.ToTable("AttributeValues");
+                });
+
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
                 {
                     b.Property<Guid>("CategoryId")
@@ -623,6 +649,24 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.CategoryAttribute", b =>
+                {
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CategoryId", "AttributeId");
+
+                    b.HasIndex("AttributeId");
+
+                    b.ToTable("CategoryAttributes");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.InventoryTransaction", b =>
@@ -704,6 +748,27 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductAttribute", b =>
+                {
+                    b.Property<Guid>("AttributeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InputType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AttributeId");
+
+                    b.ToTable("ProductAttributes");
+                });
+
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductCategory", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -731,9 +796,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<decimal>("BasePrice")
                         .HasPrecision(18)
                         .HasColumnType("decimal(18,0)");
-
-                    b.Property<string>("Color")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18)
@@ -769,9 +831,6 @@ namespace NextShopV2.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Size")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
 
@@ -783,6 +842,21 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.VariantAttributeValue", b =>
+                {
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeValueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("VariantId", "AttributeValueId");
+
+                    b.HasIndex("AttributeValueId");
+
+                    b.ToTable("VariantAttributeValues");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Security.Passkey", b =>
@@ -1066,6 +1140,17 @@ namespace NextShopV2.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.AttributeValue", b =>
+                {
+                    b.HasOne("NextShopV2.Domain.Entities.Products.ProductAttribute", "Attribute")
+                        .WithMany("Values")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+                });
+
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
                 {
                     b.HasOne("NextShopV2.Domain.Entities.Products.Category", "Parent")
@@ -1073,6 +1158,25 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasForeignKey("ParentId");
 
                     b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.CategoryAttribute", b =>
+                {
+                    b.HasOne("NextShopV2.Domain.Entities.Products.ProductAttribute", "Attribute")
+                        .WithMany()
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NextShopV2.Domain.Entities.Products.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.InventoryTransaction", b =>
@@ -1114,6 +1218,25 @@ namespace NextShopV2.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.VariantAttributeValue", b =>
+                {
+                    b.HasOne("NextShopV2.Domain.Entities.Products.AttributeValue", "AttributeValue")
+                        .WithMany("VariantAttributeValues")
+                        .HasForeignKey("AttributeValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NextShopV2.Domain.Entities.Products.ProductVariant", "Variant")
+                        .WithMany()
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttributeValue");
+
+                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Security.Passkey", b =>
@@ -1159,6 +1282,11 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("TrackingEvents");
                 });
 
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.AttributeValue", b =>
+                {
+                    b.Navigation("VariantAttributeValues");
+                });
+
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
                 {
                     b.Navigation("Children");
@@ -1173,6 +1301,11 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductAttribute", b =>
+                {
+                    b.Navigation("Values");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductVariant", b =>

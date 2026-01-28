@@ -290,8 +290,9 @@ namespace NextShopV2.Api.Extensions
             services.AddScoped<NextShopV2.Application.Interfaces.services.IProductCategoryService, NextShopV2.Application.Services.ProductCategoryService>();
             services.AddScoped<NextShopV2.Application.Interfaces.repositories.IProductCategoryRepository, NextShopV2.Infrastructure.Repositories.ProductCategoryRepository>();
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductVariantService, NextShopV2.Application.Services.ProductVariantService>();
-            services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductVariantRepository, NextShopV2.Infrastructure.Repositories.ProductVariantRepository>();
-            services.AddScoped<NextShopV2.Application.Interfaces.Services.IOrderService, NextShopV2.Application.Services.OrderService>();
+            services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductVariantRepository, NextShopV2.Infrastructure.Repositories.ProductVariantRepository>();            // Product attribute service & repository
+            services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductAttributeService, NextShopV2.Application.Services.ProductAttributeService>();
+            services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductAttributeRepository, NextShopV2.Infrastructure.Repositories.ProductAttributeRepository>();            services.AddScoped<NextShopV2.Application.Interfaces.Services.IOrderService, NextShopV2.Application.Services.OrderService>();
             services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IOrderRepository, NextShopV2.Infrastructure.Repositories.OrderRepository>();
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IShipmentService, NextShopV2.Application.Services.ShipmentService>();
             services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IShipmentRepository, NextShopV2.Infrastructure.Repositories.ShipmentRepository>();

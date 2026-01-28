@@ -8,8 +8,6 @@ namespace NextShopV2.Domain.Entities.Products
         public Guid VariantId { get; set; }
         public Guid ProductId { get; set; }
         public string SKU { get; set; } = null!;
-        public string? Color { get; set; }
-        public string? Size { get; set; }
         public decimal BasePrice { get; set; }
         public decimal DiscountPercent { get; set; }
         public decimal DiscountAmount { get; set; }

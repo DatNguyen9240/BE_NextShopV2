@@ -36,6 +36,12 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
 
+        // Product attributes and values
+        public DbSet<NextShopV2.Domain.Entities.Products.ProductAttribute> ProductAttributes { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Products.AttributeValue> AttributeValues { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Products.VariantAttributeValue> VariantAttributeValues { get; set; }
+        public DbSet<NextShopV2.Domain.Entities.Products.CategoryAttribute> CategoryAttributes { get; set; }
+
         // Push notification tokens (FCM)
         public DbSet<NextShopV2.Domain.Entities.Notifications.PushToken> PushTokens { get; set; }
         public DbSet<NextShopV2.Domain.Entities.Notifications.NotificationHistory> NotificationHistories { get; set; }
@@ -60,6 +66,45 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<ProductVariant>()
                 .HasKey(pv => pv.VariantId);
+
+            // Product attributes
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Products.ProductAttribute>(eb => {
+                eb.HasKey(a => a.AttributeId);
+                eb.Property(a => a.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Products.AttributeValue>(eb => {
+                eb.HasKey(av => av.AttributeValueId);
+                eb.Property(av => av.Value).IsRequired();
+                eb.HasOne(av => av.Attribute)
+                    .WithMany(a => a.Values)
+                    .HasForeignKey(av => av.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Products.VariantAttributeValue>(eb => {
+                eb.HasKey(vav => new { vav.VariantId, vav.AttributeValueId });
+                eb.HasOne(vav => vav.Variant)
+                    .WithMany()
+                    .HasForeignKey(vav => vav.VariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                eb.HasOne(vav => vav.AttributeValue)
+                    .WithMany(av => av.VariantAttributeValues)
+                    .HasForeignKey(vav => vav.AttributeValueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Products.CategoryAttribute>(eb => {
+                eb.HasKey(ca => new { ca.CategoryId, ca.AttributeId });
+                eb.HasOne(ca => ca.Category)
+                    .WithMany()
+                    .HasForeignKey(ca => ca.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                eb.HasOne(ca => ca.Attribute)
+                    .WithMany()
+                    .HasForeignKey(ca => ca.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // Ví dụ cho Coupon
             modelBuilder.Entity<Coupon>()

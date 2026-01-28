@@ -19,12 +19,14 @@ namespace NextShopV2.Application.Services
         private readonly IProductVariantRepository _variantRepo;
         private readonly IProductRepository _productRepo;
         private readonly IOrderResolutionService _orderResolutionService;
+        private readonly IProductAttributeService _attributeService;
 
-        public ProductVariantService(IProductVariantRepository variantRepo, IProductRepository productRepo, IOrderResolutionService orderResolutionService)
+        public ProductVariantService(IProductVariantRepository variantRepo, IProductRepository productRepo, IOrderResolutionService orderResolutionService, IProductAttributeService attributeService)
         {
             _variantRepo = variantRepo;
             _productRepo = productRepo;
             _orderResolutionService = orderResolutionService;
+            _attributeService = attributeService;
         }
 
         public async Task<List<ProductVariantResponse>> GetAllAsync()
@@ -38,10 +40,8 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = v.VariantId,
                 Sku = string.IsNullOrEmpty(v.SKU) 
-                    ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
+                    ? CommonHelpers.GenerateSKU("PRD") 
                     : v.SKU,
-                Color = v.Color,
-                Size = v.Size,
                 // Xoá AdditionalPrice
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
@@ -66,10 +66,8 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant.VariantId,
                 Sku = string.IsNullOrEmpty(variant.SKU) 
-                    ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
+                    ? CommonHelpers.GenerateSKU("PRD") 
                     : variant.SKU,
-                Color = variant.Color,
-                Size = variant.Size,
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
@@ -101,10 +99,8 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = v.VariantId,
                 Sku = string.IsNullOrEmpty(v.SKU) 
-                    ? CommonHelpers.GenerateSKU("PRD", v.Color, v.Size) 
+                    ? CommonHelpers.GenerateSKU("PRD") 
                     : v.SKU,
-                Color = v.Color,
-                Size = v.Size,
 
                 StockQuantity = v.StockQuantity,
                 IsDefault = v.IsDefault,
@@ -129,10 +125,9 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant!.VariantId,
                 Sku = string.IsNullOrEmpty(variant.SKU) 
-                    ? CommonHelpers.GenerateSKU("PRD", variant.Color, variant.Size) 
+                    ? CommonHelpers.GenerateSKU("PRD") 
                     : variant.SKU,
-                Color = variant.Color,
-                Size = variant.Size,
+
                 // Xoá AdditionalPrice
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
@@ -169,7 +164,7 @@ namespace NextShopV2.Application.Services
 
             // Auto-generate SKU if not provided
             var generatedSKU = string.IsNullOrEmpty(request.SKU) 
-                ? CommonHelpers.GenerateSKU("PRD", request.Color, request.Size)
+                ? CommonHelpers.GenerateSKU("PRD")
                 : request.SKU;
 
             // Tính DiscountAmount và PriceAfterDiscount.
@@ -197,8 +192,6 @@ namespace NextShopV2.Application.Services
                 VariantId = Guid.NewGuid(),
                 ProductId = request.ProductId,
                 SKU = generatedSKU,
-                Color = request.Color,
-                Size = request.Size,
                 StockQuantity = request.StockQuantity,
                 IsDefault = request.IsDefault,
                 DisplayOrder = resolvedDisplayOrder, // ← Use resolved DisplayOrder
@@ -218,8 +211,6 @@ namespace NextShopV2.Application.Services
             {
                 ProductVariantId = variant.VariantId,
                 Sku = variant.SKU, // SKU đã được generate trong CreateAsync
-                Color = variant.Color,
-                Size = variant.Size,
                 StockQuantity = variant.StockQuantity,
                 IsDefault = variant.IsDefault,
                 DisplayOrder = variant.DisplayOrder,
@@ -253,15 +244,12 @@ namespace NextShopV2.Application.Services
             // Auto-generate SKU if empty or null
             if (string.IsNullOrEmpty(request.SKU))
             {
-                variant.SKU = CommonHelpers.GenerateSKU("PRD", request.Color, request.Size);
+                variant.SKU = CommonHelpers.GenerateSKU("PRD");
             }
             else
             {
                 variant.SKU = request.SKU;
             }
-            
-            variant.Color = request.Color;
-            variant.Size = request.Size;
             // Update base price / discounts if provided
             if (request.BasePrice.HasValue)
             {
@@ -359,15 +347,19 @@ namespace NextShopV2.Application.Services
             if (variant == null)
                 return null;
 
+            var attributes = await _attributeService.GetVariantAttributeMapAsync(variantId);
+
             return new VariantInfo
             {
+                ProductId = variant.ProductId,
                 Price = variant.PriceAfterDiscount,
                 ProductName = variant.Product?.Name ?? string.Empty,
-                Color = variant.Color ?? string.Empty,
-                Size = variant.Size ?? string.Empty,
+                Attributes = attributes,
                 ImageUrl = variant.ImageUrl ?? string.Empty,
                 Sku = variant.SKU ?? string.Empty,
-                StockQuantity = variant.StockQuantity
+                StockQuantity = variant.StockQuantity,
+                IsActive = variant.IsActive,
+                ProductIsActive = variant.Product?.IsActive ?? false
             };
         }
     }

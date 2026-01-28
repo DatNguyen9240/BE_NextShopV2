@@ -7,12 +7,7 @@ namespace NextShopV2.Application.DTOs.Request
         [StringLength(50)]
         public string? SKU { get; set; }
         
-        [StringLength(50)]
-        public string? Color { get; set; }
         
-        [StringLength(20)]
-        public string? Size { get; set; }
-                
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; } = 0;
         
