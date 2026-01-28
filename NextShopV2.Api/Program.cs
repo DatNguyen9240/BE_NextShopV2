@@ -3,13 +3,27 @@ using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// 1. Load Environment Variables
-var environment = builder.Environment.EnvironmentName;
-var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environment.ToLower()}");
+// 1. Load Environment Variables BEFORE building the host so values are available to Kestrel and configuration
+var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environment.GetEnvironmentVariable("ENV") ?? "Production";
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environmentName.ToLower()}");
 if (!File.Exists(envPath)) envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
 if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
+
+// If ASPNETCORE_URLS or URLS is set early, clear HTTP_PORTS/HTTPS_PORTS to prevent Kestrel override warnings
+var aspnetUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? Environment.GetEnvironmentVariable("URLS");
+if (!string.IsNullOrEmpty(aspnetUrls))
+{
+    var prevHttpPorts = Environment.GetEnvironmentVariable("HTTP_PORTS");
+    var prevHttpsPorts = Environment.GetEnvironmentVariable("HTTPS_PORTS");
+    if (!string.IsNullOrEmpty(prevHttpPorts) || !string.IsNullOrEmpty(prevHttpsPorts))
+    {
+        Console.WriteLine($"ℹ️ Clearing HTTP_PORTS/HTTPS_PORTS (was: HTTP_PORTS='{prevHttpPorts}', HTTPS_PORTS='{prevHttpsPorts}') because ASPNETCORE_URLS/URLS is set to '{aspnetUrls}'.");
+        Environment.SetEnvironmentVariable("HTTP_PORTS", "");
+        Environment.SetEnvironmentVariable("HTTPS_PORTS", "");
+    }
+}
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Normalize port envs to avoid Kestrel "Overriding HTTP_PORTS" warning when ASPNETCORE_URLS is explicitly configured
 var aspnetUrls = builder.Configuration["ASPNETCORE_URLS"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
