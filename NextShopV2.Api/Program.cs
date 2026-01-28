@@ -83,18 +83,42 @@ app.MapControllers();
 app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
 app.MapHub<NextShopV2.Api.Hubs.ShipmentTrackingHub>("/hubs/shipment-tracking");
 
-// 4. Database Migrations
+// 4. Database Migrations (with retry/wait for DB readiness)
 using (var scope = app.Services.CreateScope())
 {
-    try
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var maxRetries = int.TryParse(Environment.GetEnvironmentVariable("DB_MIGRATE_RETRIES") ?? config["DB_MIGRATE_RETRIES"], out var r) ? r : 10;
+    var delayMs = int.TryParse(Environment.GetEnvironmentVariable("DB_MIGRATE_DELAY_MS") ?? config["DB_MIGRATE_DELAY_MS"], out var d) ? d : 3000;
+
+    var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
+    var succeeded = false;
+    for (var attempt = 1; attempt <= maxRetries; attempt++)
     {
-        var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
-        context.Database.Migrate();
-        Console.WriteLine("✅ Database migration completed successfully.");
+        try
+        {
+            if (!context.Database.CanConnect())
+            {
+                Console.WriteLine($"Waiting for database to be ready (attempt {attempt}/{maxRetries})...");
+                System.Threading.Thread.Sleep(delayMs);
+                continue;
+            }
+
+            context.Database.Migrate();
+            Console.WriteLine("✅ Database migration completed successfully.");
+            succeeded = true;
+            break;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Database migration failed (attempt {attempt}/{maxRetries}): {ex.Message}");
+            if (attempt == maxRetries) break;
+            System.Threading.Thread.Sleep(delayMs);
+        }
     }
-    catch (Exception ex)
+
+    if (!succeeded)
     {
-        Console.WriteLine($"❌ Database migration failed: {ex.Message}");
+        Console.WriteLine("⚠️ Database migration could not be applied after retries. Please check DB connectivity and permissions.");
     }
 }
 

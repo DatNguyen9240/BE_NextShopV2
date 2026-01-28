@@ -10,8 +10,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Redis=redis:6379
+      - DP_KEYS_PATH=/root/.aspnet/DataProtection-Keys
+      - DP_CERT_PATH=/app/secrets/dp_key.pfx # optional, mount if you want certificate protection
+      - DB_MIGRATE_RETRIES=10
+      - DB_MIGRATE_DELAY_MS=3000
+      - ASPNETCORE_URLS=http://+:5000
     volumes:
       - ./data/dataprotection-keys:/root/.aspnet/DataProtection-Keys
+      - ./secrets/dp_key.pfx:/app/secrets/dp_key.pfx:ro # optional
     depends_on:
       - redis
 
