@@ -83,14 +83,33 @@ app.MapControllers();
 app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
 app.MapHub<NextShopV2.Api.Hubs.ShipmentTrackingHub>("/hubs/shipment-tracking");
 
-// 4. Database Migrations
+// 4. Database Migrations (guarded)
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
-        context.Database.Migrate();
-        Console.WriteLine("✅ Database migration completed successfully.");
+
+        var autoMigrate = (Environment.GetEnvironmentVariable("AUTO_MIGRATE") ?? "false").ToLower() == "true";
+        var allowProdMigrate = (Environment.GetEnvironmentVariable("ALLOW_PROD_MIGRATE") ?? "false").ToLower() == "true";
+        var provider = context.Database.ProviderName ?? string.Empty;
+        var isPostgres = provider.IndexOf("Npgsql", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        Console.WriteLine($"Environment: {app.Environment.EnvironmentName}; Database Provider: {provider}; AUTO_MIGRATE={autoMigrate}; ALLOW_PROD_MIGRATE={allowProdMigrate}");
+
+        if (!autoMigrate)
+        {
+            Console.WriteLine("⏭️ Skipping database migrations because AUTO_MIGRATE is not set to 'true'.");
+        }
+        else if (isPostgres && app.Environment.IsProduction() && !allowProdMigrate)
+        {
+            Console.WriteLine("⚠️ Detected Postgres in Production and ALLOW_PROD_MIGRATE is not set. Skipping migrations. Use pre-deploy SQL script instead.");
+        }
+        else
+        {
+            context.Database.Migrate();
+            Console.WriteLine("✅ Database migration completed successfully.");
+        }
     }
     catch (Exception ex)
     {
