@@ -25,11 +25,9 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<Guid>("CartId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("CartId");
 
@@ -41,17 +39,13 @@ namespace NextShopV2.Infrastructure.Migrations
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.CartItem", b =>
                 {
                     b.Property<Guid>("CartItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("CartId");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<int>("Quantity");
 
-                    b.Property<Guid>("VariantId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("VariantId");
 
                     b.HasKey("CartItemId");
 
@@ -104,14 +98,11 @@ namespace NextShopV2.Infrastructure.Migrations
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
                 {
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ProductId");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
                     b.HasKey("ProductId", "UserId");
 

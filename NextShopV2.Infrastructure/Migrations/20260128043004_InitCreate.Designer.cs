@@ -28,11 +28,9 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<Guid>("CartId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("CartId");
 
@@ -44,17 +42,13 @@ namespace NextShopV2.Infrastructure.Migrations
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.CartItem", b =>
                 {
                     b.Property<Guid>("CartItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("CartId");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<int>("Quantity");
 
-                    b.Property<Guid>("VariantId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("VariantId");
 
                     b.HasKey("CartItemId");
 
@@ -85,8 +79,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MaxDiscountAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 2);
 
                     b.Property<decimal?>("MinOrderAmount")
                         .HasPrecision(18, 2);
@@ -107,14 +100,11 @@ namespace NextShopV2.Infrastructure.Migrations
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
                 {
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ProductId");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
                     b.HasKey("ProductId", "UserId");
 
@@ -126,24 +116,18 @@ namespace NextShopV2.Infrastructure.Migrations
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.Review", b =>
                 {
                     b.Property<Guid>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ProductId");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<int>("Rating");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("ReviewId");
 
@@ -157,30 +141,23 @@ namespace NextShopV2.Infrastructure.Migrations
             modelBuilder.Entity("NextShopV2.Domain.Entities.Marketing.Advertisement", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
                     b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
+                    b.Property<int>("SortOrder");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
                     b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
                     b.HasKey("Id");
 
