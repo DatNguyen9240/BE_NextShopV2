@@ -40,7 +40,11 @@ namespace NextShopV2.Infrastructure.Persistence
             {
                 try
                 {
-                    var uri = new Uri(databaseUrl);
+                    // Sanitize value (trim whitespace, remove accidental trailing braces, decode percent-encoding)
+                    var raw = Uri.UnescapeDataString(databaseUrl.Trim()).Trim();
+                    while (raw.EndsWith("}") || raw.EndsWith(")")) raw = raw.Substring(0, raw.Length - 1).TrimEnd();
+
+                    var uri = new Uri(raw);
                     var userInfo = uri.UserInfo.Split(':', 2);
                     var npgBuilder = new Npgsql.NpgsqlConnectionStringBuilder
                     {
@@ -49,12 +53,23 @@ namespace NextShopV2.Infrastructure.Persistence
                         Database = uri.AbsolutePath.TrimStart('/'),
                         Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
                         Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
-                        SslMode = Npgsql.SslMode.Prefer
+                        // Railway requires SSL for internal/private endpoints
+                        SslMode = Npgsql.SslMode.Require
                     };
-                    optionsBuilder.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+
+                    optionsBuilder.UseNpgsql(npgBuilder.ConnectionString, o =>
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                        // Add transient retry policy to handle brief connectivity hiccups
+                        o.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(2), errorCodesToAdd: null);
+                    });
                     isPostgres = true;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    // Log/ignore - design-time factory should not throw for env parsing problems
+                    Console.WriteLine($"⚠️ Invalid DATABASE_URL format: {ex.Message}");
+                }
             }
 
             if (!isPostgres)
@@ -67,8 +82,12 @@ namespace NextShopV2.Infrastructure.Persistence
 
                 if (!string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword))
                 {
-                    var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Prefer;Trust Server Certificate=true";
-                    optionsBuilder.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Require";
+                    optionsBuilder.UseNpgsql(pgConn, o =>
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                        o.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(2), errorCodesToAdd: null);
+                    });
                     isPostgres = true;
                 }
             }
