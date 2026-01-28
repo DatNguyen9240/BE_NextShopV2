@@ -36,9 +36,6 @@ obj/
 # Service account keys and secrets
 **/Config/serviceAccountKey.json
 
-# Local secrets folder (do NOT commit actual secret files)
-/secrets/
-
 
 # Dependency files
 packages/

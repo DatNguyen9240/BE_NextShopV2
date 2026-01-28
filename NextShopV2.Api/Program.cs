@@ -3,29 +3,13 @@ using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
 
-// 1. Load Environment Variables BEFORE building the host so values are available to Kestrel and configuration
-var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environment.GetEnvironmentVariable("ENV") ?? "Production";
-var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environmentName.ToLower()}");
-if (!File.Exists(envPath)) envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
-
-// If ASPNETCORE_URLS or URLS is set early, clear HTTP_PORTS/HTTPS_PORTS to prevent Kestrel override warnings
-var aspnetUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? Environment.GetEnvironmentVariable("URLS");
-if (!string.IsNullOrEmpty(aspnetUrls))
-{
-    var prevHttpPorts = Environment.GetEnvironmentVariable("HTTP_PORTS");
-    var prevHttpsPorts = Environment.GetEnvironmentVariable("HTTPS_PORTS");
-    if (!string.IsNullOrEmpty(prevHttpPorts) || !string.IsNullOrEmpty(prevHttpsPorts))
-    {
-        Console.WriteLine($"ℹ️ Clearing HTTP_PORTS/HTTPS_PORTS (was: HTTP_PORTS='{prevHttpPorts}', HTTPS_PORTS='{prevHttpsPorts}') because ASPNETCORE_URLS/URLS is set to '{aspnetUrls}'.");
-        Environment.SetEnvironmentVariable("HTTP_PORTS", "");
-        Environment.SetEnvironmentVariable("HTTPS_PORTS", "");
-    }
-}
-
 var builder = WebApplication.CreateBuilder(args);
 
-
+// 1. Load Environment Variables
+var environment = builder.Environment.EnvironmentName;
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environment.ToLower()}");
+if (!File.Exists(envPath)) envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
 
 // 2. Add Services via Extension Methods
 builder.Services.AddDatabaseConfiguration(builder.Configuration)
@@ -99,42 +83,18 @@ app.MapControllers();
 app.MapHub<NextShopV2.Api.Hubs.SocketNotificationHub>("/hubs/notifications");
 app.MapHub<NextShopV2.Api.Hubs.ShipmentTrackingHub>("/hubs/shipment-tracking");
 
-// 4. Database Migrations (with retry/wait for DB readiness)
+// 4. Database Migrations
 using (var scope = app.Services.CreateScope())
 {
-    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    var maxRetries = int.TryParse(Environment.GetEnvironmentVariable("DB_MIGRATE_RETRIES") ?? config["DB_MIGRATE_RETRIES"], out var r) ? r : 10;
-    var delayMs = int.TryParse(Environment.GetEnvironmentVariable("DB_MIGRATE_DELAY_MS") ?? config["DB_MIGRATE_DELAY_MS"], out var d) ? d : 3000;
-
-    var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
-    var succeeded = false;
-    for (var attempt = 1; attempt <= maxRetries; attempt++)
+    try
     {
-        try
-        {
-            if (!context.Database.CanConnect())
-            {
-                Console.WriteLine($"Waiting for database to be ready (attempt {attempt}/{maxRetries})...");
-                System.Threading.Thread.Sleep(delayMs);
-                continue;
-            }
-
-            context.Database.Migrate();
-            Console.WriteLine("✅ Database migration completed successfully.");
-            succeeded = true;
-            break;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ Database migration failed (attempt {attempt}/{maxRetries}): {ex.Message}");
-            if (attempt == maxRetries) break;
-            System.Threading.Thread.Sleep(delayMs);
-        }
+        var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("✅ Database migration completed successfully.");
     }
-
-    if (!succeeded)
+    catch (Exception ex)
     {
-        Console.WriteLine("⚠️ Database migration could not be applied after retries. Please check DB connectivity and permissions.");
+        Console.WriteLine($"❌ Database migration failed: {ex.Message}");
     }
 }
 

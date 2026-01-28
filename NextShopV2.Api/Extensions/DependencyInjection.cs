@@ -121,30 +121,12 @@ namespace NextShopV2.Api.Extensions
                 .SetApplicationName("NextShopV2")
                 .PersistKeysToStackExchangeRedis(redisMultiplexer, "DataProtection-Keys-V3");
 
-            // Support optional file-system backing for keys and custom certificate path via environment variables
-            var certPathEnv = Environment.GetEnvironmentVariable("DP_CERT_PATH");
-            var certPath = !string.IsNullOrEmpty(certPathEnv) ? certPathEnv : Path.Combine(Directory.GetCurrentDirectory(), "dp_key.pfx");
-            var certPassword = Environment.GetEnvironmentVariable("DP_CERT_PASSWORD") ?? "NextShopDefaultPassword123!"; 
-            var keysPath = Environment.GetEnvironmentVariable("DP_KEYS_PATH");
-
-            if (!string.IsNullOrEmpty(keysPath))
-            {
-                try
-                {
-                    var dir = new DirectoryInfo(keysPath);
-                    if (!dir.Exists) dir.Create();
-                    dpBuilder.PersistKeysToFileSystem(dir);
-                    Console.WriteLine($"🗄️ DataProtection keys persisted to file system: {keysPath}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"⚠️ Failed to persist DataProtection keys to file system: {ex.Message}");
-                }
-            }
-
             try
             {
-                if (!string.IsNullOrEmpty(certPath) && File.Exists(certPath))
+                var certPath = Path.Combine(Directory.GetCurrentDirectory(), "dp_key.pfx");
+                var certPassword = Environment.GetEnvironmentVariable("DP_CERT_PASSWORD") ?? "NextShopDefaultPassword123!"; 
+                
+                if (File.Exists(certPath))
                 {
                     var cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
                     dpBuilder.ProtectKeysWithCertificate(cert);
@@ -152,25 +134,13 @@ namespace NextShopV2.Api.Extensions
                 }
                 else if (OperatingSystem.IsWindows())
                 {
-                    // Use Windows DPAPI on Windows hosts
+                    // Dùng DPAPI của Windows để mã hóa chìa khóa (Không cần certificate, hết cảnh báo)
                     dpBuilder.ProtectKeysWithDpapi();
                     Console.WriteLine("🛡️ DataProtection is protected with Windows DPAPI.");
                 }
-                else
+                else 
                 {
-                    // If keys are persisted to Redis, prefer to log that fact rather than warn about missing certificate
-                    if (redisMultiplexer != null)
-                    {
-                        Console.WriteLine("ℹ️ DataProtection keys are persisted to Redis. To additionally protect keys at rest, set DP_CERT_PATH to a .pfx certificate.");
-                    }
-                    else if (!string.IsNullOrEmpty(keysPath))
-                    {
-                        Console.WriteLine("🗄️ DataProtection keys persisted to filesystem (un-encrypted). Consider setting DP_CERT_PATH to protect them with a certificate.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("ℹ️ DataProtection is using default protection (no certificate found). To protect keys in Linux, set DP_CERT_PATH or DP_KEYS_PATH.");
-                    }
+                    Console.WriteLine("ℹ️ DataProtection is using default protection (no certificate found).");
                 }
             }
             catch (Exception ex)
