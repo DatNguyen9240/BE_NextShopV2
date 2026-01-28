@@ -23,8 +23,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=builder /app/publish .
 
-# Listen on the configured port
-ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
-EXPOSE ${PORT:-8080}
-
 ENTRYPOINT ["dotnet", "NextShopV2.Api.dll"]
