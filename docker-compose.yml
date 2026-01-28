@@ -14,7 +14,7 @@ services:
       - HTTPS_PORTS=
       - DP_KEYS_PATH=/root/.aspnet/DataProtection-Keys
       - DP_CERT_PATH=/app/secrets/dp_key.pfx # optional, mount if you want certificate protection
-      - DP_CERT_PASSWORD=${DP_CERT_PASSWORD:-ChangeMePlease} # set via env or docker secrets
+      - DP_CERT_PASSWORD="NextShopEmXinhShop123@"
       - DB_MIGRATE_RETRIES=10
       - DB_MIGRATE_DELAY_MS=3000
       - ASPNETCORE_URLS=http://+:8080
@@ -24,8 +24,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    secrets:
-      - dp_cert_password
 
   redis:
     image: redis:7
@@ -47,7 +45,4 @@ services:
     depends_on:
       - redis
 
-secrets:
-  dp_cert_password:
-    file: ./secrets/dp_cert_password.txt
-    # Keep the real secret file out of the repo. Use .example for a template.
+

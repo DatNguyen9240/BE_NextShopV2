@@ -23,11 +23,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=builder /app/publish .
 
-# Copy entrypoint script and listen on the configured port
-COPY scripts/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
+# Listen on the configured port
 ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
 EXPOSE ${PORT:-8080}
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["dotnet", "NextShopV2.Api.dll"]
