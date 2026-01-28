@@ -158,7 +158,12 @@ namespace NextShopV2.Api.Extensions
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(keysPath))
+                    // If keys are persisted to Redis, prefer to log that fact rather than warn about missing certificate
+                    if (redisMultiplexer != null)
+                    {
+                        Console.WriteLine("ℹ️ DataProtection keys are persisted to Redis. To additionally protect keys at rest, set DP_CERT_PATH to a .pfx certificate.");
+                    }
+                    else if (!string.IsNullOrEmpty(keysPath))
                     {
                         Console.WriteLine("🗄️ DataProtection keys persisted to filesystem (un-encrypted). Consider setting DP_CERT_PATH to protect them with a certificate.");
                     }

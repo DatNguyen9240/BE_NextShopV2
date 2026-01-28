@@ -11,6 +11,20 @@ var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{enviro
 if (!File.Exists(envPath)) envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
 if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
 
+// Normalize port envs to avoid Kestrel "Overriding HTTP_PORTS" warning when ASPNETCORE_URLS is explicitly configured
+var aspnetUrls = builder.Configuration["ASPNETCORE_URLS"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (!string.IsNullOrEmpty(aspnetUrls))
+{
+    var prevHttpPorts = Environment.GetEnvironmentVariable("HTTP_PORTS");
+    var prevHttpsPorts = Environment.GetEnvironmentVariable("HTTPS_PORTS");
+    if (!string.IsNullOrEmpty(prevHttpPorts) || !string.IsNullOrEmpty(prevHttpsPorts))
+    {
+        Console.WriteLine($"ℹ️ Clearing HTTP_PORTS/HTTPS_PORTS (was: HTTP_PORTS='{prevHttpPorts}', HTTPS_PORTS='{prevHttpsPorts}') because ASPNETCORE_URLS is set to '{aspnetUrls}'.");
+        Environment.SetEnvironmentVariable("HTTP_PORTS", "");
+        Environment.SetEnvironmentVariable("HTTPS_PORTS", "");
+    }
+}
+
 // 2. Add Services via Extension Methods
 builder.Services.AddDatabaseConfiguration(builder.Configuration)
                 .AddRedisAndDataProtection(builder.Configuration)
