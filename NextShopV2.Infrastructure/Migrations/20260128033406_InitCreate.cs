@@ -15,13 +15,13 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Advertisements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SortOrder = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    PublicId = table.Column<string>(nullable: false),
+                    Title = table.Column<string>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: false),
+                    Type = table.Column<string>(nullable: false),
+                    SortOrder = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
