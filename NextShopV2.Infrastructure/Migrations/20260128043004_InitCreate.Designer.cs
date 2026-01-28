@@ -23,13 +23,10 @@ namespace NextShopV2.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
                 {
                     b.Property<Guid>("CartId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -75,8 +72,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired();
 
                     b.Property<decimal>("DiscountPercent")
                         .HasPrecision(10, 2)
@@ -93,8 +89,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MinOrderAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 2);
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -971,8 +966,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("Phone");
 
                     b.Property<string>("Role")
                         .IsRequired()
