@@ -27,7 +27,7 @@ COPY --from=builder /app/publish .
 COPY scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-ENV ASPNETCORE_URLS=http://+:${PORT:-5000}
-EXPOSE ${PORT:-5000}
+ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
+EXPOSE ${PORT:-8080}
 
 ENTRYPOINT ["/app/entrypoint.sh"]
