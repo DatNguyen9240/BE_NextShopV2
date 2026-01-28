@@ -57,7 +57,7 @@ namespace NextShopV2.Infrastructure.Persistence
                         Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
                         SslMode = Npgsql.SslMode.Prefer
                     };
-                    optionsBuilder.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(Microsoft.EntityFrameworkCore.Query.QuerySplittingBehavior.SplitQuery));
+                    optionsBuilder.UseNpgsql(npgBuilder.ConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                     isPostgres = true;
                 }
                 catch { }
@@ -74,7 +74,7 @@ namespace NextShopV2.Infrastructure.Persistence
                 if (!string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgDb) && !string.IsNullOrWhiteSpace(pgUser) && !string.IsNullOrWhiteSpace(pgPassword))
                 {
                     var pgConn = $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPassword};SSL Mode=Prefer;Trust Server Certificate=true";
-                    optionsBuilder.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(Microsoft.EntityFrameworkCore.Query.QuerySplittingBehavior.SplitQuery));
+                    optionsBuilder.UseNpgsql(pgConn, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                     isPostgres = true;
                 }
             }
@@ -104,7 +104,7 @@ namespace NextShopV2.Infrastructure.Persistence
                     sqlConn = "Server=localhost\\SQLEXPRESS03;Database=NextShopDB;User Id=sa;Password=12345;TrustServerCertificate=True;";
                 }
 
-n                optionsBuilder.UseSqlServer(sqlConn);
+                optionsBuilder.UseSqlServer(sqlConn);
             }
 
             return new AppDbContext(optionsBuilder.Options);
