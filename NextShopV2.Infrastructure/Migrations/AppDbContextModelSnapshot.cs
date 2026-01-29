@@ -29,7 +29,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -80,7 +80,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -94,7 +94,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("UsageLimit")
                         .HasColumnType("int");
@@ -116,7 +116,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("ProductId", "UserId");
 
@@ -136,7 +136,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -163,7 +163,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
@@ -200,7 +200,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -210,7 +210,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -228,7 +228,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
@@ -249,7 +249,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("SentAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
@@ -276,7 +276,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeviceId")
                         .HasColumnType("nvarchar(max)");
@@ -285,7 +285,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastSeenAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Platform")
                         .IsRequired()
@@ -323,7 +323,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CancelledBy")
                         .HasColumnType("nvarchar(max)");
@@ -333,7 +333,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("decimal(18,0)");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("nvarchar(max)");
@@ -375,14 +375,14 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("AppliedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ReservedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -465,7 +465,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<double?>("CurrentLat")
                         .HasColumnType("float");
@@ -483,7 +483,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("float");
 
                     b.Property<DateTime?>("LastLocationUpdate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
@@ -516,14 +516,14 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EventTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
@@ -553,7 +553,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Method")
                         .IsRequired()
@@ -612,7 +612,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Icon")
                         .HasColumnType("nvarchar(max)");
@@ -643,7 +643,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("CategoryId", "AttributeId");
 
@@ -662,7 +662,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
@@ -699,7 +699,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -724,7 +724,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("ProductId");
 
@@ -761,7 +761,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("ProductId", "CategoryId");
 
@@ -853,14 +853,14 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasDefaultValue(0L);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CredentialId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastUsedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PublicKey")
                         .IsRequired()
@@ -922,7 +922,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -959,7 +959,7 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

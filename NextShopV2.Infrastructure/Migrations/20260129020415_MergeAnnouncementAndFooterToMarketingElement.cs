@@ -72,7 +72,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Users",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -165,7 +165,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Users",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -215,7 +215,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "EventTime",
                 table: "TrackingEvents",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -231,7 +231,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "TrackingEvents",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -280,7 +280,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastLocationUpdate",
                 table: "Shipments",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -334,7 +334,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Shipments",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -382,7 +382,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Reviews",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -433,7 +433,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastSeenAt",
                 table: "PushTokens",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -459,7 +459,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "PushTokens",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -603,7 +603,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Products",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -671,7 +671,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Products",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -717,7 +717,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "ProductLikes",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -741,7 +741,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "AssignedAt",
                 table: "ProductCategories",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -840,7 +840,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Payments",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -893,7 +893,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastUsedAt",
                 table: "Passkeys",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -910,7 +910,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Passkeys",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -991,7 +991,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "OrderDate",
                 table: "Orders",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1019,7 +1019,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CancelledAt",
                 table: "Orders",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -1218,7 +1218,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "ReservedAt",
                 table: "OrderCoupons",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -1239,7 +1239,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "AppliedAt",
                 table: "OrderCoupons",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -1299,7 +1299,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "SentAt",
                 table: "NotificationHistories",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone",
@@ -1360,7 +1360,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "NotificationHistories",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1408,7 +1408,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "InventoryTransactions",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1449,7 +1449,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "StartDate",
                 table: "Coupons",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1491,7 +1491,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "EndDate",
                 table: "Coupons",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1527,7 +1527,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "AssignedAt",
                 table: "CategoryAttributes",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1586,7 +1586,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Categories",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1610,7 +1610,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Carts",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1738,7 +1738,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Advertisements",
-                type: "datetime2",
+                type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
@@ -1817,8 +1817,8 @@ namespace NextShopV2.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1912,7 +1912,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2005,7 +2005,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Avatar",
@@ -2055,7 +2055,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
@@ -2071,7 +2071,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "TrackingEventId",
@@ -2120,7 +2120,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<double>(
@@ -2174,7 +2174,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Carrier",
@@ -2222,7 +2222,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Comment",
@@ -2273,7 +2273,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
@@ -2299,7 +2299,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "PushTokenId",
@@ -2443,7 +2443,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
@@ -2511,7 +2511,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Brand",
@@ -2557,7 +2557,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -2581,7 +2581,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
@@ -2680,7 +2680,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Amount",
@@ -2733,7 +2733,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2750,7 +2750,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Id",
@@ -2831,7 +2831,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "DiscountAmount",
@@ -2859,7 +2859,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3058,7 +3058,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<decimal>(
@@ -3079,7 +3079,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -3139,7 +3139,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2",
+                oldType: "timestamp with time zone",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
@@ -3200,7 +3200,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Body",
@@ -3248,7 +3248,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<int>(
                 name: "ChangeQty",
@@ -3289,7 +3289,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "MinOrderAmount",
@@ -3331,7 +3331,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "DiscountPercent",
@@ -3367,7 +3367,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeId",
@@ -3426,7 +3426,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
@@ -3450,7 +3450,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CartId",
@@ -3578,7 +3578,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "datetime2");
+                oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
