@@ -3,6 +3,7 @@ using NextShopV2.Domain.Entities.Marketing;
 using NextShopV2.Application.Interfaces;
 using NextShopV2.Shared.Helpers;
 using NextShopV2.Api.Attributes;
+using System.Linq;
 
 namespace NextShopV2.Api.Controllers
 {
@@ -29,12 +30,28 @@ namespace NextShopV2.Api.Controllers
             return ResponseHelper.Success(marketingElement, "Active marketing element retrieved successfully");
         }
 
+        // GET: api/MarketingElements/public
+        [HttpGet("public")]
+        public async Task<IActionResult> GetPublic([FromQuery] string? name = null)
+        {
+            var marketingElements = await _marketingElementService.GetAllAsync();
+            if (!string.IsNullOrEmpty(name))
+            {
+                marketingElements = marketingElements.Where(m => m.Name == name).ToList();
+            }
+            return ResponseHelper.Success(marketingElements, "Marketing elements retrieved successfully");
+        }
+
         // GET: api/MarketingElements
         [HttpGet]
         [AdminOnly]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? name = null)
         {
             var marketingElements = await _marketingElementService.GetAllAsync();
+            if (!string.IsNullOrEmpty(name))
+            {
+                marketingElements = marketingElements.Where(m => m.Name == name).ToList();
+            }
             return ResponseHelper.Success(marketingElements, "Marketing elements retrieved successfully");
         }
 
