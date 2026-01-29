@@ -21,6 +21,15 @@ namespace NextShopV2.Api.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
             {
+                // Force PostgreSQL for migrations
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Migration" ||
+                    Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") == "Migration" ||
+                    configuration["DATABASE_URL"]?.Contains("dummy") == true)
+                {
+                    options.UseNpgsql("Host=localhost;Database=dummy;Username=dummy;Password=dummy");
+                    return;
+                }
+
                 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
                                   ?? configuration["DATABASE_URL"]
                                   ?? Environment.GetEnvironmentVariable("Postgres.DATABASE_URL")
