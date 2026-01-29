@@ -277,10 +277,8 @@ namespace NextShopV2.Api.Extensions
             services.AddScoped<NextShopV2.Application.Interfaces.IUserRepository, NextShopV2.Infrastructure.Repositories.UserRepository>();
             services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementService, NextShopV2.Application.Services.AdvertisementService>();
             services.AddScoped<NextShopV2.Application.Interfaces.IAdvertisementRepository, NextShopV2.Infrastructure.Repositories.AdvertisementRepository>();
-            services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementService, NextShopV2.Application.Services.AnnouncementService>();
-            services.AddScoped<NextShopV2.Application.Interfaces.IAnnouncementRepository, NextShopV2.Infrastructure.Repositories.AnnouncementRepository>();
-            services.AddScoped<NextShopV2.Application.Interfaces.IFooterInfoService, NextShopV2.Application.UseCases.FooterInfoService>();
-            services.AddScoped<NextShopV2.Domain.Repositories.IFooterInfoRepository, NextShopV2.Infrastructure.Repositories.FooterInfoRepository>();
+            services.AddScoped<NextShopV2.Application.Interfaces.IMarketingElementService, NextShopV2.Application.Services.MarketingElementService>();
+            services.AddScoped<NextShopV2.Application.Interfaces.IMarketingElementRepository, NextShopV2.Infrastructure.Repositories.MarketingElementRepository>();
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductService, NextShopV2.Application.Services.ProductService>();
             services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IProductRepository, NextShopV2.Infrastructure.Repositories.ProductRepository>();
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IUploadService, NextShopV2.Application.Services.UploadService>();
