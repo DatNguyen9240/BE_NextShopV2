@@ -12,8 +12,8 @@ using NextShopV2.Infrastructure.Persistence;
 namespace NextShopV2.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260129020415_MergeAnnouncementAndFooterToMarketingElement")]
-    partial class MergeAnnouncementAndFooterToMarketingElement
+    [Migration("20260129033752_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
