@@ -115,7 +115,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "MfaEnabled",
                 table: "Users",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -149,7 +149,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "EmailVerified",
                 table: "Users",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -442,7 +442,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "PushTokens",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -519,7 +519,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsDefault",
                 table: "ProductVariants",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -527,7 +527,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "ProductVariants",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -645,7 +645,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "Products",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -773,7 +773,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "ProductAttributes",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -1316,7 +1316,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsSuccessful",
                 table: "NotificationHistories",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -1483,7 +1483,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "Coupons",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -1666,7 +1666,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
                 table: "AttributeValues",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -1788,7 +1788,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<bool>(
                 name: "IsDefault",
                 table: "Addresses",
-                type: "bit",
+                type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldType: "boolean");
@@ -1816,7 +1816,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     ClassName = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -1955,7 +1955,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "GoogleId",
@@ -1989,7 +1989,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
@@ -2282,7 +2282,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "DeviceId",
@@ -2359,7 +2359,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
@@ -2367,7 +2367,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImgHover",
@@ -2485,7 +2485,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "GenderTarget",
@@ -2613,7 +2613,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "InputType",
@@ -3156,7 +3156,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
@@ -3323,7 +3323,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "EndDate",
@@ -3506,7 +3506,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<int>(
                 name: "DisplayOrder",
@@ -3628,7 +3628,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 oldClrType: typeof(bool),
-                oldType: "bit");
+                oldType: "boolean");
 
             migrationBuilder.AlterColumn<string>(
                 name: "FullAddress",
