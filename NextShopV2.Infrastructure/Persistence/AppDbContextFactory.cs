@@ -45,44 +45,22 @@ namespace NextShopV2.Infrastructure.Persistence
             var dbUser = Environment.GetEnvironmentVariable("DB_USER");
             var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
             
-            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-            if (!string.IsNullOrEmpty(databaseUrl))
+            string sqlConn;
+            if (!string.IsNullOrEmpty(defaultConn))
             {
-                // DATABASE_URL expected in format: postgres://user:pass@host:port/dbname
-                var uri = new Uri(databaseUrl);
-                var userInfo = uri.UserInfo.Split(':', 2);
-                var builder = new Npgsql.NpgsqlConnectionStringBuilder
-                {
-                    Host = uri.Host,
-                    Port = uri.Port <= 0 ? 5432 : uri.Port,
-                    Username = userInfo.Length > 0 ? userInfo[0] : null,
-                    Password = userInfo.Length > 1 ? userInfo[1] : null,
-                    Database = uri.AbsolutePath.TrimStart('/'),
-                    TrustServerCertificate = true,
-                };
-
-                optionsBuilder.UseNpgsql(builder.ConnectionString);
+                sqlConn = defaultConn;
+            }
+            else if (!string.IsNullOrEmpty(dbHost) && !string.IsNullOrEmpty(dbName))
+            {
+                sqlConn = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
             }
             else
             {
-                string sqlConn;
-                if (!string.IsNullOrEmpty(defaultConn))
-                {
-                    sqlConn = defaultConn;
-                }
-                else if (!string.IsNullOrEmpty(dbHost) && !string.IsNullOrEmpty(dbName))
-                {
-                    sqlConn = $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
-                }
-                else
-                {
-                    // Fallback using the credentials from your .env as a template
-                    sqlConn = "Server=localhost\\SQLEXPRESS03;Database=NextShopDB;User Id=sa;Password=12345;TrustServerCertificate=True;";
-                }
-
-                optionsBuilder.UseSqlServer(sqlConn);
+                // Fallback using the credentials from your .env as a template
+                sqlConn = "Server=localhost\\SQLEXPRESS03;Database=NextShopDB;User Id=sa;Password=12345;TrustServerCertificate=True;";
             }
+
+            optionsBuilder.UseSqlServer(sqlConn);
 
             return new AppDbContext(optionsBuilder.Options);
         }
