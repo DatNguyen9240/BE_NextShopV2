@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,57 +91,6 @@ using (var scope = app.Services.CreateScope())
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
         context.Database.Migrate();
         Console.WriteLine("✅ Database migration completed successfully.");
-
-        // Log DB metadata to help debug missing table issues (database, search_path, existence of advertisements table)
-        try
-        {
-            var conn = context.Database.GetDbConnection();
-            conn.Open();
-            using var cmd = conn.CreateCommand();
-
-            cmd.CommandText = "SELECT current_database();";
-            var db = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
-
-            cmd.CommandText = "SHOW search_path;";
-            var searchPath = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
-
-            cmd.CommandText = "SELECT to_regclass('public.advertisements')::text;";
-            var toReg = cmd.ExecuteScalar()?.ToString() ?? "NULL";
-
-            // List matching tables in any schema
-            cmd.CommandText = "SELECT table_schema, table_name FROM information_schema.tables WHERE lower(table_name) LIKE 'advert%';";
-            var tables = new List<string>();
-            using (var rdr = cmd.ExecuteReader())
-            {
-                while (rdr.Read())
-                {
-                    var schema = rdr.IsDBNull(0) ? "<null>" : rdr.GetString(0);
-                    var name = rdr.IsDBNull(1) ? "<null>" : rdr.GetString(1);
-                    tables.Add($"{schema}.{name}");
-                }
-            }
-
-            // List applied migrations
-            cmd.CommandText = "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\";";
-            var migrations = new List<string>();
-            using (var rdr2 = cmd.ExecuteReader())
-            {
-                while (rdr2.Read())
-                {
-                    migrations.Add(rdr2.IsDBNull(0) ? "<null>" : rdr2.GetString(0));
-                }
-            }
-
-            Console.WriteLine($"🗄️ Database: {db}; search_path: {searchPath}; public.advertisements: {toReg}");
-            Console.WriteLine($"📋 Matching tables: {(tables.Any() ? string.Join(", ", tables) : "<none>")}");
-            Console.WriteLine($"📦 Applied migrations: {(migrations.Any() ? string.Join(", ", migrations) : "<none>")}");
-
-            conn.Close();
-        }
-        catch (Exception innerEx)
-        {
-            Console.WriteLine($"⚠️ Failed to query DB metadata: {innerEx.Message}");
-        }
     }
     catch (Exception ex)
     {
