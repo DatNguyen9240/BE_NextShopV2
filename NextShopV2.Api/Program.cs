@@ -123,7 +123,7 @@ using (var scope = app.Services.CreateScope())
             }
 
             // List applied migrations
-            cmd.CommandText = "SELECT MigrationId FROM \"__EFMigrationsHistory\" ORDER BY MigrationId;";
+            cmd.CommandText = "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\";";
             var migrations = new List<string>();
             using (var rdr2 = cmd.ExecuteReader())
             {
