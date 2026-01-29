@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,26 @@ using (var scope = app.Services.CreateScope())
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
         context.Database.Migrate();
         Console.WriteLine("✅ Database migration completed successfully.");
+
+        // Log DB metadata to help debug missing table issues (database, search_path, existence of advertisements table)
+        try
+        {
+            var conn = context.Database.GetDbConnection();
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT current_database();";
+            var db = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
+            cmd.CommandText = "SHOW search_path;";
+            var searchPath = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
+            cmd.CommandText = "SELECT to_regclass('public.advertisements');";
+            var toReg = cmd.ExecuteScalar()?.ToString() ?? "NULL";
+            Console.WriteLine($"🗄️ Database: {db}; search_path: {searchPath}; public.advertisements: {toReg}");
+            conn.Close();
+        }
+        catch (Exception innerEx)
+        {
+            Console.WriteLine($"⚠️ Failed to query DB metadata: {innerEx.Message}");
+        }
     }
     catch (Exception ex)
     {
