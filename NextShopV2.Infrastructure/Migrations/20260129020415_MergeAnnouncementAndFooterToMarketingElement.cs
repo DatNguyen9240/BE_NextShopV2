@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -56,7 +56,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeValueId",
                 table: "VariantAttributeValues",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -64,7 +64,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
                 table: "VariantAttributeValues",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -182,7 +182,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
                 table: "Users",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -198,7 +198,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipmentId",
                 table: "TrackingEvents",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -239,7 +239,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "TrackingEventId",
                 table: "TrackingEvents",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -263,7 +263,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipperId",
                 table: "Shipments",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
@@ -272,7 +272,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
                 table: "Shipments",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -350,7 +350,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipmentId",
                 table: "Shipments",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -358,7 +358,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "Reviews",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -374,7 +374,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "Reviews",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -398,7 +398,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ReviewId",
                 table: "Reviews",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -406,7 +406,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "PushTokens",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
@@ -467,7 +467,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "PushTokenId",
                 table: "PushTokens",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -500,7 +500,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "ProductVariants",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -595,7 +595,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
                 table: "ProductVariants",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -709,7 +709,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "Products",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -725,7 +725,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "ProductLikes",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -733,7 +733,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "ProductLikes",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -749,7 +749,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
                 table: "ProductCategories",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -757,7 +757,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "ProductCategories",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -790,7 +790,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeId",
                 table: "ProductAttributes",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -824,7 +824,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
                 table: "Payments",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -860,7 +860,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "PaymentId",
                 table: "Payments",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -868,7 +868,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "Passkeys",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -926,7 +926,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "Orders",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1064,7 +1064,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
                 table: "Orders",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1090,7 +1090,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
                 table: "OrderItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
@@ -1173,7 +1173,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
                 table: "OrderItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
@@ -1182,7 +1182,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
                 table: "OrderItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1202,7 +1202,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderItemId",
                 table: "OrderItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1248,7 +1248,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CouponId",
                 table: "OrderCoupons",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1256,7 +1256,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
                 table: "OrderCoupons",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1376,7 +1376,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "NotificationHistoryId",
                 table: "NotificationHistories",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1384,7 +1384,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
                 table: "InventoryTransactions",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1424,7 +1424,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "TransactionId",
                 table: "InventoryTransactions",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1519,7 +1519,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CouponId",
                 table: "Coupons",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1535,7 +1535,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeId",
                 table: "CategoryAttributes",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1543,7 +1543,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
                 table: "CategoryAttributes",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1551,7 +1551,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "ParentId",
                 table: "Categories",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
@@ -1594,7 +1594,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
                 table: "Categories",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1602,7 +1602,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "Carts",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1618,7 +1618,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CartId",
                 table: "Carts",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1626,7 +1626,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
                 table: "CartItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1642,7 +1642,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CartId",
                 table: "CartItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1650,7 +1650,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "CartItemId",
                 table: "CartItems",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1682,7 +1682,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeId",
                 table: "AttributeValues",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1690,7 +1690,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeValueId",
                 table: "AttributeValues",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1746,7 +1746,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
                 table: "Advertisements",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1754,7 +1754,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 table: "Addresses",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1804,7 +1804,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "AddressId",
                 table: "Addresses",
-                type: "uniqueidentifier",
+                type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
@@ -1813,7 +1813,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "MarketingElements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -1896,7 +1896,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
@@ -1904,7 +1904,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -2022,7 +2022,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -2038,7 +2038,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Location",
@@ -2079,7 +2079,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TrackingNumber",
@@ -2103,7 +2103,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
+                oldType: "uuid",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2112,7 +2112,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastLocationUpdate",
@@ -2190,7 +2190,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -2198,7 +2198,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<int>(
                 name: "Rating",
@@ -2214,7 +2214,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2238,7 +2238,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -2246,7 +2246,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
+                oldType: "uuid",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2307,7 +2307,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ThumbnailUrl",
@@ -2340,7 +2340,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "PriceAfterDiscount",
@@ -2435,7 +2435,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -2549,7 +2549,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2565,7 +2565,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
@@ -2573,7 +2573,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "AssignedAt",
@@ -2589,7 +2589,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
@@ -2597,7 +2597,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -2630,7 +2630,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -2664,7 +2664,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Method",
@@ -2700,7 +2700,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -2708,7 +2708,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Transports",
@@ -2766,7 +2766,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "TotalAmount",
@@ -2904,7 +2904,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "VariantSku",
@@ -2930,7 +2930,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
+                oldType: "uuid",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<decimal>(
@@ -3013,7 +3013,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
+                oldType: "uuid",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -3022,7 +3022,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "DiscountAmount",
@@ -3042,7 +3042,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -3088,7 +3088,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "OrderId",
@@ -3096,7 +3096,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "UserId",
@@ -3216,7 +3216,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
@@ -3224,7 +3224,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Reason",
@@ -3264,7 +3264,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<int>(
                 name: "UsedCount",
@@ -3359,7 +3359,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "AssignedAt",
@@ -3375,7 +3375,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CategoryId",
@@ -3383,7 +3383,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ParentId",
@@ -3391,7 +3391,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
+                oldType: "uuid",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3434,7 +3434,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -3442,7 +3442,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -3458,7 +3458,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "VariantId",
@@ -3466,7 +3466,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<int>(
                 name: "Quantity",
@@ -3482,7 +3482,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CartItemId",
@@ -3490,7 +3490,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Value",
@@ -3522,7 +3522,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "AttributeValueId",
@@ -3530,7 +3530,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Type",
@@ -3586,7 +3586,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -3594,7 +3594,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.AlterColumn<string>(
                 name: "RecipientName",
@@ -3644,7 +3644,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "uuid",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uuid");
 
             migrationBuilder.CreateTable(
                 name: "Announcements",
