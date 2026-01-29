@@ -17,10 +17,9 @@ namespace NextShopV2.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
                 {
@@ -38,7 +37,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.CartItem", b =>
@@ -62,7 +61,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Coupons.Coupon", b =>
@@ -104,7 +103,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("CouponId");
 
-                    b.ToTable("Coupons");
+                    b.ToTable("Coupons", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
@@ -122,7 +121,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProductLikes");
+                    b.ToTable("ProductLikes", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.Review", b =>
@@ -153,7 +152,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Marketing.Advertisement", b =>
@@ -186,7 +185,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Advertisements");
+                    b.ToTable("Advertisements", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Marketing.MarketingElement", b =>
@@ -214,7 +213,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketingElements");
+                    b.ToTable("MarketingElements", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Notifications.NotificationHistory", b =>
@@ -266,7 +265,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("NotificationHistoryId");
 
-                    b.ToTable("NotificationHistories");
+                    b.ToTable("NotificationHistories", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Notifications.PushToken", b =>
@@ -301,7 +300,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("PushTokenId");
 
-                    b.ToTable("PushTokens");
+                    b.ToTable("PushTokens", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Order", b =>
@@ -363,7 +362,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.OrderCoupon", b =>
@@ -392,7 +391,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("CouponId");
 
-                    b.ToTable("OrderCoupons");
+                    b.ToTable("OrderCoupons", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.OrderItem", b =>
@@ -451,7 +450,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Shipment", b =>
@@ -506,7 +505,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("ShipperId");
 
-                    b.ToTable("Shipments");
+                    b.ToTable("Shipments", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.TrackingEvent", b =>
@@ -539,7 +538,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("ShipmentId");
 
-                    b.ToTable("TrackingEvents");
+                    b.ToTable("TrackingEvents", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Payments.Payment", b =>
@@ -576,7 +575,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.AttributeValue", b =>
@@ -602,7 +601,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.ToTable("AttributeValues");
+                    b.ToTable("AttributeValues", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Category", b =>
@@ -631,7 +630,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.CategoryAttribute", b =>
@@ -649,7 +648,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.ToTable("CategoryAttributes");
+                    b.ToTable("CategoryAttributes", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.InventoryTransaction", b =>
@@ -679,7 +678,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("InventoryTransactions");
+                    b.ToTable("InventoryTransactions", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.Product", b =>
@@ -728,7 +727,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductAttribute", b =>
@@ -749,7 +748,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("AttributeId");
 
-                    b.ToTable("ProductAttributes");
+                    b.ToTable("ProductAttributes", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductCategory", b =>
@@ -767,7 +766,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.ProductVariant", b =>
@@ -824,7 +823,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariants");
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Products.VariantAttributeValue", b =>
@@ -839,7 +838,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("AttributeValueId");
 
-                    b.ToTable("VariantAttributeValues");
+                    b.ToTable("VariantAttributeValues", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Security.Passkey", b =>
@@ -876,7 +875,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Passkeys");
+                    b.ToTable("Passkeys", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Users.Address", b =>
@@ -909,7 +908,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Users.User", b =>
@@ -966,7 +965,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
