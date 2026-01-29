@@ -103,7 +103,7 @@ using (var scope = app.Services.CreateScope())
             var db = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
             cmd.CommandText = "SHOW search_path;";
             var searchPath = cmd.ExecuteScalar()?.ToString() ?? "<unknown>";
-            cmd.CommandText = "SELECT to_regclass('public.advertisements');";
+            cmd.CommandText = "SELECT to_regclass('public.advertisements')::text;";
             var toReg = cmd.ExecuteScalar()?.ToString() ?? "NULL";
             Console.WriteLine($"🗄️ Database: {db}; search_path: {searchPath}; public.advertisements: {toReg}");
             conn.Close();

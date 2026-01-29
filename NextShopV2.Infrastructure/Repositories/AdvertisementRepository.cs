@@ -40,22 +40,22 @@ namespace NextShopV2.Infrastructure.Repositories
             {
                 if (delta > 0)
                 {
-                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Advertisements SET SortOrder = SortOrder + {delta} WHERE (Type IS NULL OR Type = '') AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
+                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE public.advertisements SET SortOrder = SortOrder + {delta} WHERE (Type IS NULL OR Type = '') AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
                 }
                 else
                 {
-                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Advertisements SET SortOrder = SortOrder - {Math.Abs(delta)} WHERE (Type IS NULL OR Type = '') AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
+                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE public.advertisements SET SortOrder = SortOrder - {Math.Abs(delta)} WHERE (Type IS NULL OR Type = '') AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
                 }
             }
             else
             {
                 if (delta > 0)
                 {
-                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Advertisements SET SortOrder = SortOrder + {delta} WHERE LOWER(Type) = LOWER({normalizedType}) AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
+                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE public.advertisements SET SortOrder = SortOrder + {delta} WHERE LOWER(Type) = LOWER({normalizedType}) AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
                 }
                 else
                 {
-                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Advertisements SET SortOrder = SortOrder - {Math.Abs(delta)} WHERE LOWER(Type) = LOWER({normalizedType}) AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
+                    await _context.Database.ExecuteSqlInterpolatedAsync($"UPDATE public.advertisements SET SortOrder = SortOrder - {Math.Abs(delta)} WHERE LOWER(Type) = LOWER({normalizedType}) AND SortOrder >= {startInclusive} AND SortOrder <= {endInclusive}");
                 }
             }
         }
