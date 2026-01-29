@@ -11,6 +11,9 @@ namespace NextShopV2.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Drop if exists
+            migrationBuilder.Sql("DROP TABLE IF EXISTS \"MarketingElements\";");
+
             // Create the new MarketingElements table
             migrationBuilder.CreateTable(
                 name: "MarketingElements",
