@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,12 +90,45 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<NextShopV2.Infrastructure.Persistence.AppDbContext>();
+
+        // Detect provider and model hints to avoid applying Postgres migrations on SQL Server
+        var providerName = context.Database.ProviderName ?? "unknown";
+        var modelUsesPostgresTypes = context.Model.GetEntityTypes()
+            .SelectMany(e => e.GetProperties())
+            .Any(p => {
+                var ct = p.GetColumnType();
+                if (!string.IsNullOrEmpty(ct))
+                {
+                    var lower = ct.ToLowerInvariant();
+                    if (lower.Contains("timestamp with time zone") || lower.Contains("uuid") || lower.Contains("character varying") || lower.Contains("numeric(") || lower.Contains("double precision"))
+                        return true;
+                }
+                if (p.GetAnnotations().Any(a => a.Name.StartsWith("Npgsql", StringComparison.OrdinalIgnoreCase))) return true;
+                return false;
+            });
+
+        Console.WriteLine($"ℹ️ Database provider: {providerName}. Detected Postgres-specific model types: {modelUsesPostgresTypes}.");
+
+        if (modelUsesPostgresTypes && providerName.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            var msg = "❌ Detected a provider mismatch: EF model appears configured for PostgreSQL (Npgsql types) but application is using SQL Server provider. Please set DATABASE_URL or PG* environment variables to point to a PostgreSQL database in production.";
+            Console.WriteLine(msg);
+            throw new InvalidOperationException(msg);
+        }
+
         context.Database.Migrate();
         Console.WriteLine("✅ Database migration completed successfully.");
     }
     catch (Exception ex)
     {
         Console.WriteLine($"❌ Database migration failed: {ex.Message}");
+        Console.WriteLine(ex.ToString());
+        // Fail fast in production so team notices; non-production continue running to allow local debugging.
+        if (app.Environment.IsProduction())
+        {
+            Console.WriteLine("❌ Application will stop due to database configuration error.");
+            Environment.Exit(1);
+        }
     }
 }
 
