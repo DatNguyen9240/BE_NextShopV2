@@ -81,7 +81,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Role",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -89,7 +89,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Phone",
                 table: "Users",
-                type: "nvarchar(450)",
+                type: "varchar(450)",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -98,7 +98,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "PasswordHash",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -106,7 +106,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "MfaType",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -123,7 +123,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "GoogleId",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -132,7 +132,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Gender",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -141,7 +141,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "FullName",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -157,7 +157,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -173,7 +173,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Avatar",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -190,7 +190,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "TrackingEvents",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -206,7 +206,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Location",
                 table: "TrackingEvents",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -223,7 +223,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "TrackingEvents",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -247,7 +247,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "TrackingNumber",
                 table: "Shipments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -255,7 +255,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "Shipments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -307,7 +307,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "DeliveryAddress",
                 table: "Shipments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -342,7 +342,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Carrier",
                 table: "Shipments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -390,7 +390,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Comment",
                 table: "Reviews",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -415,7 +415,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Token",
                 table: "PushTokens",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -423,7 +423,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Platform",
                 table: "PushTokens",
-                type: "nvarchar(50)",
+                type: "varchar(50)",
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(string),
@@ -450,7 +450,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "DeviceId",
                 table: "PushTokens",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -475,7 +475,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ThumbnailUrl",
                 table: "ProductVariants",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -492,7 +492,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "SKU",
                 table: "ProductVariants",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -535,7 +535,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ImgHover",
                 table: "ProductVariants",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -544,7 +544,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
                 table: "ProductVariants",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -628,7 +628,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "TagsJson",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -637,7 +637,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -653,7 +653,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "GenderTarget",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -662,7 +662,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -679,7 +679,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Brand",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -700,7 +700,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "AdditionalInfo",
                 table: "Products",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -765,7 +765,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "ProductAttributes",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -781,7 +781,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "InputType",
                 table: "ProductAttributes",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -798,7 +798,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "Payments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -806,7 +806,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderPaymentId",
                 table: "Payments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -815,7 +815,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderData",
                 table: "Payments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -832,7 +832,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Method",
                 table: "Payments",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -876,7 +876,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Transports",
                 table: "Passkeys",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -885,7 +885,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "PublicKey",
                 table: "Passkeys",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -902,7 +902,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "CredentialId",
                 table: "Passkeys",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -918,7 +918,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Id",
                 table: "Passkeys",
-                type: "nvarchar(450)",
+                type: "varchar(450)",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -956,7 +956,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -982,7 +982,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ShippingAddress",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1010,7 +1010,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "CancelledBy",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1028,7 +1028,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "CancelReason",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1037,7 +1037,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "BuyerPhone",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1046,7 +1046,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "BuyerName",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1055,7 +1055,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "AdminCancelReason",
                 table: "Orders",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1072,7 +1072,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "VariantSku",
                 table: "OrderItems",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1081,7 +1081,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "VariantOptionsJson",
                 table: "OrderItems",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1155,7 +1155,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ProductSku",
                 table: "OrderItems",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1164,7 +1164,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ProductName",
                 table: "OrderItems",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1210,7 +1210,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "OrderCoupons",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1264,7 +1264,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "UserId",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1273,7 +1273,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1281,7 +1281,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "TargetToken",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1290,7 +1290,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1324,7 +1324,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1333,7 +1333,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "FirebaseResponse",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1342,7 +1342,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ErrorMessage",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1351,7 +1351,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Data",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1368,7 +1368,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Body",
                 table: "NotificationHistories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1392,7 +1392,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Reason",
                 table: "InventoryTransactions",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1400,7 +1400,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedBy",
                 table: "InventoryTransactions",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1511,7 +1511,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Code",
                 table: "Coupons",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1560,7 +1560,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "Categories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1568,7 +1568,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
                 table: "Categories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1577,7 +1577,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Icon",
                 table: "Categories",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text",
@@ -1658,7 +1658,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Value",
                 table: "AttributeValues",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1698,7 +1698,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Type",
                 table: "Advertisements",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1706,7 +1706,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
                 table: "Advertisements",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1722,7 +1722,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "PublicId",
                 table: "Advertisements",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1730,7 +1730,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
                 table: "Advertisements",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1762,7 +1762,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "RecipientName",
                 table: "Addresses",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1796,7 +1796,7 @@ namespace NextShopV2.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "FullAddress",
                 table: "Addresses",
-                type: "nvarchar(max)",
+                type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -1814,8 +1814,8 @@ namespace NextShopV2.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ClassName = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -1921,7 +1921,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Phone",
@@ -1929,7 +1929,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
+                oldType: "varchar(450)",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -1938,7 +1938,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "MfaType",
@@ -1946,7 +1946,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
@@ -1963,7 +1963,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -1972,7 +1972,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -1981,7 +1981,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "EmailVerified",
@@ -1997,7 +1997,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2013,7 +2013,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2030,7 +2030,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipmentId",
@@ -2046,7 +2046,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2063,7 +2063,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2087,7 +2087,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -2095,7 +2095,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipperId",
@@ -2147,7 +2147,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<double>(
@@ -2182,7 +2182,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ShipmentId",
@@ -2230,7 +2230,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ReviewId",
@@ -2255,7 +2255,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Platform",
@@ -2264,7 +2264,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
+                oldType: "varchar(50)",
                 oldMaxLength: 50);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2290,7 +2290,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2315,7 +2315,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
@@ -2332,7 +2332,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProductId",
@@ -2375,7 +2375,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2384,7 +2384,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
@@ -2468,7 +2468,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2477,7 +2477,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
@@ -2493,7 +2493,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2502,7 +2502,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2519,7 +2519,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<decimal>(
@@ -2540,7 +2540,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2605,7 +2605,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
@@ -2621,7 +2621,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2638,7 +2638,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderPaymentId",
@@ -2646,7 +2646,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2655,7 +2655,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2672,7 +2672,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2716,7 +2716,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2725,7 +2725,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastUsedAt",
@@ -2742,7 +2742,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -2758,7 +2758,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(450)");
+                oldType: "varchar(450)");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
@@ -2796,7 +2796,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<double>(
                 name: "ShippingLng",
@@ -2822,7 +2822,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2850,7 +2850,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -2868,7 +2868,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2877,7 +2877,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2886,7 +2886,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2895,7 +2895,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2912,7 +2912,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -2921,7 +2921,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -2995,7 +2995,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3004,7 +3004,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
@@ -3050,7 +3050,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "ReservedAt",
@@ -3104,7 +3104,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3113,7 +3113,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TargetToken",
@@ -3121,7 +3121,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3130,7 +3130,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -3164,7 +3164,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3173,7 +3173,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3182,7 +3182,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3191,7 +3191,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -3208,7 +3208,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "NotificationHistoryId",
@@ -3232,7 +3232,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedBy",
@@ -3240,7 +3240,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -3351,7 +3351,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "CouponId",
@@ -3400,7 +3400,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
@@ -3408,7 +3408,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -3417,7 +3417,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
+                oldType: "text",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -3498,7 +3498,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsActive",
@@ -3538,7 +3538,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -3546,7 +3546,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<int>(
                 name: "SortOrder",
@@ -3562,7 +3562,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
@@ -3570,7 +3570,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -3602,7 +3602,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<double>(
                 name: "Longitude",
@@ -3636,7 +3636,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "text");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "AddressId",
