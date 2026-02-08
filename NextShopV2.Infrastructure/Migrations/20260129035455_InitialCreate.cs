@@ -343,6 +343,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     CancelledBy = table.Column<string>(type: "text", nullable: true),
                     CancelledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     SubTotal = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false),
+                    TaxAmount = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false, defaultValue: 0m),
                     DiscountAmount = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false),
                     BuyerName = table.Column<string>(type: "text", nullable: true),
