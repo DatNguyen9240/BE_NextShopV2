@@ -23,6 +23,8 @@ namespace NextShopV2.Application.DTOs.Request
         
         public bool IsActive { get; set; } = true;
         
+        public decimal? TaxRate { get; set; }
+        
         public List<string>? Tags { get; set; }
 
         // Optional: categories to assign to the product on creation

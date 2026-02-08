@@ -167,6 +167,7 @@ namespace NextShopV2.Application.Services
                 TotalLikes = 0,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = request.IsActive,
+                TaxRate = request.TaxRate,
                 Tags = request.Tags ?? new List<string>()
             };
             await _repo.AddAsync(product);
@@ -197,6 +198,7 @@ namespace NextShopV2.Application.Services
             product.GenderTarget = request.GenderTarget;
             product.Brand = request.Brand;
             product.IsActive = request.IsActive;
+            product.TaxRate = request.TaxRate;
             product.Tags = request.Tags ?? new List<string>();
             await _repo.UpdateAsync(product);
             await _repo.SaveAsync();
@@ -285,6 +287,7 @@ namespace NextShopV2.Application.Services
                 TotalReviews = p.TotalReviews,
                 TotalLikes = p.TotalLikes,
                 IsActive = includeInactiveProducts ? p.IsActive : (p.IsActive ? true : (bool?)null),
+                TaxRate = p.TaxRate,
                 Tags = (p.Tags == null || !p.Tags.Any()) ? null : p.Tags,
                 // Total stock across all variants
                 TotalStockQuantity = orderedVariants.Sum(v => v.StockQuantity),

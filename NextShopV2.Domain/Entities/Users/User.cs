@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using NextShopV2.Domain.Entities.Carts;
 using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Domain.Entities.Interactions;
 using NextShopV2.Domain.Entities.Products;
@@ -31,7 +30,6 @@ namespace NextShopV2.Domain.Entities.Users
         public DateTime? UpdatedAt { get; set; }
 
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
-        public ICollection<Cart> Carts { get; set; } = new List<Cart>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<ProductLike> ProductLikes { get; set; } = new List<ProductLike>();

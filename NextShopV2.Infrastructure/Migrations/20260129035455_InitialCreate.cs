@@ -37,7 +37,8 @@ namespace NextShopV2.Infrastructure.Migrations
                     ParentId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ImageUrl = table.Column<string>(type: "text", nullable: true),
-                    Icon = table.Column<string>(type: "text", nullable: true)
+                    Icon = table.Column<string>(type: "text", nullable: true),
+                    TaxRate = table.Column<decimal>(type: "numeric(5,4)", precision: 5, scale: 4, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -139,6 +140,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    TaxRate = table.Column<decimal>(type: "numeric(5,4)", precision: 5, scale: 4, nullable: true),
                     TagsJson = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -186,6 +188,22 @@ namespace NextShopV2.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaxSettings",
+                columns: table => new
+                {
+                    SettingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Key = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaxSettings", x => x.SettingId);
                 });
 
             migrationBuilder.CreateTable(
@@ -306,25 +324,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     table.PrimaryKey("PK_Addresses", x => x.AddressId);
                     table.ForeignKey(
                         name: "FK_Addresses_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Carts",
-                columns: table => new
-                {
-                    CartId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Carts", x => x.CartId);
-                    table.ForeignKey(
-                        name: "FK_Carts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -487,32 +486,6 @@ namespace NextShopV2.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CartItems",
-                columns: table => new
-                {
-                    CartItemId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CartId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VariantId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CartItems", x => x.CartItemId);
-                    table.ForeignKey(
-                        name: "FK_CartItems_Carts_CartId",
-                        column: x => x.CartId,
-                        principalTable: "Carts",
-                        principalColumn: "CartId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CartItems_ProductVariants_VariantId",
-                        column: x => x.VariantId,
-                        principalTable: "ProductVariants",
-                        principalColumn: "VariantId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OrderCoupons",
                 columns: table => new
                 {
@@ -668,21 +641,6 @@ namespace NextShopV2.Infrastructure.Migrations
                 column: "AttributeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartItems_CartId",
-                table: "CartItems",
-                column: "CartId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CartItems_VariantId",
-                table: "CartItems",
-                column: "VariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Carts_UserId",
-                table: "Carts",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Categories_ParentId",
                 table: "Categories",
                 column: "ParentId");
@@ -775,6 +733,12 @@ namespace NextShopV2.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TaxSettings_Key",
+                table: "TaxSettings",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VariantAttributeValues_AttributeValueId",
                 table: "VariantAttributeValues",
                 column: "AttributeValueId");
@@ -788,9 +752,6 @@ namespace NextShopV2.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Advertisements");
-
-            migrationBuilder.DropTable(
-                name: "CartItems");
 
             migrationBuilder.DropTable(
                 name: "CategoryAttributes");
@@ -829,13 +790,13 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
+                name: "TaxSettings");
+
+            migrationBuilder.DropTable(
                 name: "TrackingEvents");
 
             migrationBuilder.DropTable(
                 name: "VariantAttributeValues");
-
-            migrationBuilder.DropTable(
-                name: "Carts");
 
             migrationBuilder.DropTable(
                 name: "Coupons");

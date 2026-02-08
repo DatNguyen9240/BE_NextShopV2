@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NextShopV2.Domain.Entities.Users;
 using NextShopV2.Domain.Entities.Products;
-using NextShopV2.Domain.Entities.Carts;
 using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Domain.Entities.Interactions;
 using NextShopV2.Domain.Entities.Coupons;
@@ -25,8 +24,6 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<ProductVariant> ProductVariants { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
-        public DbSet<Cart> Carts { get; set; } = null!;
-        public DbSet<CartItem> CartItems { get; set; } = null!;
         public DbSet<Address> Addresses { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<NextShopV2.Domain.Entities.Orders.Shipment> Shipments { get; set; } = null!;
@@ -47,6 +44,9 @@ namespace NextShopV2.Infrastructure.Persistence
 
         // Passkeys (WebAuthn)
         public DbSet<NextShopV2.Domain.Entities.Security.Passkey> Passkeys { get; set; } = null!;
+
+        // Tax Settings
+        public DbSet<NextShopV2.Domain.Entities.TaxSetting> TaxSettings { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -127,6 +127,10 @@ namespace NextShopV2.Infrastructure.Persistence
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<Order>()
+                .Property(o => o.TaxAmount)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Order>()
                 .Property(o => o.DiscountAmount)
                 .HasPrecision(18, 0);
 
@@ -168,6 +172,14 @@ namespace NextShopV2.Infrastructure.Persistence
                 .Property(p => p.AverageRating)
                 .HasPrecision(5, 2);
 
+            modelBuilder.Entity<Product>()
+                .Property(p => p.TaxRate)
+                .HasPrecision(5, 4);
+
+            modelBuilder.Entity<Category>()
+                .Property(c => c.TaxRate)
+                .HasPrecision(5, 4);
+
             modelBuilder.Entity<ProductVariant>()
                 .Property(pv => pv.BasePrice)
                 .HasPrecision(18, 0);
@@ -205,6 +217,16 @@ namespace NextShopV2.Infrastructure.Persistence
 
             modelBuilder.Entity<User>(eb => {
                 eb.HasIndex(u => u.Phone).IsUnique();
+            });
+
+            // Configure TaxSetting
+            modelBuilder.Entity<NextShopV2.Domain.Entities.TaxSetting>(eb => {
+                eb.HasKey(s => s.SettingId);
+                eb.Property(s => s.Key).IsRequired().HasMaxLength(100);
+                eb.HasIndex(s => s.Key).IsUnique();
+                eb.Property(s => s.Value).IsRequired();
+                eb.Property(s => s.Description).HasMaxLength(500);
+                eb.Property(s => s.CreatedAt).IsRequired();
             });
 
             base.OnModelCreating(modelBuilder);

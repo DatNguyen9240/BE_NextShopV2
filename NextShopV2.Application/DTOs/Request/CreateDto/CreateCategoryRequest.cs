@@ -12,5 +12,7 @@ namespace NextShopV2.Application.DTOs.Request
         public string Name { get; set; } = null!;
 
         public Guid? ParentId { get; set; }
+        
+        public decimal? TaxRate { get; set; }
     }
 }

@@ -15,5 +15,7 @@ namespace NextShopV2.Application.DTOs.Response
         public int StockQuantity { get; set; }
         public bool IsActive { get; set; }
         public bool ProductIsActive { get; set; }
+        // Tax rate applicable to this variant (from product, category, or system default)
+        public decimal TaxRate { get; set; }
     }
 } 

@@ -30,6 +30,8 @@ namespace NextShopV2.Infrastructure.Repositories
         {
             return await _context.ProductVariants
                 .Include(v => v.Product)
+                    .ThenInclude(p => p.ProductCategories)
+                        .ThenInclude(pc => pc.Category)
                 .FirstOrDefaultAsync(v => v.VariantId == id);
         }
 

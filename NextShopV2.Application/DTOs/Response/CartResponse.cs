@@ -8,6 +8,10 @@ namespace NextShopV2.Application.DTOs.Response
         public List<CartItemDto> Items { get; set; } = new List<CartItemDto>();
         public decimal TotalAmount { get; set; }
         public int TotalItems { get; set; }
+        
+        // Tax breakdown
+        public decimal SubtotalBeforeTax { get; set; }
+        public decimal TaxAmount { get; set; }
     }
 
     public class CartItemDto
@@ -18,5 +22,10 @@ namespace NextShopV2.Application.DTOs.Response
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
         public object? VariantInfo { get; set; }
+        
+        // Tax information for this item
+        public decimal TaxRate { get; set; }
+        public decimal PriceBeforeTax { get; set; }
+        public decimal TaxAmount { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace NextShopV2.Application.DTOs.Response
         public string Name { get; set; } = null!;
         public Guid? ParentId { get; set; }
         public DateTime CreatedAt { get; set; }
+        public decimal? TaxRate { get; set; }
         public string? ParentName { get; set; }
         public List<CategoryResponse> Children { get; set; } = new List<CategoryResponse>();
     }

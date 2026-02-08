@@ -10,6 +10,7 @@ namespace NextShopV2.Application.DTOs.Response
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = null!;
         public decimal SubTotal { get; set; }
+        public decimal TaxAmount { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal TotalAmount { get; set; }
 

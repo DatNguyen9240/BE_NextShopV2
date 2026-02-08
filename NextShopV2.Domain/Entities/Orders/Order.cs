@@ -16,9 +16,10 @@ namespace NextShopV2.Domain.Entities.Orders
         public string? AdminCancelReason { get; set; }
         public string? CancelledBy { get; set; }
         public DateTime? CancelledAt { get; set; }
-        public decimal SubTotal { get; set; } // Total before discount
-        public decimal DiscountAmount { get; set; } = 0; // Total discount applied
-        public decimal TotalAmount { get; set; } // Final amount after discount
+        public decimal SubTotal { get; set; } // Total before discount and tax (price only)
+        public decimal TaxAmount { get; set; } = 0; // Total tax amount (calculated on price after discount)
+        public decimal DiscountAmount { get; set; } = 0; // Total discount applied (on price only)
+        public decimal TotalAmount { get; set; } // Final amount: (SubTotal - DiscountAmount) + TaxAmount
 
         // Buyer information (for payment records)
         public string? BuyerName { get; set; }

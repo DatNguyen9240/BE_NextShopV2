@@ -19,6 +19,8 @@ namespace NextShopV2.Application.DTOs.Response
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? IsActive { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public decimal? TaxRate { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<string>? Tags { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<ProductVariantResponse>? Variants { get; set; }

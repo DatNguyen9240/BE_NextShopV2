@@ -20,6 +20,9 @@ namespace NextShopV2.Domain.Entities.Products
         public DateTime? UpdatedAt { get; set; }
         public bool IsActive { get; set; } = true;
 
+        // Tax rate for this product (nullable - if null, use category or system default)
+        public decimal? TaxRate { get; set; }
+
         // Store tags as JSON in the DB column
         public string? TagsJson { get; set; }
 

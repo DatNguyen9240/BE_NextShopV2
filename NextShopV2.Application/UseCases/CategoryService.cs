@@ -43,7 +43,8 @@ namespace NextShopV2.Application.Services
                 ParentId = request.ParentId,
                 CreatedAt = DateTime.UtcNow,
                 ImageUrl = request.ImageUrl,
-                Icon = request.Icon
+                Icon = request.Icon,
+                TaxRate = request.TaxRate
             };
 
             var createdCategory = await _categoryRepository.AddAsync(category);
@@ -57,6 +58,7 @@ namespace NextShopV2.Application.Services
                 CreatedAt = createdCategory.CreatedAt,
                 ImageUrl = createdCategory.ImageUrl,
                 Icon = createdCategory.Icon,
+                TaxRate = createdCategory.TaxRate,
                 ParentName = request.ParentId.HasValue 
                     ? await _categoryRepository.GetParentNameAsync(request.ParentId.Value) 
                     : null
@@ -115,6 +117,9 @@ namespace NextShopV2.Application.Services
 
             category.Name = request.Name;
             category.ParentId = request.ParentId;
+            category.ImageUrl = request.ImageUrl;
+            category.Icon = request.Icon;
+            category.TaxRate = request.TaxRate;
 
             var updatedCategory = await _categoryRepository.UpdateAsync(category);
 
@@ -124,6 +129,9 @@ namespace NextShopV2.Application.Services
                 Name = updatedCategory.Name,
                 ParentId = updatedCategory.ParentId,
                 CreatedAt = updatedCategory.CreatedAt,
+                ImageUrl = updatedCategory.ImageUrl,
+                Icon = updatedCategory.Icon,
+                TaxRate = updatedCategory.TaxRate,
                 ParentName = request.ParentId.HasValue 
                     ? await _categoryRepository.GetParentNameAsync(request.ParentId.Value) 
                     : null
@@ -197,6 +205,9 @@ namespace NextShopV2.Application.Services
                 Name = category.Name,
                 ParentId = category.ParentId,
                 CreatedAt = category.CreatedAt,
+                ImageUrl = category.ImageUrl,
+                Icon = category.Icon,
+                TaxRate = category.TaxRate,
                 ParentName = category.Parent?.Name,
                 Children = category.Children?.Select(MapToResponse).ToList() ?? new List<CategoryResponse>()
             };

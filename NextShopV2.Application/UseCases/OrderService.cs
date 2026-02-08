@@ -21,8 +21,9 @@ namespace NextShopV2.Application.Services
         private readonly ICouponService _couponService;
         private readonly IUserRepository _userRepo;
         private readonly IProductAttributeService _attributeService;
+        private readonly ITaxSettingService _settingService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, IProductAttributeService attributeService)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, IProductAttributeService attributeService, ITaxSettingService settingService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
@@ -30,6 +31,7 @@ namespace NextShopV2.Application.Services
             _couponService = couponService;
             _userRepo = userRepository;
             _attributeService = attributeService;
+            _settingService = settingService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -63,13 +65,14 @@ namespace NextShopV2.Application.Services
             return orders.Select(MapToResponse).ToList();
         }
 
-        private const decimal DefaultTaxRate = 0.10m; // 10% default tax rate
-
         public async Task<OrderResponse> CreateAsync(Guid userId, CreateOrderRequest request)
         {
             // Validate request has items
             if (request.Items.IsNullOrEmpty())
                 throw new ArgumentException("Order must contain at least one item");
+
+            // Get system default tax rate from settings
+            var systemTaxRate = await _settingService.GetTaxRateAsync();
 
             // Generate order ID first
             var orderId = Guid.NewGuid();
@@ -95,7 +98,34 @@ namespace NextShopV2.Application.Services
                     // throw new ArgumentException($"Insufficient stock for variant {itemRequest.VariantId}");
                     Console.WriteLine($"Warning: Insufficient stock for variant {itemRequest.VariantId}, but proceeding for testing");
 
-                var unitPrice = variant.PriceAfterDiscount;
+                // Determine tax rate: Product TaxRate > Category TaxRate > System Default
+                decimal itemTaxRate = systemTaxRate;
+                
+                if (variant.Product != null)
+                {
+                    // Priority 1: Product-specific tax rate
+                    if (variant.Product.TaxRate.HasValue)
+                    {
+                        itemTaxRate = variant.Product.TaxRate.Value;
+                    }
+                    // Priority 2: Category tax rate (use first category if product has multiple)
+                    else if (variant.Product.ProductCategories != null && variant.Product.ProductCategories.Any())
+                    {
+                        var firstCategory = variant.Product.ProductCategories.FirstOrDefault()?.Category;
+                        if (firstCategory?.TaxRate.HasValue == true)
+                        {
+                            itemTaxRate = firstCategory.TaxRate.Value;
+                        }
+                    }
+                }
+                // Priority 3: System default (already set above)
+
+                var unitPrice = variant.PriceAfterDiscount; // Price excluding tax
+                var lineTotal = unitPrice * itemRequest.Quantity;
+                
+                // Calculate tax (tax-exclusive): add tax on top of price
+                var taxAmount = Math.Round(lineTotal * itemTaxRate, 0, MidpointRounding.AwayFromZero);
+                
                 var orderItem = new OrderItem
                 {
                     OrderItemId = Guid.NewGuid(),
@@ -109,9 +139,9 @@ namespace NextShopV2.Application.Services
                     ProductSku = variant.SKU,
                     VariantOptionsJson = JsonSerializer.Serialize(new { attributes = await _attributeService.GetVariantAttributeMapAsync(variant.VariantId), imageUrl = variant.ImageUrl }),
                     DiscountAmount = 0m,
-                    TaxRate = DefaultTaxRate,
-                    TaxAmount = Math.Round(unitPrice * itemRequest.Quantity * DefaultTaxRate, 0),
-                    TotalAmount = Math.Round(unitPrice * itemRequest.Quantity - 0m + Math.Round(unitPrice * itemRequest.Quantity * DefaultTaxRate, 0), 0)
+                    TaxRate = itemTaxRate,
+                    TaxAmount = taxAmount,
+                    TotalAmount = lineTotal + taxAmount // Total = Price + Tax
                 };
 
                 orderItems.Add(orderItem);
@@ -164,7 +194,7 @@ namespace NextShopV2.Application.Services
                 for (int i = 0; i < orderItems.Count; i++)
                 {
                     var item = orderItems[i];
-                    var lineTotal = item.Quantity * item.UnitPrice;
+                    var lineTotal = item.Quantity * item.UnitPrice; // Price excluding tax
                     var share = lineTotal / totalAmount;
                     var itemDiscount = (decimal)Math.Round(discountAmount * share, 0);
                     // assign remainder to last item to avoid rounding gaps
@@ -172,84 +202,82 @@ namespace NextShopV2.Application.Services
                     else remaining -= itemDiscount;
 
                     item.DiscountAmount = itemDiscount;
-                    item.TotalAmount = Math.Round(lineTotal - item.DiscountAmount + item.TaxAmount, 0);
+                    
+                    // Recalculate tax based on discounted price (tax-exclusive)
+                    var discountedPrice = lineTotal - itemDiscount;
+                    item.TaxAmount = Math.Round(discountedPrice * item.TaxRate, 0, MidpointRounding.AwayFromZero);
+                    item.TotalAmount = discountedPrice + item.TaxAmount; // Total = (Price - Discount) + Tax
                 }
             }
-            else
+
+            var orderTaxAmount = orderItems.Sum(i => i.TaxAmount);
+            var finalAmount = Math.Max(0, orderItems.Sum(i => i.TotalAmount));
+
+            // Fetch user info (name, phone) and default address from DB instead of taking from request
+            var user = _userRepo.GetById(userId);
+            if (user == null)
+                throw new ArgumentException($"User {userId} not found");
+
+            var buyerName = user.FullName;
+            var buyerPhone = user.Phone;
+            string? shippingAddress = null;
+            double? shippingLat = null;
+            double? shippingLng = null;
+            var defaultAddress = user.Addresses?.FirstOrDefault(a => a.IsDefault) ?? user.Addresses?.FirstOrDefault();
+            if (defaultAddress != null)
             {
-                // Ensure TotalAmount fields are set (tax already computed earlier)
-                foreach (var it in orderItems)
-                {
-                    it.TotalAmount = Math.Round(it.Quantity * it.UnitPrice - it.DiscountAmount + it.TaxAmount, 2);
-                }
+                shippingAddress = defaultAddress.FullAddress;
+                shippingLat = defaultAddress.Latitude;
+                shippingLng = defaultAddress.Longitude;
             }
 
-                var finalAmount = Math.Max(0, orderItems.Sum(i => i.TotalAmount) - discountAmount);
+            // Override with request values if provided
+            if (!string.IsNullOrWhiteSpace(request.ShippingAddress))
+                shippingAddress = request.ShippingAddress;
+            if (request.ShippingLat.HasValue)
+                shippingLat = request.ShippingLat.Value;
+            if (request.ShippingLng.HasValue)
+                shippingLng = request.ShippingLng.Value;
 
-                // Fetch user info (name, phone) and default address from DB instead of taking from request
-                var user = _userRepo.GetById(userId);
-                if (user == null)
-                    throw new ArgumentException($"User {userId} not found");
+            // Validate required profile info
+            if (string.IsNullOrWhiteSpace(buyerPhone))
+                throw new ArgumentException("Vui lòng cập nhật số điện thoại trong hồ sơ trước khi đặt hàng");
+            if (string.IsNullOrWhiteSpace(shippingAddress))
+                throw new ArgumentException("Vui lòng cập nhật địa chỉ giao hàng mặc định trong hồ sơ trước khi đặt hàng");
 
-                var buyerName = user.FullName;
-                var buyerPhone = user.Phone;
-                string? shippingAddress = null;
-                double? shippingLat = null;
-                double? shippingLng = null;
-                var defaultAddress = user.Addresses?.FirstOrDefault(a => a.IsDefault) ?? user.Addresses?.FirstOrDefault();
-                if (defaultAddress != null)
+            var order = new Order
+            {
+                OrderId = orderId,
+                UserId = userId,
+                OrderDate = DateTime.UtcNow,
+                Status = "Pending",
+                SubTotal = totalAmount,
+                TaxAmount = orderTaxAmount,
+                DiscountAmount = discountAmount,
+                TotalAmount = finalAmount,
+                BuyerName = buyerName,
+                BuyerPhone = buyerPhone,
+                ShippingAddress = shippingAddress,
+                ShippingLat = shippingLat,
+                ShippingLng = shippingLng,
+                Items = orderItems,
+                OrderCoupons = orderCoupons,
+                // Không còn CouponId, coupon
+            };
+
+            // If payment method is COD, create a pending Payment record so collection can be tracked
+            if (!string.IsNullOrEmpty(request.PaymentMethod) && request.PaymentMethod.Equals("COD", StringComparison.OrdinalIgnoreCase))
+            {
+                order.Payments.Add(new NextShopV2.Domain.Entities.Payments.Payment
                 {
-                    shippingAddress = defaultAddress.FullAddress;
-                    shippingLat = defaultAddress.Latitude;
-                    shippingLng = defaultAddress.Longitude;
-                }
-
-                // Override with request values if provided
-                if (!string.IsNullOrWhiteSpace(request.ShippingAddress))
-                    shippingAddress = request.ShippingAddress;
-                if (request.ShippingLat.HasValue)
-                    shippingLat = request.ShippingLat.Value;
-                if (request.ShippingLng.HasValue)
-                    shippingLng = request.ShippingLng.Value;
-
-                // Validate required profile info
-                if (string.IsNullOrWhiteSpace(buyerPhone))
-                    throw new ArgumentException("Vui lòng cập nhật số điện thoại trong hồ sơ trước khi đặt hàng");
-                if (string.IsNullOrWhiteSpace(shippingAddress))
-                    throw new ArgumentException("Vui lòng cập nhật địa chỉ giao hàng mặc định trong hồ sơ trước khi đặt hàng");
-
-                var order = new Order
-                {
+                    PaymentId = Guid.NewGuid(),
                     OrderId = orderId,
-                    UserId = userId,
-                    OrderDate = DateTime.UtcNow,
+                    Method = "COD",
+                    Amount = finalAmount,
                     Status = "Pending",
-                    SubTotal = totalAmount,
-                    DiscountAmount = discountAmount,
-                    TotalAmount = finalAmount,
-                    BuyerName = buyerName,
-                    BuyerPhone = buyerPhone,
-                    ShippingAddress = shippingAddress,
-                    ShippingLat = shippingLat,
-                    ShippingLng = shippingLng,
-                    Items = orderItems,
-                    OrderCoupons = orderCoupons,
-                    // Không còn CouponId, coupon
-                };
-
-                // If payment method is COD, create a pending Payment record so collection can be tracked
-                if (!string.IsNullOrEmpty(request.PaymentMethod) && request.PaymentMethod.Equals("COD", StringComparison.OrdinalIgnoreCase))
-                {
-                    order.Payments.Add(new NextShopV2.Domain.Entities.Payments.Payment
-                    {
-                        PaymentId = Guid.NewGuid(),
-                        OrderId = orderId,
-                        Method = "COD",
-                        Amount = finalAmount,
-                        Status = "Pending",
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
 
             try
             {
@@ -391,6 +419,7 @@ namespace NextShopV2.Application.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status,
                 SubTotal = order.SubTotal,
+                TaxAmount = order.TaxAmount,
                 DiscountAmount = order.DiscountAmount,
                 TotalAmount = order.TotalAmount,
                 BuyerName = order.BuyerName,
@@ -409,6 +438,7 @@ namespace NextShopV2.Application.Services
                         Quantity = item.Quantity,
                         UnitPrice = item.UnitPrice,
                         DiscountAmount = item.DiscountAmount,
+                        TaxRate = item.TaxRate,
                         TaxAmount = item.TaxAmount,
                         TotalAmount = item.TotalAmount,
                         Variant = variant == null ? null : BuildVariantResponse(variant, item.VariantOptionsJson),

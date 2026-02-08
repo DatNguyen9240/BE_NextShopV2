@@ -39,7 +39,9 @@ namespace NextShopV2.Infrastructure.Services
                     CreatedAt = DateTime.UtcNow,
                     Items = new List<CartItemDto>(),
                     TotalAmount = 0,
-                    TotalItems = 0
+                    TotalItems = 0,
+                    SubtotalBeforeTax = 0,
+                    TaxAmount = 0
                 };
             }
 
@@ -55,18 +57,32 @@ namespace NextShopV2.Infrastructure.Services
                     var variantInfo = await _variantService.GetVariantInfoAsync(redisItem.VariantId);
                     if (variantInfo != null)
                     {
+                        var priceBeforeTax = variantInfo.Price * redisItem.Quantity; // Price excluding tax
+                        var taxRate = variantInfo.TaxRate;
+                        
+                        // Calculate tax (tax-exclusive): add tax on top of price
+                        var taxAmount = Math.Round(priceBeforeTax * taxRate, 0, MidpointRounding.AwayFromZero);
+                        var totalPrice = priceBeforeTax + taxAmount; // Total = Price + Tax
+                        
                         cartItems.Add(new CartItemDto
                         {
                             CartItemId = redisItem.CartItemId,
                             VariantId = redisItem.VariantId,
                             Quantity = redisItem.Quantity,
                             UnitPrice = variantInfo.Price,
-                            TotalPrice = variantInfo.Price * redisItem.Quantity,
-                            VariantInfo = variantInfo
+                            TotalPrice = totalPrice,
+                            VariantInfo = variantInfo,
+                            TaxRate = taxRate,
+                            PriceBeforeTax = priceBeforeTax,
+                            TaxAmount = taxAmount
                         });
                     }
                 }
             }
+
+            var cartTotalAmount = cartItems.Sum(item => item.TotalPrice);
+            var cartSubtotalBeforeTax = Math.Round(cartItems.Sum(item => item.PriceBeforeTax), 0, MidpointRounding.AwayFromZero);
+            var cartTaxAmount = Math.Round(cartItems.Sum(item => item.TaxAmount), 0, MidpointRounding.AwayFromZero);
 
             return new CartDto
             {
@@ -74,8 +90,10 @@ namespace NextShopV2.Infrastructure.Services
                 UserId = userId,
                 CreatedAt = createdAt,
                 Items = cartItems,
-                TotalAmount = cartItems.Sum(item => item.TotalPrice),
-                TotalItems = cartItems.Sum(item => item.Quantity)
+                TotalAmount = cartTotalAmount,
+                TotalItems = cartItems.Sum(item => item.Quantity),
+                SubtotalBeforeTax = cartSubtotalBeforeTax,
+                TaxAmount = cartTaxAmount
             };
         }
 

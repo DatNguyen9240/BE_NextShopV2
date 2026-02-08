@@ -25,49 +25,6 @@ namespace NextShopV2.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
-                {
-                    b.Property<Guid>("CartId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CartId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.CartItem", b =>
-                {
-                    b.Property<Guid>("CartItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("VariantId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CartItemId");
-
-                    b.HasIndex("CartId");
-
-                    b.HasIndex("VariantId");
-
-                    b.ToTable("CartItems");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Coupons.Coupon", b =>
                 {
                     b.Property<Guid>("CouponId")
@@ -630,6 +587,10 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("TaxRate")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
                     b.HasKey("CategoryId");
 
                     b.HasIndex("ParentId");
@@ -719,6 +680,10 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.Property<string>("TagsJson")
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("TaxRate")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
 
                     b.Property<int>("TotalLikes")
                         .HasColumnType("integer");
@@ -972,34 +937,37 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
+            modelBuilder.Entity("NextShopV2.Domain.Entities.TaxSetting", b =>
                 {
-                    b.HasOne("NextShopV2.Domain.Entities.Users.User", "User")
-                        .WithMany("Carts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("SettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.Navigation("User");
-                });
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.CartItem", b =>
-                {
-                    b.HasOne("NextShopV2.Domain.Entities.Carts.Cart", "Cart")
-                        .WithMany("Items")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasOne("NextShopV2.Domain.Entities.Products.ProductVariant", "Variant")
-                        .WithMany()
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Navigation("Cart");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Navigation("Variant");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("SettingId");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("TaxSettings");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
@@ -1246,11 +1214,6 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.Carts.Cart", b =>
-                {
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("NextShopV2.Domain.Entities.Orders.Order", b =>
                 {
                     b.Navigation("Items");
@@ -1301,8 +1264,6 @@ namespace NextShopV2.Infrastructure.Migrations
             modelBuilder.Entity("NextShopV2.Domain.Entities.Users.User", b =>
                 {
                     b.Navigation("Addresses");
-
-                    b.Navigation("Carts");
 
                     b.Navigation("Orders");
 
