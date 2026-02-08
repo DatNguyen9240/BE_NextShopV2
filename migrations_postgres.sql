@@ -208,6 +208,7 @@ CREATE TABLE "Orders" (
     "CancelledBy" text,
     "CancelledAt" timestamp with time zone,
     "SubTotal" numeric(18,0) NOT NULL,
+    "TaxAmount" numeric(18,2) NOT NULL DEFAULT 0,
     "DiscountAmount" numeric(18,0) NOT NULL,
     "TotalAmount" numeric(18,0) NOT NULL,
     "BuyerName" text,
