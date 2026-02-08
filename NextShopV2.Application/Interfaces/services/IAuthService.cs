@@ -36,5 +36,9 @@ namespace NextShopV2.Application.Interfaces
         Task<AppAuthResponse> GoogleSignIn(string idToken);
         // Google Sign-Up (create account from Google and send verification)
         Task<AppAuthResponse> GoogleRegister(string idToken);
+
+        // Forgot Password & Reset Password
+        Task<AppApiResponse> ForgotPassword(ForgotPasswordRequest request);
+        Task<AppApiResponse> ResetPassword(ResetPasswordRequest request);
     }
 }

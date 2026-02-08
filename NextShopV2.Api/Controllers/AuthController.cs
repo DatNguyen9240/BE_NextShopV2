@@ -42,7 +42,7 @@ namespace NextShopV2.Api.Controllers
                 return ResponseHelper.BadRequest("Token is required");
 
             var result = await _authService.VerifyEmailToken(token);
-            var frontendBase = _config["Frontend:BaseUrl"] ?? "http://localhost:3000";
+            var frontendBase = GetFrontendBaseUrl();
             if (!result.Success)
             {
                 var failedUrl = $"{frontendBase.TrimEnd('/')}/auth/verify?status=failed";
@@ -323,6 +323,48 @@ namespace NextShopV2.Api.Controllers
             return ResponseHelper.Success("Deleted");
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = await _authService.ForgotPassword(request);
+            if (!result.Success)
+                return ResponseHelper.BadRequest(result.Message ?? "Failed to process request");
+
+            return ResponseHelper.Success(result.Message ?? "Password reset link sent");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return ResponseHelper.BadRequest("Invalid input");
+
+            var result = await _authService.ResetPassword(request);
+            if (!result.Success)
+                return ResponseHelper.BadRequest(result.Message ?? "Failed to reset password");
+
+            return ResponseHelper.Success(result.Message ?? "Password reset successfully");
+        }
+
+        private string GetFrontendBaseUrl()
+        {
+            var configValue = _config["Frontend:BaseUrl"];
+            
+            // Check if config value is a placeholder that wasn't expanded
+            if (string.IsNullOrWhiteSpace(configValue) || configValue.StartsWith("${"))
+            {
+                // Try to get from environment variable
+                var envValue = Environment.GetEnvironmentVariable("FRONTEND_URL");
+                if (!string.IsNullOrWhiteSpace(envValue))
+                    return envValue;
+            }
+            
+            // Return config value or default
+            return configValue ?? "http://localhost:3000";
+        }
 
     }
 

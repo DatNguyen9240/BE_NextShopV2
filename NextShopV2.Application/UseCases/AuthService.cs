@@ -127,7 +127,7 @@ namespace NextShopV2.Application.Services
             await _redisDb.StringSetAsync($"mfa:email:req:{requestId}", json, TimeSpan.FromMinutes(5));
 
             // Send email (await here to surface errors)
-            var subject = "NextShop: Mã xác thực của bạn";
+            var subject = "Emxinh.shop: Mã xác thực của bạn";
             var html = LoadOtpTemplate(code, "Đăng nhập", 5);
             try
             {
@@ -218,7 +218,7 @@ namespace NextShopV2.Application.Services
                 }
 
                 template = template.Replace("{{code}}", System.Net.WebUtility.HtmlEncode(code));
-                template = template.Replace("{{siteName}}", "NextShop");
+                template = template.Replace("{{siteName}}", "Emxinh.shop");
                 template = template.Replace("{{expiryMinutes}}", expiryMinutes.ToString());
                 return template;
             }
@@ -249,7 +249,7 @@ namespace NextShopV2.Application.Services
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             await _redisDb.StringSetAsync($"mfa:enable:req:{requestId}", json, TimeSpan.FromMinutes(10));
 
-            var subject = "NextShop: Xác nhận bật 2 lớp";
+            var subject = "Emxinh.shop: Xác nhận bật 2 lớp";
             var html = LoadOtpTemplate(code, "Bật xác thực 2 lớp", 10);
             try
             {
@@ -320,9 +320,9 @@ namespace NextShopV2.Application.Services
             var key = $"verify:email:{token}";
             await _redisDb.StringSetAsync(key, userId.ToString(), TimeSpan.FromHours(24));
 
-            var frontendBase = _config["Frontend:BaseUrl"] ?? "http://localhost:3000";
-            var verifyUrl = $"{frontendBase.TrimEnd('/')}/auth/verify?token={System.Net.WebUtility.UrlEncode(token)}";
-            var subject = "NextShop: Xác nhận email của bạn";
+            var frontendBase = GetFrontendBaseUrl();
+            var verifyUrl = $"{frontendBase.TrimEnd('/')}/auth/verify?token={token}";
+            var subject = "Emxinh.shop: Xác nhận email của bạn";
             var html = LoadVerifyTemplate(verifyUrl, 24);
 
             try
@@ -458,9 +458,10 @@ namespace NextShopV2.Application.Services
                 }
 
                 template = template.Replace("{{verificationUrl}}", verifyUrl);
-                template = template.Replace("{{siteName}}", "NextShop");
+                template = template.Replace("{{siteName}}", "Emxinh.shop");
                 template = template.Replace("{{expiryHours}}", expiryHours.ToString());
                 template = template.Replace("{{buttonText}}", "Xác thực email");
+                template = template.Replace("{{year}}", DateTime.UtcNow.Year.ToString());
                 return template;
             }
             catch
@@ -732,6 +733,128 @@ namespace NextShopV2.Application.Services
 
             await _userRepository.SaveAsync();
             return true;
+        }
+
+        // --- Forgot Password & Reset Password ---
+        public async Task<AppApiResponse> ForgotPassword(ForgotPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return new AppApiResponse { Success = false, Message = "Email là bắt buộc" };
+
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            // For security, don't reveal whether the email exists or not
+            // Always return success to prevent email enumeration attacks
+            if (user == null)
+            {
+                // Simulate delay to prevent timing attacks
+                await Task.Delay(100);
+                return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+            }
+
+            // Generate reset token
+            var resetToken = Guid.NewGuid().ToString();
+            var key = $"reset:password:{resetToken}";
+            await _redisDb.StringSetAsync(key, user.Id.ToString(), TimeSpan.FromHours(1));
+
+            // Build reset URL - No encoding needed, token is already safe (GUID)
+            var frontendBase = GetFrontendBaseUrl();
+            var resetUrl = $"{frontendBase.TrimEnd('/')}/reset-password?token={resetToken}";
+            
+            // Send email
+            var subject = "Emxinh.shop: Đặt lại mật khẩu";
+            var html = LoadResetPasswordTemplate(resetUrl, 1);
+
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, subject, html);
+            }
+            catch (Exception)
+            {
+                await _redisDb.KeyDeleteAsync(key);
+                // Don't reveal the error, just return generic success
+                return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+            }
+
+            return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+        }
+
+        public async Task<AppApiResponse> ResetPassword(ResetPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
+                return new AppApiResponse { Success = false, Message = "Dữ liệu không hợp lệ" };
+
+            // Check token in Redis
+            var key = $"reset:password:{request.Token}";
+            var val = await _redisDb.StringGetAsync(key);
+            
+            if (val.IsNullOrEmpty)
+                return new AppApiResponse { Success = false, Message = "Token không hợp lệ hoặc đã hết hạn" };
+
+            if (!Guid.TryParse(val.ToString(), out var userId))
+                return new AppApiResponse { Success = false, Message = "Token không hợp lệ" };
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return new AppApiResponse { Success = false, Message = "Người dùng không tồn tại" };
+
+            // Update password
+            user.PasswordHash = PasswordHelper.HashPassword(request.NewPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepository.SaveAsync();
+
+            // Delete the token so it can't be reused
+            await _redisDb.KeyDeleteAsync(key);
+
+            // Invalidate all refresh tokens for this user (force re-login on all devices)
+            await _redisDb.KeyDeleteAsync($"refresh:{user.Id}");
+
+            return new AppApiResponse { Success = true, Message = "Đặt lại mật khẩu thành công" };
+        }
+
+        private string LoadResetPasswordTemplate(string resetUrl, int expiryHours)
+        {
+            try
+            {
+                var baseDir = System.AppContext.BaseDirectory ?? ".";
+                var path = System.IO.Path.Combine(baseDir, "EmailTemplates", "reset_password_template.html");
+                string template = System.IO.File.Exists(path) ? System.IO.File.ReadAllText(path) : null!;
+                
+                if (string.IsNullOrWhiteSpace(template))
+                {
+                    // Fallback simple HTML
+                    template = $"<p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau: <a href=\"{System.Net.WebUtility.HtmlEncode(resetUrl)}\">Đặt lại mật khẩu</a></p>" +
+                               $"<p>Link này sẽ hết hạn sau {expiryHours} giờ.</p>";
+                }
+
+                template = template.Replace("{{resetUrl}}", resetUrl);
+                template = template.Replace("{{siteName}}", "Emxinh.shop");
+                template = template.Replace("{{expiryHours}}", expiryHours.ToString());
+                template = template.Replace("{{buttonText}}", "Đặt lại mật khẩu");
+                template = template.Replace("{{year}}", DateTime.UtcNow.Year.ToString());
+                return template;
+            }
+            catch
+            {
+                return $"<p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau: <a href=\"{System.Net.WebUtility.HtmlEncode(resetUrl)}\">Đặt lại mật khẩu</a></p>" +
+                       $"<p>Link này sẽ hết hạn sau {expiryHours} giờ.</p>";
+            }
+        }
+
+        private string GetFrontendBaseUrl()
+        {
+            var configValue = _config["Frontend:BaseUrl"];
+            
+            // Check if config value is a placeholder that wasn't expanded
+            if (string.IsNullOrWhiteSpace(configValue) || configValue.StartsWith("${"))
+            {
+                // Try to get from environment variable
+                var envValue = Environment.GetEnvironmentVariable("FRONTEND_URL");
+                if (!string.IsNullOrWhiteSpace(envValue))
+                    return envValue;
+            }
+            
+            // Return config value or default
+            return configValue ?? "http://localhost:3000";
         }
     }
 }
