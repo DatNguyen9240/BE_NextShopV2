@@ -20,12 +20,41 @@ namespace NextShopV2.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            var smtpHost = _configuration["Smtp:Host"] ?? System.Environment.GetEnvironmentVariable("SMTP_HOST") ?? "";
-            var smtpPort = int.TryParse(_configuration["Smtp:Port"] ?? System.Environment.GetEnvironmentVariable("SMTP_PORT"), out var p) ? p : 587;
-            var smtpUser = _configuration["Smtp:Username"] ?? System.Environment.GetEnvironmentVariable("SMTP_USER") ?? string.Empty;
-            var smtpPass = _configuration["Smtp:Password"] ?? System.Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? string.Empty;
-            var fromEmail = _configuration["Smtp:FromEmail"] ?? System.Environment.GetEnvironmentVariable("SMTP_USER") ?? "no-reply@nextshop.com";
-            var fromName = _configuration["Smtp:FromName"] ?? System.Environment.GetEnvironmentVariable("SMTP_FROM_NAME") ?? "NextShop";
+            // Helper để expand environment variable placeholders như ${SMTP_USER}
+            string ExpandEnvVar(string? value, string envVarName, string defaultValue = "")
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    return System.Environment.GetEnvironmentVariable(envVarName) ?? defaultValue;
+                
+                // Nếu là placeholder như ${SMTP_USER}, expand nó
+                if (value.StartsWith("${") && value.EndsWith("}"))
+                {
+                    var varName = value.Substring(2, value.Length - 3);
+                    return System.Environment.GetEnvironmentVariable(varName) ?? defaultValue;
+                }
+                
+                return value;
+            }
+
+            var smtpHost = ExpandEnvVar(_configuration["Smtp:Host"], "SMTP_HOST", "smtp.gmail.com");
+            var smtpPortStr = ExpandEnvVar(_configuration["Smtp:Port"], "SMTP_PORT", "587");
+            var smtpPort = int.TryParse(smtpPortStr, out var p) ? p : 587;
+            var smtpUser = ExpandEnvVar(_configuration["Smtp:Username"], "SMTP_USER");
+            var smtpPass = ExpandEnvVar(_configuration["Smtp:Password"], "SMTP_PASSWORD");
+            var fromEmail = ExpandEnvVar(_configuration["Smtp:FromEmail"], "SMTP_USER", "no-reply@nextshop.com");
+            var fromName = ExpandEnvVar(_configuration["Smtp:FromName"], "SMTP_FROM_NAME", "NextShop");
+
+            // Log config (không log password)
+            if (string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPass))
+            {
+                _logger.LogWarning("SMTP credentials missing! User: {HasUser}, Pass: {HasPass}", 
+                    !string.IsNullOrEmpty(smtpUser), !string.IsNullOrEmpty(smtpPass));
+            }
+            else
+            {
+                _logger.LogInformation("SMTP configured: Host={Host}, Port={Port}, User={User}, From={From}", 
+                    smtpHost, smtpPort, smtpUser, fromEmail);
+            }
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromEmail));
