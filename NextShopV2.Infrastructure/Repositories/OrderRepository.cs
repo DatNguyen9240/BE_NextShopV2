@@ -50,6 +50,40 @@ namespace NextShopV2.Infrastructure.Repositories
             return await query.CountAsync();
         }
 
+        public async Task<Dictionary<Guid, int>> CountOrderCouponsByCouponIdsAsync(List<Guid> couponIds, params string[] statuses)
+        {
+            if (couponIds == null || !couponIds.Any())
+                return new Dictionary<Guid, int>();
+
+            var query = _context.OrderCoupons.AsQueryable().Where(oc => couponIds.Contains(oc.CouponId));
+            if (statuses != null && statuses.Length > 0)
+                query = query.Where(oc => statuses.Contains(oc.Status));
+
+            var grouped = await query
+                .GroupBy(oc => oc.CouponId)
+                .Select(g => new { CouponId = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return grouped.ToDictionary(x => x.CouponId, x => x.Count);
+        }
+
+        public async Task<List<Order>> GetByIdsAsync(List<Guid> orderIds)
+        {
+            if (orderIds == null || !orderIds.Any())
+                return new List<Order>();
+
+            return await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Variant)
+                        .ThenInclude(v => v!.Product)
+                .Include(o => o.Payments)
+                .Include(o => o.Shipment)
+                .Include(o => o.OrderCoupons)
+                .Where(o => orderIds.Contains(o.OrderId))
+                .ToListAsync();
+        }
+
         public async Task<List<Order>> GetByUserIdAsync(Guid userId)
         {
             return await _context.Orders

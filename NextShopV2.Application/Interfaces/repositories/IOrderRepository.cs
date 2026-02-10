@@ -20,5 +20,11 @@ namespace NextShopV2.Application.Interfaces.Repositories
 
         // Count reserved/applied coupons for a given coupon id
         Task<int> CountOrderCouponsByCouponIdAsync(Guid couponId, params string[] statuses);
+        
+        // Bulk count reserved/applied coupons for multiple coupon ids
+        Task<Dictionary<Guid, int>> CountOrderCouponsByCouponIdsAsync(List<Guid> couponIds, params string[] statuses);
+        
+        // Get multiple orders by ids
+        Task<List<Order>> GetByIdsAsync(List<Guid> orderIds);
     }
 }

@@ -10,7 +10,7 @@ namespace NextShopV2.Application.Interfaces.Services
     public interface IProductService
     {
         Task<List<ProductDto>> GetAllAsync(bool includeInactive = false);
-        Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null, bool includeInactive = false);
+        Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null, string? search = null, bool includeInactive = false);
         Task<ProductDto?> GetByIdAsync(Guid id, bool includeInactive = false);
         Task<ProductDto> CreateAsync(CreateProductRequest request);
         Task<bool> UpdateAsync(Guid id, UpdateProductRequest request);

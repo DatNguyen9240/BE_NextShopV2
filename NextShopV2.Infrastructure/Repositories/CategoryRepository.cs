@@ -81,6 +81,19 @@ namespace NextShopV2.Infrastructure.Repositories
             return await _context.Categories.AnyAsync(c => c.CategoryId == id);
         }
 
+        public async Task<Dictionary<Guid, bool>> ExistsManyAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new Dictionary<Guid, bool>();
+
+            var existingIds = await _context.Categories
+                .Where(c => ids.Contains(c.CategoryId))
+                .Select(c => c.CategoryId)
+                .ToListAsync();
+
+            return ids.ToDictionary(id => id, id => existingIds.Contains(id));
+        }
+
         public async Task<bool> NameExistsAtLevelAsync(string name, Guid? parentId, Guid? excludeId = null)
         {
             var query = _context.Categories

@@ -33,7 +33,7 @@ namespace NextShopV2.Application.Services
 
         public Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null)
         {
-            return GetPagedAsync(categoryId, page, pageSize, minPrice, maxPrice, sort, includeInactive: false);
+            return GetPagedAsync(categoryId, page, pageSize, minPrice, maxPrice, sort, search: null, includeInactive: false);
         }
 
         public Task<ProductDto?> GetByIdAsync(Guid id)
@@ -56,7 +56,7 @@ namespace NextShopV2.Application.Services
             return products.Select(p => p.ToDto(includeVariants: false, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive)).ToList();
         }
 
-        public async Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null, bool includeInactive = false)
+        public async Task<PagedResult<ProductDto>> GetPagedAsync(Guid? categoryId = null, int page = 1, int pageSize = 12, decimal? minPrice = null, decimal? maxPrice = null, string? sort = null, string? search = null, bool includeInactive = false)
         {
             // For now, load all and filter in-memory. For large datasets, implement repository queries.
             var products = (await _repo.GetAllAsync()).AsQueryable();
@@ -65,6 +65,16 @@ namespace NextShopV2.Application.Services
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
+            }
+
+            // Filter by search keyword
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                products = products.Where(p => 
+                    (p.Name != null && p.Name.ToLower().Contains(searchLower)) ||
+                    (p.Description != null && p.Description.ToLower().Contains(searchLower))
+                );
             }
 
             // Filter out inactive products for public store unless explicitly requested
@@ -133,20 +143,25 @@ namespace NextShopV2.Application.Services
 
             var dto = product.ToDto(includeVariants: true, includeInactiveVariants: includeInactive, includeInactiveProducts: includeInactive);
 
-            // populate variant attributes for frontend convenience (may result in N+1 queries for variants)
+            // populate variant attributes for frontend convenience (optimized to avoid N+1 queries)
             if (dto?.Variants != null && dto.Variants.Count > 0)
             {
-                foreach (var v in dto.Variants)
+                try
                 {
-                    try
+                    var variantIds = dto.Variants.Select(v => v.ProductVariantId).ToList();
+                    var allAttributeMaps = await _attributeService.GetVariantAttributeMapsAsync(variantIds);
+                    
+                    foreach (var v in dto.Variants)
                     {
-                        var map = await _attributeService.GetVariantAttributeMapAsync(v.ProductVariantId);
-                        if (map != null && map.Count > 0) v.Attributes = map;
+                        if (allAttributeMaps.TryGetValue(v.ProductVariantId, out var map) && map.Count > 0)
+                        {
+                            v.Attributes = map;
+                        }
                     }
-                    catch
-                    {
-                        // ignore errors and continue
-                    }
+                }
+                catch
+                {
+                    // ignore errors and continue
                 }
             }
 

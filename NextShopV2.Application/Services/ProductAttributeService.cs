@@ -236,6 +236,33 @@ namespace NextShopV2.Application.Services
             return dict;
         }
 
+        public async Task<Dictionary<Guid, Dictionary<string, string>>> GetVariantAttributeMapsAsync(List<Guid> variantIds)
+        {
+            if (variantIds == null || !variantIds.Any())
+                return new Dictionary<Guid, Dictionary<string, string>>();
+
+            var bulkData = await _repo.GetVariantAttributeValuesBulkAsync(variantIds);
+            var result = new Dictionary<Guid, Dictionary<string, string>>();
+
+            foreach (var variantId in variantIds)
+            {
+                var dict = new Dictionary<string, string>();
+                if (bulkData.TryGetValue(variantId, out var vavs))
+                {
+                    foreach (var vav in vavs)
+                    {
+                        var attrName = vav.AttributeValue?.Attribute?.Name ?? string.Empty;
+                        var value = vav.AttributeValue?.Value ?? string.Empty;
+                        if (!string.IsNullOrEmpty(attrName))
+                            dict[attrName] = value;
+                    }
+                }
+                result[variantId] = dict;
+            }
+
+            return result;
+        }
+
         public async Task AssignVariantAttributeValueAsync(AssignVariantAttributeRequest request)
         {
             var value = await _repo.GetValueByIdAsync(request.AttributeValueId);

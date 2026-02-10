@@ -24,6 +24,7 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task DeleteAttributeValueAsync(Guid id);
 
         Task<List<Domain.Entities.Products.VariantAttributeValue>> GetVariantAttributeValuesAsync(Guid variantId);
+        Task<Dictionary<Guid, List<Domain.Entities.Products.VariantAttributeValue>>> GetVariantAttributeValuesBulkAsync(List<Guid> variantIds);
         Task AssignVariantAttributeValueAsync(Domain.Entities.Products.VariantAttributeValue vav);
         Task RemoveVariantAttributeValueAsync(Guid variantId, Guid attributeValueId);
 

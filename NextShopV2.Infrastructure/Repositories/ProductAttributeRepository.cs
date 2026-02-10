@@ -107,6 +107,22 @@ namespace NextShopV2.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Dictionary<Guid, List<Domain.Entities.Products.VariantAttributeValue>>> GetVariantAttributeValuesBulkAsync(List<Guid> variantIds)
+        {
+            if (variantIds == null || !variantIds.Any())
+                return new Dictionary<Guid, List<Domain.Entities.Products.VariantAttributeValue>>();
+
+            var allValues = await _context.Set<Domain.Entities.Products.VariantAttributeValue>()
+                .Where(vav => variantIds.Contains(vav.VariantId))
+                .Include(vav => vav.AttributeValue)
+                    .ThenInclude(av => av.Attribute)
+                .ToListAsync();
+
+            return allValues
+                .GroupBy(vav => vav.VariantId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
+
         public async Task AssignVariantAttributeValueAsync(Domain.Entities.Products.VariantAttributeValue vav)
         {
             // Determine attribute id of the provided attribute value

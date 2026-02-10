@@ -113,14 +113,13 @@ namespace NextShopV2.Application.Services
                 throw new ArgumentException("Product not found");
             }
 
-            // Validate all categories exist
-            foreach (var categoryId in request.CategoryIds)
+            // Validate all categories exist (bulk check to avoid N+1)
+            var categoryExistence = await _categoryRepository.ExistsManyAsync(request.CategoryIds);
+            var missingCategories = categoryExistence.Where(kvp => !kvp.Value).Select(kvp => kvp.Key).ToList();
+            
+            if (missingCategories.Any())
             {
-                var categoryExists = await _categoryRepository.ExistsAsync(categoryId);
-                if (!categoryExists)
-                {
-                    throw new ArgumentException($"Category with ID {categoryId} not found");
-                }
+                throw new ArgumentException($"Categories not found: {string.Join(", ", missingCategories)}");
             }
 
             // Remove existing assignments for this product

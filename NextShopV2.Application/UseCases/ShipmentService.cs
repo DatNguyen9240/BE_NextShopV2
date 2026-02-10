@@ -31,10 +31,27 @@ namespace NextShopV2.Application.Services
         public async Task<List<ShipmentResponse>> GetAllAsync()
         {
             var shipments = await _shipmentRepo.GetAllAsync();
+            if (!shipments.Any())
+                return new List<ShipmentResponse>();
+
+            // Bulk load orders to avoid N+1 query
+            var orderIds = shipments.Select(s => s.OrderId).Distinct().ToList();
+            var orders = await _orderRepo.GetByIdsAsync(orderIds);
+            var orderDict = orders.ToDictionary(o => o.OrderId);
+
+            // Load unique shippers to minimize queries
+            var shipperIds = shipments.Where(s => s.ShipperId.HasValue).Select(s => s.ShipperId!.Value).Distinct().ToList();
+            var shipperDict = new Dictionary<Guid, UserResponse?>();
+            foreach (var shipperId in shipperIds)
+            {
+                var shipper = await _authService.GetMe(shipperId);
+                shipperDict[shipperId] = shipper;
+            }
+
             var responses = new List<ShipmentResponse>();
             foreach (var shipment in shipments)
             {
-                responses.Add(await MapToResponse(shipment));
+                responses.Add(MapToResponseOptimized(shipment, orderDict, shipperDict));
             }
             return responses;
         }
@@ -54,10 +71,27 @@ namespace NextShopV2.Application.Services
         public async Task<List<ShipmentResponse>> GetByStatusAsync(string status)
         {
             var shipments = await _shipmentRepo.GetByStatusAsync(status);
+            if (!shipments.Any())
+                return new List<ShipmentResponse>();
+
+            // Bulk load orders to avoid N+1 query
+            var orderIds = shipments.Select(s => s.OrderId).Distinct().ToList();
+            var orders = await _orderRepo.GetByIdsAsync(orderIds);
+            var orderDict = orders.ToDictionary(o => o.OrderId);
+
+            // Load unique shippers to minimize queries
+            var shipperIds = shipments.Where(s => s.ShipperId.HasValue).Select(s => s.ShipperId!.Value).Distinct().ToList();
+            var shipperDict = new Dictionary<Guid, UserResponse?>();
+            foreach (var shipperId in shipperIds)
+            {
+                var shipper = await _authService.GetMe(shipperId);
+                shipperDict[shipperId] = shipper;
+            }
+
             var responses = new List<ShipmentResponse>();
             foreach (var shipment in shipments)
             {
-                responses.Add(await MapToResponseWithTracking(shipment));
+                responses.Add(await MapToResponseWithTrackingOptimized(shipment, orderDict, shipperDict));
             }
             return responses;
         }
@@ -65,10 +99,22 @@ namespace NextShopV2.Application.Services
         public async Task<List<ShipmentResponse>> GetByShipperAsync(Guid shipperId)
         {
             var shipments = await _shipmentRepo.GetByShipperAsync(shipperId);
+            if (!shipments.Any())
+                return new List<ShipmentResponse>();
+
+            // Bulk load orders to avoid N+1 query
+            var orderIds = shipments.Select(s => s.OrderId).Distinct().ToList();
+            var orders = await _orderRepo.GetByIdsAsync(orderIds);
+            var orderDict = orders.ToDictionary(o => o.OrderId);
+
+            // Shipper is same for all, load once
+            var shipper = await _authService.GetMe(shipperId);
+            var shipperDict = new Dictionary<Guid, UserResponse?> { { shipperId, shipper } };
+
             var responses = new List<ShipmentResponse>();
             foreach (var shipment in shipments)
             {
-                responses.Add(await MapToResponseWithTracking(shipment));
+                responses.Add(await MapToResponseWithTrackingOptimized(shipment, orderDict, shipperDict));
             }
             return responses;
         }
@@ -76,10 +122,22 @@ namespace NextShopV2.Application.Services
         public async Task<List<ShipmentResponse>> GetByShipperAndStatusAsync(Guid shipperId, string status)
         {
             var shipments = await _shipmentRepo.GetByShipperAndStatusAsync(shipperId, status);
+            if (!shipments.Any())
+                return new List<ShipmentResponse>();
+
+            // Bulk load orders to avoid N+1 query
+            var orderIds = shipments.Select(s => s.OrderId).Distinct().ToList();
+            var orders = await _orderRepo.GetByIdsAsync(orderIds);
+            var orderDict = orders.ToDictionary(o => o.OrderId);
+
+            // Shipper is same for all, load once
+            var shipper = await _authService.GetMe(shipperId);
+            var shipperDict = new Dictionary<Guid, UserResponse?> { { shipperId, shipper } };
+
             var responses = new List<ShipmentResponse>();
             foreach (var shipment in shipments)
             {
-                responses.Add(await MapToResponseWithTracking(shipment));
+                responses.Add(await MapToResponseWithTrackingOptimized(shipment, orderDict, shipperDict));
             }
             return responses;
         }
@@ -303,6 +361,44 @@ namespace NextShopV2.Application.Services
         private async Task<ShipmentResponse> MapToResponseWithTracking(Shipment shipment)
         {
             var response = await MapToResponse(shipment);
+            response.TrackingEvents = await _trackingService.GetTrackingEventsAsync(shipment.ShipmentId);
+            return response;
+        }
+
+        private ShipmentResponse MapToResponseOptimized(Shipment shipment, Dictionary<Guid, Order> orderDict, Dictionary<Guid, UserResponse?> shipperDict)
+        {
+            UserResponse? shipper = null;
+            if (shipment.ShipperId.HasValue && shipperDict.TryGetValue(shipment.ShipperId.Value, out var s))
+            {
+                shipper = s;
+            }
+
+            // Get order from dictionary
+            orderDict.TryGetValue(shipment.OrderId, out var order);
+            var deliveryAddress = shipment.DeliveryAddress ?? order?.ShippingAddress;
+
+            return new ShipmentResponse
+            {
+                ShipmentId = shipment.ShipmentId,
+                OrderId = shipment.OrderId,
+                ShipperId = shipment.ShipperId,
+                Shipper = shipper,
+                Carrier = shipment.Carrier,
+                TrackingNumber = shipment.TrackingNumber,
+                Status = shipment.Status,
+                CreatedAt = shipment.CreatedAt,
+                CurrentLat = shipment.CurrentLat,
+                CurrentLng = shipment.CurrentLng,
+                LastLocationUpdate = shipment.LastLocationUpdate,
+                DeliveryAddress = deliveryAddress,
+                DeliveryLat = shipment.DeliveryLat,
+                DeliveryLng = shipment.DeliveryLng
+            };
+        }
+
+        private async Task<ShipmentResponse> MapToResponseWithTrackingOptimized(Shipment shipment, Dictionary<Guid, Order> orderDict, Dictionary<Guid, UserResponse?> shipperDict)
+        {
+            var response = MapToResponseOptimized(shipment, orderDict, shipperDict);
             response.TrackingEvents = await _trackingService.GetTrackingEventsAsync(shipment.ShipmentId);
             return response;
         }

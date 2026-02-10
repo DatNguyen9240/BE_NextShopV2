@@ -12,6 +12,7 @@ namespace NextShopV2.Application.Interfaces.repositories
         Task<Category> UpdateAsync(Category category);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
+        Task<Dictionary<Guid, bool>> ExistsManyAsync(List<Guid> ids);
         Task<bool> NameExistsAtLevelAsync(string name, Guid? parentId, Guid? excludeId = null);
         Task<bool> HasChildrenAsync(Guid id);
         Task<bool> HasProductsAsync(Guid id);

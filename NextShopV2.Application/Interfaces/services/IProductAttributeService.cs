@@ -25,6 +25,9 @@ namespace NextShopV2.Application.Interfaces.Services
 
         // Variant attribute map: attribute name -> value
         Task<Dictionary<string, string>> GetVariantAttributeMapAsync(Guid variantId);
+        
+        // Bulk variant attribute maps: variantId -> (attribute name -> value)
+        Task<Dictionary<Guid, Dictionary<string, string>>> GetVariantAttributeMapsAsync(List<Guid> variantIds);
 
         // Category-attribute assignments
         Task AssignAttributeToCategoryAsync(Guid categoryId, Guid attributeId);

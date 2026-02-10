@@ -21,8 +21,27 @@ namespace NextShopV2.Application.Services
         public async Task<List<CouponResponse>> GetAllAsync()
         {
             var coupons = await _couponRepo.GetAllAsync();
-            var tasks = coupons.Select(c => MapToResponseAsync(c));
-            return (await Task.WhenAll(tasks)).ToList();
+            if (!coupons.Any())
+                return new List<CouponResponse>();
+
+            // Bulk load reserved counts to avoid N+1 query
+            var couponIds = coupons.Select(c => c.CouponId).ToList();
+            var reservedCounts = await _orderRepo.CountOrderCouponsByCouponIdsAsync(couponIds, "Reserved");
+
+            return coupons.Select(c => new CouponResponse
+            {
+                CouponId = c.CouponId,
+                Code = c.Code,
+                DiscountPercent = c.DiscountPercent,
+                MinOrderAmount = c.MinOrderAmount,
+                MaxDiscountAmount = c.MaxDiscountAmount,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                UsageLimit = c.UsageLimit,
+                UsedCount = c.UsedCount,
+                ReservedCount = reservedCounts.TryGetValue(c.CouponId, out var count) ? count : 0,
+                IsActive = c.IsActive
+            }).ToList();
         }
 
         public async Task<bool> CanReserveCouponAsync(Guid couponId)
@@ -197,8 +216,27 @@ namespace NextShopV2.Application.Services
         public async Task<List<CouponResponse>> GetActiveCouponsAsync()
         {
             var coupons = await _couponRepo.GetActiveCouponsAsync();
-            var tasks = coupons.Select(c => MapToResponseAsync(c));
-            return (await Task.WhenAll(tasks)).ToList();
+            if (!coupons.Any())
+                return new List<CouponResponse>();
+
+            // Bulk load reserved counts to avoid N+1 query
+            var couponIds = coupons.Select(c => c.CouponId).ToList();
+            var reservedCounts = await _orderRepo.CountOrderCouponsByCouponIdsAsync(couponIds, "Reserved");
+
+            return coupons.Select(c => new CouponResponse
+            {
+                CouponId = c.CouponId,
+                Code = c.Code,
+                DiscountPercent = c.DiscountPercent,
+                MinOrderAmount = c.MinOrderAmount,
+                MaxDiscountAmount = c.MaxDiscountAmount,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                UsageLimit = c.UsageLimit,
+                UsedCount = c.UsedCount,
+                ReservedCount = reservedCounts.TryGetValue(c.CouponId, out var count) ? count : 0,
+                IsActive = c.IsActive
+            }).ToList();
         }
 
         public async Task<bool> ValidateCouponAsync(string code)
