@@ -38,8 +38,13 @@ namespace NextShopV2.Infrastructure.Services
             using var client = new SmtpClient();
             try
             {
-                // Use secure connection when possible
-                await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.Auto);
+                // Set timeout để tránh connection hang
+                client.Timeout = 30000; // 30 seconds
+                
+                _logger.LogInformation("Attempting to send email to {Email} via {Host}:{Port}", toEmail, smtpHost, smtpPort);
+                
+                // Use StartTls cho Gmail (ổn định hơn Auto)
+                await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
 
                 if (!string.IsNullOrEmpty(smtpUser))
                 {
@@ -47,16 +52,20 @@ namespace NextShopV2.Infrastructure.Services
                 }
 
                 await client.SendAsync(message);
-                _logger.LogInformation("Email sent to {Email} with subject {Subject}", toEmail, subject);
+                _logger.LogInformation("Email sent successfully to {Email} with subject {Subject}", toEmail, subject);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                _logger.LogError("Failed to send email to {Email}", toEmail);
+                _logger.LogError(ex, "Failed to send email to {Email}. Host: {Host}, Port: {Port}, User: {User}", 
+                    toEmail, smtpHost, smtpPort, smtpUser);
                 throw;
             }
             finally
             {
-                await client.DisconnectAsync(true);
+                if (client.IsConnected)
+                {
+                    await client.DisconnectAsync(true);
+                }
             }
         }
     }
