@@ -310,6 +310,15 @@ namespace NextShopV2.Api.Extensions
             services.AddScoped<NextShopV2.Domain.Repositories.ITaxSettingRepository, NextShopV2.Infrastructure.Repositories.TaxSettingRepository>();
             
             services.AddSingleton<NextShopV2.Application.Interfaces.Services.IFirebaseNotificationService, NextShopV2.Infrastructure.Services.FirebaseNotificationService>();
+            
+            // Resend Email Service
+            services.AddOptions<Resend.ResendClientOptions>()
+                .Configure<IConfiguration>((options, configuration) =>
+                {
+                    options.ApiToken = configuration["Resend:ApiKey"] ?? Environment.GetEnvironmentVariable("RESEND_API_KEY") ?? "";
+                });
+            services.AddHttpClient<Resend.IResend, Resend.ResendClient>();
+            
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IEmailService, NextShopV2.Infrastructure.Services.EmailService>();
             services.AddScoped<NextShopV2.Domain.Repositories.IFirebasePushTokenRepository, NextShopV2.Infrastructure.Repositories.FirebasePushTokenRepository>();
             services.AddScoped<NextShopV2.Domain.Repositories.INotificationHistoryRepository, NextShopV2.Infrastructure.Repositories.NotificationHistoryRepository>();
