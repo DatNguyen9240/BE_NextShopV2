@@ -14,14 +14,7 @@ if (File.Exists(envPath))
     DotNetEnv.Env.Load(envPath);
     Console.WriteLine($"✅ Loaded environment from: {envPath}");
 }
-else
-{
-    Console.WriteLine($"⚠️ No .env file found at: {envPath}");
-}
-
-// Log Resend config
-var resendKey = builder.Configuration["Resend:ApiKey"] ?? Environment.GetEnvironmentVariable("RESEND_API_KEY");
-Console.WriteLine($"🔑 Resend API Key configured: {(!string.IsNullOrEmpty(resendKey) ? "Yes" : "No")} (length: {resendKey?.Length ?? 0})");
+// In production, env vars are injected by platform (Railway/Render) - no .env file needed
 
 // 2. Add Services via Extension Methods
 builder.Services.AddDatabaseConfiguration(builder.Configuration)
