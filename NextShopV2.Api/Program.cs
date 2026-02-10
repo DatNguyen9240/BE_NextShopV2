@@ -9,7 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 var environment = builder.Environment.EnvironmentName;
 var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", $".env.{environment.ToLower()}");
 if (!File.Exists(envPath)) envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+    Console.WriteLine($"✅ Loaded environment from: {envPath}");
+}
+else
+{
+    Console.WriteLine($"⚠️ No .env file found at: {envPath}");
+}
+
+// Log Resend config
+var resendKey = builder.Configuration["Resend:ApiKey"] ?? Environment.GetEnvironmentVariable("RESEND_API_KEY");
+Console.WriteLine($"🔑 Resend API Key configured: {(!string.IsNullOrEmpty(resendKey) ? "Yes" : "No")} (length: {resendKey?.Length ?? 0})");
 
 // 2. Add Services via Extension Methods
 builder.Services.AddDatabaseConfiguration(builder.Configuration)

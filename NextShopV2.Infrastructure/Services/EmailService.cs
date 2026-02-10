@@ -24,6 +24,9 @@ namespace NextShopV2.Infrastructure.Services
             var fromEmail = _configuration["Resend:FromEmail"] ?? "onboarding@resend.dev";
             var fromName = _configuration["Resend:FromName"] ?? "NextShop";
 
+            // Debug log
+            _logger.LogInformation("Resend FromEmail: {FromEmail}, FromName: {FromName}", fromEmail, fromName);
+
             try
             {
                 var message = new EmailMessage
