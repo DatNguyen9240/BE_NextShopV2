@@ -22,5 +22,6 @@ RUN dotnet publish NextShopV2.Api.csproj -c Release -o /app/publish /p:UseAppHos
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=builder /app/publish .
+COPY .env.production ../.env.production
 
 ENTRYPOINT ["dotnet", "NextShopV2.Api.dll"]
