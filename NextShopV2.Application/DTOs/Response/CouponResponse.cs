@@ -6,6 +6,8 @@ namespace NextShopV2.Application.DTOs.Response
     {
         public Guid CouponId { get; set; }
         public string Code { get; set; } = null!;
+        public Guid? UserId { get; set; }
+        public string? CouponType { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal? MinOrderAmount { get; set; }
     public decimal? MaxDiscountAmount { get; set; }

@@ -39,6 +39,8 @@ CREATE TABLE "Categories" (
 CREATE TABLE "Coupons" (
     "CouponId" uuid NOT NULL,
     "Code" text NOT NULL,
+    "UserId" uuid,
+    "CouponType" text,
     "DiscountPercent" numeric(10,2) NOT NULL,
     "MinOrderAmount" numeric(18,2),
     "MaxDiscountAmount" numeric(18,2),
@@ -212,7 +214,9 @@ CREATE TABLE "Orders" (
     "DiscountAmount" numeric(18,0) NOT NULL,
     "TotalAmount" numeric(18,0) NOT NULL,
     "BuyerName" text,
+    "BuyerEmail" text,
     "BuyerPhone" text,
+    "BuyerGender" text,
     "ShippingAddress" text,
     "ShippingLat" double precision,
     "ShippingLng" double precision,
@@ -407,8 +411,24 @@ CREATE UNIQUE INDEX "IX_Users_Phone" ON "Users" ("Phone");
 
 CREATE INDEX "IX_VariantAttributeValues_AttributeValueId" ON "VariantAttributeValues" ("AttributeValueId");
 
+CREATE TABLE "WelcomeSettings" (
+    "Id" uuid NOT NULL,
+    "DiscountPercent" numeric(10,2) NOT NULL,
+    "MinOrderAmount" numeric(18,2),
+    "MaxDiscountAmount" numeric(18,2),
+    "UsageLimit" integer NOT NULL,
+    "ValidityMonths" integer NOT NULL,
+    "IsEnabled" boolean NOT NULL,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "UpdatedAt" timestamp with time zone,
+    CONSTRAINT "PK_WelcomeSettings" PRIMARY KEY ("Id")
+);
+
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260128064705_InitCreate', '9.0.9');
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260210143423_AddWelcomeCouponSettings', '9.0.9');
 
 COMMIT;
 

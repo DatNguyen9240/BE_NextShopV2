@@ -73,6 +73,38 @@ namespace NextShopV2.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> ExistsByPredicateAsync(System.Linq.Expressions.Expression<Func<Coupon, bool>> predicate)
+        {
+            return await _context.Coupons.AnyAsync(predicate);
+        }
+
+        public async Task<WelcomeCouponSettings?> GetWelcomeCouponSettingsAsync()
+        {
+            return await _context.WelcomeCouponSettings.FirstOrDefaultAsync();
+        }
+
+        public async Task<WelcomeCouponSettings> UpdateWelcomeCouponSettingsAsync(WelcomeCouponSettings settings)
+        {
+            var existing = await GetWelcomeCouponSettingsAsync();
+            if (existing != null)
+            {
+                existing.DiscountPercent = settings.DiscountPercent;
+                existing.MinOrderAmount = settings.MinOrderAmount;
+                existing.MaxDiscountAmount = settings.MaxDiscountAmount;
+                existing.UsageLimit = settings.UsageLimit;
+                existing.ValidityMonths = settings.ValidityMonths;
+                existing.IsEnabled = settings.IsEnabled;
+                existing.UpdatedAt = DateTime.UtcNow;
+                _context.WelcomeCouponSettings.Update(existing);
+            }
+            else
+            {
+                _context.WelcomeCouponSettings.Add(settings);
+            }
+            await SaveAsync();
+            return existing ?? settings;
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

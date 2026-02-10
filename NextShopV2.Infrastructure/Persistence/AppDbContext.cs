@@ -30,6 +30,7 @@ namespace NextShopV2.Infrastructure.Persistence
         public DbSet<NextShopV2.Domain.Entities.Orders.TrackingEvent> TrackingEvents { get; set; } = null!;
         public DbSet<Coupon> Coupons { get; set; } = null!;
         public DbSet<OrderCoupon> OrderCoupons { get; set; } = null!;
+        public DbSet<WelcomeCouponSettings> WelcomeCouponSettings { get; set; } = null!;
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; } = null!;
 
         // Product attributes and values

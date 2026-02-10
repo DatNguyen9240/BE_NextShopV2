@@ -18,15 +18,17 @@ namespace NextShopV2.Application.Services
         private readonly IDatabase _redisDb;
         private readonly string? _jwtKey;
         private readonly NextShopV2.Application.Interfaces.Services.IEmailService _emailService;
+        private readonly NextShopV2.Application.Interfaces.Services.ICouponService _couponService;
         private readonly string? _mfaKey;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
 
-        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config, NextShopV2.Application.Interfaces.Services.IEmailService emailService)
+        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config, NextShopV2.Application.Interfaces.Services.IEmailService emailService, NextShopV2.Application.Interfaces.Services.ICouponService couponService)
         {
             _userRepository = userRepository;
             _redisDb = redis.GetDatabase();
             _jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? config["Jwt:Key"];
             _emailService = emailService;
+            _couponService = couponService;
             _mfaKey = config["Mfa:Key"] ?? config["Jwt:Key"];
             _config = config;
         }
@@ -349,9 +351,26 @@ namespace NextShopV2.Application.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppAuthResponse { Success = false, Message = "User not found" };
 
+            // Check if this is the first email verification
+            bool isFirstVerification = !user.EmailVerified;
+
             user.EmailVerified = true;
             await _userRepository.SaveAsync();
             await _redisDb.KeyDeleteAsync(key);
+
+            // Create welcome voucher only on first verification and if user doesn't have one yet
+            if (isFirstVerification)
+            {
+                var hasWelcomeCoupon = await _couponService.HasUserWelcomeCouponAsync(user.Id);
+                if (!hasWelcomeCoupon)
+                {
+                    var settings = await _couponService.GetWelcomeCouponSettingsAsync();
+                    if (settings != null && settings.IsEnabled)
+                    {
+                        await CreateWelcomeVoucherForUser(user.Id, settings);
+                    }
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(_jwtKey)) return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
             var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
@@ -837,6 +856,52 @@ namespace NextShopV2.Application.Services
             {
                 return $"<p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau: <a href=\"{System.Net.WebUtility.HtmlEncode(resetUrl)}\">Đặt lại mật khẩu</a></p>" +
                        $"<p>Link này sẽ hết hạn sau {expiryHours} giờ.</p>";
+            }
+        }
+
+        private async Task CreateWelcomeVoucherForUser(Guid userId, WelcomeCouponSettingsResponse settings)
+        {
+            try
+            {
+                // Generate unique coupon code
+                var code = $"WELCOME{userId.ToString().Substring(0, 8).ToUpper()}";
+
+                var createRequest = new NextShopV2.Application.DTOs.Request.CreateCouponRequest
+                {
+                    Code = code,
+                    UserId = userId, // Assign to this user
+                    CouponType = "Welcome",
+                    DiscountPercent = settings.DiscountPercent,
+                    MinOrderAmount = settings.MinOrderAmount,
+                    MaxDiscountAmount = settings.MaxDiscountAmount,
+                    UsageLimit = settings.UsageLimit,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddMonths(settings.ValidityMonths),
+                    IsActive = true
+                };
+
+                await _couponService.CreateAsync(createRequest);
+
+                // Send notification email
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user != null)
+                {
+                    var subject = "Chào mừng bạn đến với NextShop!";
+                    var html = $@"
+                        <h2>Chào mừng {user.FullName}!</h2>
+                        <p>Cảm ơn bạn đã xác thực email và tham gia NextShop.</p>
+                        <p>Bạn nhận được voucher đặc biệt: <strong>{code}</strong></p>
+                        <p>Giảm {settings.DiscountPercent}% cho đơn hàng từ {settings.MinOrderAmount:N0}đ, tối đa {settings.MaxDiscountAmount:N0}đ.</p>
+                        <p>Voucher có hiệu lực trong {settings.ValidityMonths} tháng.</p>
+                        <p>Chúc bạn mua sắm vui vẻ!</p>
+                    ";
+                    await _emailService.SendEmailAsync(user.Email, subject, html);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the verification process
+                Console.WriteLine($"Failed to create welcome voucher for user {userId}: {ex.Message}");
             }
         }
 

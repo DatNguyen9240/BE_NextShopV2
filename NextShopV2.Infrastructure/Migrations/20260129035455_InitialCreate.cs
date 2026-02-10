@@ -56,6 +56,8 @@ namespace NextShopV2.Infrastructure.Migrations
                 {
                     CouponId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CouponType = table.Column<string>(type: "text", nullable: true),
                     DiscountPercent = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
                     MinOrderAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     MaxDiscountAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
@@ -191,19 +193,22 @@ namespace NextShopV2.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TaxSettings",
+                name: "WelcomeSettings",
                 columns: table => new
                 {
-                    SettingId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Key = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Value = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DiscountPercent = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
+                    MinOrderAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxDiscountAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    UsageLimit = table.Column<int>(type: "integer", nullable: false),
+                    ValidityMonths = table.Column<int>(type: "integer", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TaxSettings", x => x.SettingId);
+                    table.PrimaryKey("PK_WelcomeSettings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -347,7 +352,9 @@ namespace NextShopV2.Infrastructure.Migrations
                     DiscountAmount = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric(18,0)", precision: 18, scale: 0, nullable: false),
                     BuyerName = table.Column<string>(type: "text", nullable: true),
+                    BuyerEmail = table.Column<string>(type: "text", nullable: true),
                     BuyerPhone = table.Column<string>(type: "text", nullable: true),
+                    BuyerGender = table.Column<string>(type: "text", nullable: true),
                     ShippingAddress = table.Column<string>(type: "text", nullable: true),
                     ShippingLat = table.Column<double>(type: "double precision", nullable: true),
                     ShippingLng = table.Column<double>(type: "double precision", nullable: true)
@@ -792,6 +799,9 @@ namespace NextShopV2.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "TaxSettings");
+
+            migrationBuilder.DropTable(
+                name: "WelcomeSettings");
 
             migrationBuilder.DropTable(
                 name: "TrackingEvents");

@@ -8,6 +8,8 @@ namespace NextShopV2.Domain.Entities.Coupons
     {
         public Guid CouponId { get; set; }
         public string Code { get; set; } = null!;
+        public Guid? UserId { get; set; } // Nullable: null = global coupon, not null = user-specific
+        public string? CouponType { get; set; } // "Welcome", "Manual", "Promotion", etc.
         public decimal DiscountPercent { get; set; }
         public decimal? MinOrderAmount { get; set; } // Số tiền tối thiểu để áp dụng coupon
         public decimal? MaxDiscountAmount { get; set; } // Số tiền giảm tối đa

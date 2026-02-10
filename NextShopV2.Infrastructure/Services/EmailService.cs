@@ -44,12 +44,19 @@ namespace NextShopV2.Infrastructure.Services
             catch (Resend.ResendException ex) when (ex.Message.Contains("only send testing emails"))
             {
                 _logger.LogWarning("Cannot send to {Email} - Resend free plan with onboarding@resend.dev only allows sending to account owner email. Please verify a domain at resend.com/domains", toEmail);
-                throw;
+                // Don't throw - just log warning in production to avoid blocking user flows
+                if (_configuration["ASPNETCORE_ENVIRONMENT"] != "Production")
+                {
+                    throw;
+                }
             }
             catch (Resend.ResendException ex) when (ex.Message.Contains("domain is not verified"))
             {
                 _logger.LogWarning("Cannot send from {FromEmail} - Domain not verified. Please verify at resend.com/domains", fromEmail);
-                throw;
+                if (_configuration["ASPNETCORE_ENVIRONMENT"] != "Production")
+                {
+                    throw;
+                }
             }
             catch (System.Exception ex)
             {

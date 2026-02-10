@@ -220,6 +220,7 @@ namespace NextShopV2.Application.Services
 
             var buyerName = user.FullName;
             var buyerPhone = user.Phone;
+            var buyerGender = user.Gender;
             string? shippingAddress = null;
             double? shippingLat = null;
             double? shippingLng = null;
@@ -256,7 +257,9 @@ namespace NextShopV2.Application.Services
                 DiscountAmount = discountAmount,
                 TotalAmount = finalAmount,
                 BuyerName = buyerName,
+                BuyerEmail = user.Email,
                 BuyerPhone = buyerPhone,
+                BuyerGender = buyerGender,
                 ShippingAddress = shippingAddress,
                 ShippingLat = shippingLat,
                 ShippingLng = shippingLng,
@@ -423,7 +426,9 @@ namespace NextShopV2.Application.Services
                 DiscountAmount = order.DiscountAmount,
                 TotalAmount = order.TotalAmount,
                 BuyerName = order.BuyerName,
+                BuyerEmail = order.BuyerEmail,
                 BuyerPhone = order.BuyerPhone,
+                BuyerGender = order.BuyerGender,
                 ShippingAddress = order.ShippingAddress,
                 ShippingLat = order.ShippingLat,
                 ShippingLng = order.ShippingLng,

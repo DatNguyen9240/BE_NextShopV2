@@ -342,5 +342,60 @@ namespace NextShopV2.Api.Controllers
                 });
             }
         }
+
+        [HttpGet("welcome-settings")]
+        public async Task<IActionResult> GetWelcomeSettings()
+        {
+            try
+            {
+                var settings = await _couponService.GetWelcomeCouponSettingsAsync();
+                if (settings == null)
+                {
+                    return NotFound(new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Welcome coupon settings not found"
+                    });
+                }
+
+                return Ok(new ApiResponse
+                {
+                    Success = true,
+                    Message = "Welcome coupon settings retrieved successfully",
+                    Data = settings
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("welcome-settings")]
+        public async Task<IActionResult> UpdateWelcomeSettings([FromBody] UpdateWelcomeCouponSettingsRequest request)
+        {
+            try
+            {
+                var settings = await _couponService.UpdateWelcomeCouponSettingsAsync(request);
+                return Ok(new ApiResponse
+                {
+                    Success = true,
+                    Message = "Welcome coupon settings updated successfully",
+                    Data = settings
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

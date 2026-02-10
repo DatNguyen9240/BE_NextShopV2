@@ -16,7 +16,9 @@ namespace NextShopV2.Application.DTOs.Response
 
         // Buyer info
         public string? BuyerName { get; set; }
+        public string? BuyerEmail { get; set; }
         public string? BuyerPhone { get; set; }
+        public string? BuyerGender { get; set; }
 
         public List<OrderCouponResponse> Coupons { get; set; } = new List<OrderCouponResponse>();
         public string? ShippingAddress { get; set; }

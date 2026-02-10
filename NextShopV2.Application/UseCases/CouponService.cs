@@ -148,6 +148,8 @@ namespace NextShopV2.Application.Services
             {
                 CouponId = Guid.NewGuid(),
                 Code = request.Code.ToUpper().Trim(),
+                UserId = request.UserId,
+                CouponType = request.CouponType,
                 DiscountPercent = request.DiscountPercent,
                 MinOrderAmount = request.MinOrderAmount,
                 MaxDiscountAmount = request.MaxDiscountAmount,
@@ -299,6 +301,58 @@ namespace NextShopV2.Application.Services
             return true;
         }
 
+        public async Task<bool> HasUserWelcomeCouponAsync(Guid userId)
+        {
+            return await _couponRepo.ExistsByPredicateAsync(c => c.UserId == userId && c.CouponType == "Welcome");
+        }
+
+        public async Task<WelcomeCouponSettingsResponse?> GetWelcomeCouponSettingsAsync()
+        {
+            var settings = await _couponRepo.GetWelcomeCouponSettingsAsync();
+            if (settings == null) return null;
+
+            return new WelcomeCouponSettingsResponse
+            {
+                Id = settings.Id,
+                DiscountPercent = settings.DiscountPercent,
+                MinOrderAmount = settings.MinOrderAmount,
+                MaxDiscountAmount = settings.MaxDiscountAmount,
+                UsageLimit = settings.UsageLimit,
+                ValidityMonths = settings.ValidityMonths,
+                IsEnabled = settings.IsEnabled,
+                CreatedAt = settings.CreatedAt,
+                UpdatedAt = settings.UpdatedAt
+            };
+        }
+
+        public async Task<WelcomeCouponSettingsResponse> UpdateWelcomeCouponSettingsAsync(UpdateWelcomeCouponSettingsRequest request)
+        {
+            var settings = new WelcomeCouponSettings
+            {
+                DiscountPercent = request.DiscountPercent,
+                MinOrderAmount = request.MinOrderAmount,
+                MaxDiscountAmount = request.MaxDiscountAmount,
+                UsageLimit = request.UsageLimit,
+                ValidityMonths = request.ValidityMonths,
+                IsEnabled = request.IsEnabled
+            };
+
+            var updated = await _couponRepo.UpdateWelcomeCouponSettingsAsync(settings);
+
+            return new WelcomeCouponSettingsResponse
+            {
+                Id = updated.Id,
+                DiscountPercent = updated.DiscountPercent,
+                MinOrderAmount = updated.MinOrderAmount,
+                MaxDiscountAmount = updated.MaxDiscountAmount,
+                UsageLimit = updated.UsageLimit,
+                ValidityMonths = updated.ValidityMonths,
+                IsEnabled = updated.IsEnabled,
+                CreatedAt = updated.CreatedAt,
+                UpdatedAt = updated.UpdatedAt
+            };
+        }
+
         private async Task<CouponResponse> MapToResponseAsync(Coupon coupon)
         {
             // Count current reservations for this coupon (status = Reserved)
@@ -308,6 +362,8 @@ namespace NextShopV2.Application.Services
             {
                 CouponId = coupon.CouponId,
                 Code = coupon.Code,
+                UserId = coupon.UserId,
+                CouponType = coupon.CouponType,
                 DiscountPercent = coupon.DiscountPercent,
                 MinOrderAmount = coupon.MinOrderAmount,
                 MaxDiscountAmount = coupon.MaxDiscountAmount,

@@ -20,5 +20,10 @@ namespace NextShopV2.Application.Interfaces.Services
         Task<bool> CanReserveCouponAsync(Guid couponId);
         Task<bool> ConfirmCouponUsageForOrderAsync(Guid orderId);
         Task<bool> ReleaseCouponReservationsForOrderAsync(Guid orderId);
+
+        // Welcome coupon management
+        Task<bool> HasUserWelcomeCouponAsync(Guid userId);
+        Task<WelcomeCouponSettingsResponse?> GetWelcomeCouponSettingsAsync();
+        Task<WelcomeCouponSettingsResponse> UpdateWelcomeCouponSettingsAsync(UpdateWelcomeCouponSettingsRequest request);
     }
 }

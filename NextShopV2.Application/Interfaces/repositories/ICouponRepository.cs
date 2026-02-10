@@ -11,7 +11,10 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task<Coupon> UpdateAsync(Coupon coupon);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(string code);
+        Task<bool> ExistsByPredicateAsync(System.Linq.Expressions.Expression<Func<Coupon, bool>> predicate);
         Task<IEnumerable<Coupon>> GetActiveCouponsAsync();
+        Task<WelcomeCouponSettings?> GetWelcomeCouponSettingsAsync();
+        Task<WelcomeCouponSettings> UpdateWelcomeCouponSettingsAsync(WelcomeCouponSettings settings);
         Task SaveAsync();
     }
 }
