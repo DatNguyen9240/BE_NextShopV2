@@ -36,19 +36,7 @@ namespace NextShopV2.Application.Services
             // check existence first to respond immediately if email taken
             var existingUser = await _userRepository.GetByEmailAsync(request.Email!);
             if (existingUser != null)
-            {
-                // Nếu user đã tồn tại nhưng chưa verify, cho phép gửi lại email
-                if (!existingUser.EmailVerified)
-                {
-                    var resent = await StartEmailVerification(existingUser.Id, existingUser.Email);
-                    if (!resent.Success)
-                    {
-                        return new AppApiResponse { Success = false, Message = "Email đã tồn tại nhưng gửi email xác thực thất bại. Vui lòng thử lại sau" };
-                    }
-                    return new AppApiResponse { Success = true, Message = "Email đã tồn tại. Đã gửi lại email xác thực" };
-                }
-                return new AppApiResponse { Success = false, Message = "Email đã tồn tại và đã được xác thực" };
-            }
+                return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
 
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = new User
@@ -68,7 +56,7 @@ namespace NextShopV2.Application.Services
             var sent = await StartEmailVerification(user.Id, user.Email);
             if (!sent.Success)
             {
-                return new AppApiResponse { Success = true, Message = "Đăng ký thành công nhưng gửi email xác thực thất bại. Bạn có thể đăng nhập và yêu cầu gửi lại" };
+                return new AppApiResponse { Success = true, Message = "Đăng ký thành công nhưng gửi email xác thực thất bại" };
             }
 
             return new AppApiResponse { Success = true, Message = "Đăng ký thành công. Đã gửi email xác thực" };

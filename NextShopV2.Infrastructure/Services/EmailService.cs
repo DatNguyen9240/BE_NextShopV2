@@ -20,13 +20,13 @@ namespace NextShopV2.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            // Helper để expand environment variable placeholders như ${SMTP_USER}
-            string ExpandEnvVar(string? value, string envVarName, string defaultValue = "")
+            // Helper để expand placeholders như ${SMTP_USER} trong appsettings
+            string ExpandPlaceholder(string? value, string envVarName, string defaultValue = "")
             {
                 if (string.IsNullOrWhiteSpace(value))
                     return System.Environment.GetEnvironmentVariable(envVarName) ?? defaultValue;
                 
-                // Nếu là placeholder như ${SMTP_USER}, expand nó
+                // Nếu là placeholder dạng ${VAR_NAME}, expand nó
                 if (value.StartsWith("${") && value.EndsWith("}"))
                 {
                     var varName = value.Substring(2, value.Length - 3);
@@ -36,24 +36,22 @@ namespace NextShopV2.Infrastructure.Services
                 return value;
             }
 
-            var smtpHost = ExpandEnvVar(_configuration["Smtp:Host"], "SMTP_HOST", "smtp.gmail.com");
-            var smtpPortStr = ExpandEnvVar(_configuration["Smtp:Port"], "SMTP_PORT", "587");
+            var smtpHost = ExpandPlaceholder(_configuration["Smtp:Host"], "SMTP_HOST", "smtp.gmail.com");
+            var smtpPortStr = ExpandPlaceholder(_configuration["Smtp:Port"], "SMTP_PORT", "587");
             var smtpPort = int.TryParse(smtpPortStr, out var p) ? p : 587;
-            var smtpUser = ExpandEnvVar(_configuration["Smtp:Username"], "SMTP_USER");
-            var smtpPass = ExpandEnvVar(_configuration["Smtp:Password"], "SMTP_PASSWORD");
-            var fromEmail = ExpandEnvVar(_configuration["Smtp:FromEmail"], "SMTP_USER", "no-reply@nextshop.com");
-            var fromName = ExpandEnvVar(_configuration["Smtp:FromName"], "SMTP_FROM_NAME", "NextShop");
+            var smtpUser = ExpandPlaceholder(_configuration["Smtp:Username"], "SMTP_USER");
+            var smtpPass = ExpandPlaceholder(_configuration["Smtp:Password"], "SMTP_PASSWORD");
+            var fromEmail = ExpandPlaceholder(_configuration["Smtp:FromEmail"], "SMTP_USER", "no-reply@nextshop.com");
+            var fromName = ExpandPlaceholder(_configuration["Smtp:FromName"], "SMTP_FROM_NAME", "NextShop");
 
-            // Log config (không log password)
+            // Log để debug (không log password)
+            _logger.LogInformation("📧 SMTP Config - Host: {Host}, Port: {Port}, User: {User}, From: {From}", 
+                smtpHost, smtpPort, smtpUser, fromEmail);
+            
             if (string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPass))
             {
-                _logger.LogWarning("SMTP credentials missing! User: {HasUser}, Pass: {HasPass}", 
-                    !string.IsNullOrEmpty(smtpUser), !string.IsNullOrEmpty(smtpPass));
-            }
-            else
-            {
-                _logger.LogInformation("SMTP configured: Host={Host}, Port={Port}, User={User}, From={From}", 
-                    smtpHost, smtpPort, smtpUser, fromEmail);
+                _logger.LogError("❌ SMTP credentials missing! Check environment variables: SMTP_USER and SMTP_PASSWORD");
+                throw new System.InvalidOperationException("SMTP credentials not configured");
             }
 
             var message = new MimeMessage();
@@ -64,77 +62,35 @@ namespace NextShopV2.Infrastructure.Services
             var builder = new BodyBuilder { HtmlBody = htmlBody };
             message.Body = builder.ToMessageBody();
 
-            // Retry với multiple ports để tránh firewall/network issues
-            var attempts = new[]
+            using var client = new SmtpClient();
+            try
             {
-                (Port: smtpPort, Options: MailKit.Security.SecureSocketOptions.StartTls, Name: "StartTls"),
-                (Port: 465, Options: MailKit.Security.SecureSocketOptions.SslOnConnect, Name: "SSL"),
-                (Port: 587, Options: MailKit.Security.SecureSocketOptions.Auto, Name: "Auto")
-            };
+                client.Timeout = 30000; // 30s timeout
+                
+                _logger.LogInformation("🔌 Connecting to SMTP server...");
+                await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
 
-            Exception? lastException = null;
+                _logger.LogInformation("🔐 Authenticating...");
+                await client.AuthenticateAsync(smtpUser, smtpPass);
 
-            foreach (var attempt in attempts)
+                _logger.LogInformation("📤 Sending email...");
+                await client.SendAsync(message);
+                
+                _logger.LogInformation("✅ Email sent successfully to {Email} with subject: {Subject}", toEmail, subject);
+            }
+            catch (System.Exception ex)
             {
-                using var client = new SmtpClient();
-                try
+                _logger.LogError(ex, "❌ Failed to send email to {Email}. Host: {Host}:{Port}, User: {User}", 
+                    toEmail, smtpHost, smtpPort, smtpUser);
+                throw;
+            }
+            finally
+            {
+                if (client.IsConnected)
                 {
-                    // Timeout 15s cho mỗi attempt
-                    client.Timeout = 15000;
-                    
-                    _logger.LogInformation("Attempting to connect via {Method} on port {Port} to {Host}", 
-                        attempt.Name, attempt.Port, smtpHost);
-                    
-                    await client.ConnectAsync(smtpHost, attempt.Port, attempt.Options);
-
-                    if (!string.IsNullOrEmpty(smtpUser))
-                    {
-                        await client.AuthenticateAsync(smtpUser, smtpPass);
-                    }
-
-                    await client.SendAsync(message);
-                    _logger.LogInformation("Email sent successfully to {Email} via {Method}:{Port}", 
-                        toEmail, attempt.Name, attempt.Port);
-                    
-                    if (client.IsConnected)
-                    {
-                        await client.DisconnectAsync(true);
-                    }
-                    return; // Success!
-                }
-                catch (System.TimeoutException tex)
-                {
-                    lastException = tex;
-                    _logger.LogWarning("Timeout connecting to {Host}:{Port} via {Method}: {Message}", 
-                        smtpHost, attempt.Port, attempt.Name, tex.Message);
-                    
-                    if (client.IsConnected)
-                    {
-                        try { await client.DisconnectAsync(true); } catch { }
-                    }
-                    // Try next method
-                }
-                catch (System.Exception ex)
-                {
-                    lastException = ex;
-                    _logger.LogWarning(ex, "Failed to send via {Method}:{Port}, trying next method", 
-                        attempt.Name, attempt.Port);
-                    
-                    if (client.IsConnected)
-                    {
-                        try { await client.DisconnectAsync(true); } catch { }
-                    }
-                    // Try next method
+                    await client.DisconnectAsync(true);
                 }
             }
-
-            // All attempts failed
-            _logger.LogError(lastException, "All SMTP connection attempts failed for {Email}. Host: {Host}, User: {User}", 
-                toEmail, smtpHost, smtpUser);
-            throw new System.InvalidOperationException(
-                $"Cannot connect to SMTP server {smtpHost}. This may be due to firewall or network restrictions on your hosting provider. " +
-                "Consider using a transactional email service like SendGrid, AWS SES, or Mailgun for production.", 
-                lastException);
         }
     }
 }
