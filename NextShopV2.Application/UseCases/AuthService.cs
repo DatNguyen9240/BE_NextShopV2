@@ -101,6 +101,14 @@ namespace NextShopV2.Application.Services
             // For users without MFA enabled, return tokens directly (backwards compatible)
             if (!user.MfaEnabled || string.IsNullOrWhiteSpace(user.MfaType) || !user.MfaType.Equals("Email", System.StringComparison.OrdinalIgnoreCase))
             {
+                // Require email verification before issuing tokens
+                if (!user.EmailVerified)
+                {
+                    // Send verification email
+                    await StartEmailVerification(user.Id, user.Email);
+                    return new AppApiResponse { Success = false, Message = "Email chưa được xác thực. Đã gửi email xác thực" };
+                }
+
                 if (string.IsNullOrWhiteSpace(_jwtKey))
                     return new AppApiResponse { Success = false, Message = "JWT key is missing in configuration" };
                 var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
@@ -186,6 +194,11 @@ namespace NextShopV2.Application.Services
                     return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
                 var user = await _userRepository.GetByIdAsync(userId);
                 if (user == null) return new AppAuthResponse { Success = false, Message = "User not found" };
+                
+                // Double-check email verification (should already be verified from StartEmailOtp)
+                if (!user.EmailVerified)
+                    return new AppAuthResponse { Success = false, Message = "Email not verified" };
+                
                 var accessToken = JwtHelper.GenerateToken(_jwtKey, user.Id, user.Email, user.Role);
                 var refreshToken = Guid.NewGuid().ToString();
                 await _redisDb.StringSetAsync($"refresh:{user.Id}", refreshToken, TimeSpan.FromDays(7));

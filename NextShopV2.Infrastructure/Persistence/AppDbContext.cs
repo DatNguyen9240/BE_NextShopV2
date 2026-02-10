@@ -230,6 +230,13 @@ namespace NextShopV2.Infrastructure.Persistence
                 eb.Property(s => s.CreatedAt).IsRequired();
             });
 
+            // Configure WelcomeCouponSettings decimal properties
+            modelBuilder.Entity<WelcomeCouponSettings>(eb => {
+                eb.Property(w => w.DiscountPercent).HasPrecision(5, 2);
+                eb.Property(w => w.MinOrderAmount).HasPrecision(18, 2);
+                eb.Property(w => w.MaxDiscountAmount).HasPrecision(18, 2);
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }

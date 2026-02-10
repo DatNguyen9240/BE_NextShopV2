@@ -309,7 +309,22 @@ namespace NextShopV2.Application.Services
         public async Task<WelcomeCouponSettingsResponse?> GetWelcomeCouponSettingsAsync()
         {
             var settings = await _couponRepo.GetWelcomeCouponSettingsAsync();
-            if (settings == null) return null;
+            if (settings == null)
+            {
+                // Create default settings if not exists
+                settings = new WelcomeCouponSettings
+                {
+                    Id = Guid.NewGuid(),
+                    DiscountPercent = 10,
+                    MinOrderAmount = 100000,
+                    MaxDiscountAmount = 50000,
+                    UsageLimit = 1,
+                    ValidityMonths = 1,
+                    IsEnabled = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                settings = await _couponRepo.UpdateWelcomeCouponSettingsAsync(settings);
+            }
 
             return new WelcomeCouponSettingsResponse
             {
