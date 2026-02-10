@@ -315,7 +315,10 @@ namespace NextShopV2.Api.Extensions
             services.AddOptions<Resend.ResendClientOptions>()
                 .Configure<IConfiguration>((options, configuration) =>
                 {
-                    options.ApiToken = configuration["Resend:ApiKey"] ?? Environment.GetEnvironmentVariable("RESEND_API_KEY") ?? "";
+                    var apiKey = Environment.GetEnvironmentVariable("RESEND_API_KEY") 
+                        ?? configuration["Resend:ApiKey"];
+                    options.ApiToken = apiKey ?? "";
+                    Console.WriteLine($"🔧 Configuring Resend with API key length: {apiKey?.Length ?? 0}");
                 });
             services.AddHttpClient<Resend.IResend, Resend.ResendClient>();
             

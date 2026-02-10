@@ -12,6 +12,9 @@ services:
       - ConnectionStrings__Redis=redis:6379
       - DP_KEYS_PATH=/root/.aspnet/DataProtection-Keys
       - ASPNETCORE_URLS=http://+:8080
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+      - RESEND_FROM_NAME=${RESEND_FROM_NAME}
     volumes:
       - ./data/dataprotection-keys:/root/.aspnet/DataProtection-Keys
     depends_on:

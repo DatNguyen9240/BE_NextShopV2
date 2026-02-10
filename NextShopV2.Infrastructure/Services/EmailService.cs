@@ -21,8 +21,12 @@ namespace NextShopV2.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            var fromEmail = _configuration["Resend:FromEmail"] ?? "onboarding@resend.dev";
-            var fromName = _configuration["Resend:FromName"] ?? "NextShop";
+            var fromEmail = Environment.GetEnvironmentVariable("RESEND_FROM_EMAIL") 
+                ?? _configuration["Resend:FromEmail"] 
+                ?? "onboarding@resend.dev";
+            var fromName = Environment.GetEnvironmentVariable("RESEND_FROM_NAME") 
+                ?? _configuration["Resend:FromName"] 
+                ?? "NextShop";
 
             // Debug log
             _logger.LogInformation("Resend FromEmail: {FromEmail}, FromName: {FromName}", fromEmail, fromName);
