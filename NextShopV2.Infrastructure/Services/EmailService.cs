@@ -64,38 +64,77 @@ namespace NextShopV2.Infrastructure.Services
             var builder = new BodyBuilder { HtmlBody = htmlBody };
             message.Body = builder.ToMessageBody();
 
-            using var client = new SmtpClient();
-            try
+            // Retry với multiple ports để tránh firewall/network issues
+            var attempts = new[]
             {
-                // Set timeout để tránh connection hang
-                client.Timeout = 30000; // 30 seconds
-                
-                _logger.LogInformation("Attempting to send email to {Email} via {Host}:{Port}", toEmail, smtpHost, smtpPort);
-                
-                // Use StartTls cho Gmail (ổn định hơn Auto)
-                await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                (Port: smtpPort, Options: MailKit.Security.SecureSocketOptions.StartTls, Name: "StartTls"),
+                (Port: 465, Options: MailKit.Security.SecureSocketOptions.SslOnConnect, Name: "SSL"),
+                (Port: 587, Options: MailKit.Security.SecureSocketOptions.Auto, Name: "Auto")
+            };
 
-                if (!string.IsNullOrEmpty(smtpUser))
-                {
-                    await client.AuthenticateAsync(smtpUser, smtpPass);
-                }
+            Exception? lastException = null;
 
-                await client.SendAsync(message);
-                _logger.LogInformation("Email sent successfully to {Email} with subject {Subject}", toEmail, subject);
-            }
-            catch (System.Exception ex)
+            foreach (var attempt in attempts)
             {
-                _logger.LogError(ex, "Failed to send email to {Email}. Host: {Host}, Port: {Port}, User: {User}", 
-                    toEmail, smtpHost, smtpPort, smtpUser);
-                throw;
-            }
-            finally
-            {
-                if (client.IsConnected)
+                using var client = new SmtpClient();
+                try
                 {
-                    await client.DisconnectAsync(true);
+                    // Timeout 15s cho mỗi attempt
+                    client.Timeout = 15000;
+                    
+                    _logger.LogInformation("Attempting to connect via {Method} on port {Port} to {Host}", 
+                        attempt.Name, attempt.Port, smtpHost);
+                    
+                    await client.ConnectAsync(smtpHost, attempt.Port, attempt.Options);
+
+                    if (!string.IsNullOrEmpty(smtpUser))
+                    {
+                        await client.AuthenticateAsync(smtpUser, smtpPass);
+                    }
+
+                    await client.SendAsync(message);
+                    _logger.LogInformation("Email sent successfully to {Email} via {Method}:{Port}", 
+                        toEmail, attempt.Name, attempt.Port);
+                    
+                    if (client.IsConnected)
+                    {
+                        await client.DisconnectAsync(true);
+                    }
+                    return; // Success!
+                }
+                catch (System.TimeoutException tex)
+                {
+                    lastException = tex;
+                    _logger.LogWarning("Timeout connecting to {Host}:{Port} via {Method}: {Message}", 
+                        smtpHost, attempt.Port, attempt.Name, tex.Message);
+                    
+                    if (client.IsConnected)
+                    {
+                        try { await client.DisconnectAsync(true); } catch { }
+                    }
+                    // Try next method
+                }
+                catch (System.Exception ex)
+                {
+                    lastException = ex;
+                    _logger.LogWarning(ex, "Failed to send via {Method}:{Port}, trying next method", 
+                        attempt.Name, attempt.Port);
+                    
+                    if (client.IsConnected)
+                    {
+                        try { await client.DisconnectAsync(true); } catch { }
+                    }
+                    // Try next method
                 }
             }
+
+            // All attempts failed
+            _logger.LogError(lastException, "All SMTP connection attempts failed for {Email}. Host: {Host}, User: {User}", 
+                toEmail, smtpHost, smtpUser);
+            throw new System.InvalidOperationException(
+                $"Cannot connect to SMTP server {smtpHost}. This may be due to firewall or network restrictions on your hosting provider. " +
+                "Consider using a transactional email service like SendGrid, AWS SES, or Mailgun for production.", 
+                lastException);
         }
     }
 }
