@@ -248,5 +248,12 @@ namespace NextShopV2.Application.UseCases
                 await _pushTokenRepository.UpdateAsync(token);
             }
         }
+
+        public async Task RemoveTokenAsync(string token)
+        {
+            if (string.IsNullOrEmpty(token)) return;
+            // repository will mark token inactive if found
+            await _pushTokenRepository.DeleteAsync(token);
+        }
     }
 }

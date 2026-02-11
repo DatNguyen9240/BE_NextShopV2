@@ -15,5 +15,8 @@ namespace NextShopV2.Application.Interfaces.Services
 
         // Send notification to tokens owned by a specific user
         Task<FirebaseNotificationSendResult> SendToUserAsync(Guid userId, FirebaseNotificationRequest request);
+        
+            // Remove a single token (mark inactive)
+            Task RemoveTokenAsync(string token);
     }
 }

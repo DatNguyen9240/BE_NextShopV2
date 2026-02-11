@@ -174,5 +174,22 @@ namespace NextShopV2.Api.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPost("remove-token")]
+        public async Task<IActionResult> RemoveToken([FromBody] FirebaseFcmTokenModel model)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(model?.Token)) return BadRequest("Token is required");
+                await _notificationService.RemoveTokenAsync(model.Token);
+                _logger.LogInformation($"Token removed: {model.Token}");
+                return Ok(new { message = "Token removed" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error removing token: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }
