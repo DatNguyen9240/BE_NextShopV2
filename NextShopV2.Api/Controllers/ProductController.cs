@@ -88,6 +88,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
         {
             if (!ModelState.IsValid)
@@ -98,6 +99,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductRequest request)
         {
             if (!ModelState.IsValid)
@@ -111,6 +113,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _service.DeleteAsync(id);

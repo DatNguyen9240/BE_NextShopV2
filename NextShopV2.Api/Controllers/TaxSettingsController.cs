@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using NextShopV2.Api.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Shared.Helpers;
@@ -24,7 +25,7 @@ namespace NextShopV2.Api.Controllers
         /// Get all tax settings (Admin only)
         /// </summary>
         [HttpGet]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> GetAll()
         {
             var settings = await _settingService.GetAllAsync();
@@ -35,7 +36,7 @@ namespace NextShopV2.Api.Controllers
         /// Get a specific setting value
         /// </summary>
         [HttpGet("{key}")]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> GetByKey(string key)
         {
             var value = await _settingService.GetValueAsync(key);
@@ -50,7 +51,7 @@ namespace NextShopV2.Api.Controllers
         /// Get current tax rate
         /// </summary>
         [HttpGet("tax-rate")]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> GetTaxRate()
         {
             var rate = await _settingService.GetTaxRateAsync();
@@ -65,7 +66,7 @@ namespace NextShopV2.Api.Controllers
         /// Update or create a setting (Admin only)
         /// </summary>
         [HttpPost]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> SetSetting([FromBody] SetSettingRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Key))
@@ -100,7 +101,7 @@ namespace NextShopV2.Api.Controllers
         /// Update tax rate (Admin only) - convenient endpoint
         /// </summary>
         [HttpPost("tax-rate")]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> SetTaxRate([FromBody] SetTaxRateRequest request)
         {
             if (request.Rate < 0 || request.Rate > 1)
@@ -124,7 +125,7 @@ namespace NextShopV2.Api.Controllers
         /// Delete a setting (Admin only)
         /// </summary>
         [HttpDelete("{key}")]
-        [Authorize]
+        [AdminOnly]
         public async Task<IActionResult> Delete(string key)
         {
             await _settingService.DeleteAsync(key);

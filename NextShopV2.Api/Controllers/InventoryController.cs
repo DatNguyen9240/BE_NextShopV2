@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Response;
 using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Api.Attributes;
 using NextShopV2.Application.DTOs;
 
 namespace NextShopV2.Api.Controllers
@@ -18,6 +19,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("update")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateInventory([FromBody] UpdateInventoryRequest request)
         {
             // Get current user (you might get this from JWT token or authentication)

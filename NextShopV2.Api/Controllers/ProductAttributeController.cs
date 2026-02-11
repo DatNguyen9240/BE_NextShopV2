@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Api.Attributes;
 using System;
 using System.Threading.Tasks;
 
@@ -46,6 +47,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> Create([FromBody] NextShopV2.Application.DTOs.Request.CreateAttributeRequest request)
         {
             var r = await _service.CreateAttributeAsync(request);
@@ -53,6 +55,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost("value")]
+        [AdminOnly]
         public async Task<IActionResult> CreateValue([FromBody] NextShopV2.Application.DTOs.Request.CreateAttributeValueRequest request)
         {
             var v = await _service.CreateAttributeValueAsync(request);
@@ -67,6 +70,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateAttribute(Guid id, [FromBody] NextShopV2.Application.DTOs.Request.UpdateAttributeRequest request)
         {
             var r = await _service.UpdateAttributeAsync(id, request);
@@ -75,6 +79,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteAttribute(Guid id)
         {
             var ok = await _service.DeleteAttributeAsync(id);
@@ -83,6 +88,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPut("value/{id}")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateAttributeValue(Guid id, [FromBody] NextShopV2.Application.DTOs.Request.UpdateAttributeValueRequest request)
         {
             var r = await _service.UpdateAttributeValueAsync(id, request);
@@ -91,6 +97,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete("value/{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteAttributeValue(Guid id)
         {
             var ok = await _service.DeleteAttributeValueAsync(id);
@@ -98,6 +105,7 @@ namespace NextShopV2.Api.Controllers
             return Ok(new { success = true });
         }
         [HttpPost("{categoryId}/assign/{attributeId}")]
+        [AdminOnly]
         public async Task<IActionResult> AssignToCategory(Guid categoryId, Guid attributeId)
         {
             await _service.AssignAttributeToCategoryAsync(categoryId, attributeId);
@@ -105,6 +113,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete("{categoryId}/assign/{attributeId}")]
+        [AdminOnly]
         public async Task<IActionResult> RemoveFromCategory(Guid categoryId, Guid attributeId)
         {
             await _service.RemoveAttributeFromCategoryAsync(categoryId, attributeId);

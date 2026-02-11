@@ -46,14 +46,51 @@ ALTER PUBLICATION supabase_realtime ADD TABLE chat_messages;
 ALTER TABLE chat_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow everyone to read (Select) for real-time synchronization
--- This allows the frontend to receive updates via subscriptions.
-CREATE POLICY "Allow select for all" ON chat_conversations FOR SELECT USING (true);
-CREATE POLICY "Allow select for all" ON chat_messages FOR SELECT USING (true);
+-- Policy: Allow admins or involved participants to read (SELECT).
+-- Admins are identified via a JWT custom claim `role = 'admin'`.
+-- Participants are the conversation owner (`chat_conversations.user_id`) or
+-- the message sender (`chat_messages.sender_id`).
+CREATE POLICY "select_conversation_admin_or_owner" ON chat_conversations FOR SELECT
+USING (
+    (current_setting('jwt.claims', true)::json ->> 'role') = 'admin'
+    OR user_id = auth.uid()::text
+);
 
--- NOTE: No INSERT/UPDATE policies are created. 
--- This means only the SERVICE_ROLE_KEY (used in our Next.js API Proxy routes)
--- can write to these tables. This is the most secure setup for this architecture.
+CREATE POLICY "select_message_admin_or_participant" ON chat_messages FOR SELECT
+USING (
+    (current_setting('jwt.claims', true)::json ->> 'role') = 'admin'
+    OR sender_id = auth.uid()::text
+    OR EXISTS (
+        SELECT 1 FROM chat_conversations cc WHERE cc.id = chat_messages.conversation_id AND cc.user_id = auth.uid()::text
+    )
+);
+
+-- INSERT: allow authenticated users to insert messages as themselves, or admins.
+CREATE POLICY "insert_message_sender_or_admin" ON chat_messages FOR INSERT
+WITH CHECK (
+    (current_setting('jwt.claims', true)::json ->> 'role') = 'admin'
+    OR sender_id = auth.uid()::text
+);
+
+-- Optional: allow creating conversations when the user matches
+CREATE POLICY "insert_conversation_owner_or_admin" ON chat_conversations FOR INSERT
+WITH CHECK (
+    (current_setting('jwt.claims', true)::json ->> 'role') = 'admin'
+    OR user_id = auth.uid()::text
+);
+
+-- UPDATE/DELETE: restrict to admins only to simplify audit/cleanup.
+CREATE POLICY "update_message_admin_only" ON chat_messages FOR UPDATE
+USING ((current_setting('jwt.claims', true)::json ->> 'role') = 'admin');
+
+CREATE POLICY "delete_message_admin_only" ON chat_messages FOR DELETE
+USING ((current_setting('jwt.claims', true)::json ->> 'role') = 'admin');
+
+CREATE POLICY "update_conversation_admin_only" ON chat_conversations FOR UPDATE
+USING ((current_setting('jwt.claims', true)::json ->> 'role') = 'admin');
+
+CREATE POLICY "delete_conversation_admin_only" ON chat_conversations FOR DELETE
+USING ((current_setting('jwt.claims', true)::json ->> 'role') = 'admin');
 
 -- 6. AUTOMATIC METADATA UPDATES
 -- Trigger function to update 'last_message_at' whenever a new message is sent.

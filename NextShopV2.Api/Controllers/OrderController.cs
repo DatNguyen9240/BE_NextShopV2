@@ -29,6 +29,7 @@ namespace NextShopV2.Api.Controllers
 
 
         [HttpGet]
+        [AdminOnly]
         public async Task<IActionResult> GetAll()
         {
             var orders = await _orderService.GetAllAsync();
@@ -48,6 +49,13 @@ namespace NextShopV2.Api.Controllers
             if (ownershipCheck != null)
                 return ownershipCheck;
 
+            // Hide admin-only fields for non-admin users
+            if (!this.IsAdmin())
+            {
+                order.AdminCancelReason = null;
+                order.CancelledBy = null;
+            }
+
             return ResponseHelper.Success(order);
         }
 
@@ -63,10 +71,27 @@ namespace NextShopV2.Api.Controllers
             if (page > 0 && pageSize > 0)
             {
                 var (items, total) = await _orderService.GetByUserIdPagedAsync(userId, page, pageSize, status);
+                // Strip admin-only fields for non-admin users
+                if (!this.IsAdmin())
+                {
+                    foreach (var it in items)
+                    {
+                        it.AdminCancelReason = null;
+                        it.CancelledBy = null;
+                    }
+                }
                 return ResponseHelper.Success(new { items, total, page, pageSize });
             }
 
             var orders = await _orderService.GetByUserIdAsync(userId);
+            if (!this.IsAdmin())
+            {
+                foreach (var o in orders)
+                {
+                    o.AdminCancelReason = null;
+                    o.CancelledBy = null;
+                }
+            }
             return ResponseHelper.Success(orders);
         }
 
@@ -80,6 +105,15 @@ namespace NextShopV2.Api.Controllers
                 return userCheck;
 
             var orders = await _orderService.GetByUserIdAsync(userId);
+            // Only admin should see admin-only fields
+            if (!this.IsAdmin())
+            {
+                foreach (var o in orders)
+                {
+                    o.AdminCancelReason = null;
+                    o.CancelledBy = null;
+                }
+            }
             return ResponseHelper.Success(orders);
         }
 

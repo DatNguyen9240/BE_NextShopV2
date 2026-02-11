@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
+using NextShopV2.Api.Attributes;
 using NextShopV2.Application.DTOs.Request;
 using System;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> Assign([FromBody] AssignVariantAttributeRequest request)
         {
             if (request == null || request.VariantId == Guid.Empty || request.AttributeValueId == Guid.Empty)
@@ -49,6 +51,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete]
+        [AdminOnly]
         public async Task<IActionResult> Remove([FromQuery] Guid variantId, [FromQuery] Guid attributeValueId)
         {
             await _service.RemoveVariantAttributeValueAsync(variantId, attributeValueId);

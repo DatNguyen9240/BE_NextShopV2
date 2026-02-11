@@ -63,6 +63,7 @@ namespace NextShopV2.Api.Controllers
 
         // POST: api/Category
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
         {
             if (!ModelState.IsValid)
@@ -74,6 +75,7 @@ namespace NextShopV2.Api.Controllers
 
         // PUT: api/Category/{id}
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Update(Guid id, [FromBody] CreateCategoryRequest request)
         {
             if (!ModelState.IsValid)
@@ -85,6 +87,7 @@ namespace NextShopV2.Api.Controllers
 
         // DELETE: api/Category/{id}
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _categoryService.DeleteCategoryAsync(id);

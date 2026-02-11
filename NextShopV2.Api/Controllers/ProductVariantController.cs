@@ -105,6 +105,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> Create([FromBody] CreateProductVariantRequest request)
         {
             if (!ModelState.IsValid)
@@ -115,6 +116,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductVariantRequest request)
         {
             if (!ModelState.IsValid)
@@ -128,6 +130,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPatch("{id}/stock")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateStock(Guid id, [FromBody] UpdateStockRequest request)
         {
             if (!ModelState.IsValid)
@@ -141,6 +144,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpPatch("{id}/set-default")]
+        [AdminOnly]
         public async Task<IActionResult> SetAsDefault(Guid id)
         {
             var success = await _variantService.SetAsDefaultAsync(id);
@@ -151,6 +155,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> Delete(Guid id)
         {
             var success = await _variantService.DeleteAsync(id);
