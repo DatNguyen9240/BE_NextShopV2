@@ -218,17 +218,40 @@ public class PaymentService : IPaymentService
     public PaymentStatusResponse? GetPaymentStatusByOrderId(Guid orderId)
     {
         var payments = _db.Payments.Where(p => p.OrderId == orderId).OrderByDescending(p => p.CreatedAt).ToList();
-        if (payments == null || payments.Count == 0) return null;
 
-        // Prefer any payment that is already Paid
-        var paid = payments.FirstOrDefault(p => !string.IsNullOrEmpty(p.Status) && p.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase));
-        var selected = paid ?? payments.First();
+        // If we have payments, prefer any that are Paid; otherwise use the latest
+        if (payments != null && payments.Count > 0)
+        {
+            var paid = payments.FirstOrDefault(p => !string.IsNullOrEmpty(p.Status) && p.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase));
+            var selected = paid ?? payments.First();
+
+            // If selected payment has a non-empty status, return it
+            if (!string.IsNullOrEmpty(selected.Status))
+            {
+                return new PaymentStatusResponse
+                {
+                    Status = selected.Status,
+                    OrderId = selected.OrderId,
+                    ProviderData = selected.ProviderData
+                };
+            }
+            // otherwise fall through to check the order status below
+        }
+
+        // No payment rows or no definitive payment status: fall back to order.Status
+        var order = _db.Orders.FirstOrDefault(o => o.OrderId == orderId);
+        if (order == null) return null;
+
+        // Normalize order status to common payment state strings when possible
+        string mappedStatus = !string.IsNullOrEmpty(order.Status) && order.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase)
+            ? "Paid"
+            : order.Status; // leave other statuses as-is (e.g., Pending, Cancelled)
 
         return new PaymentStatusResponse
         {
-            Status = selected.Status,
-            OrderId = selected.OrderId,
-            ProviderData = selected.ProviderData
+            Status = mappedStatus,
+            OrderId = order.OrderId,
+            ProviderData = null
         };
     }
 
