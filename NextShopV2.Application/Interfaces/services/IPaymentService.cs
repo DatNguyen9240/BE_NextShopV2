@@ -12,4 +12,7 @@ public interface IPaymentService
 
     // Mark a payment (including COD) as paid/collected. Returns true if successful.
     Task<bool> MarkPaymentAsPaidAsync(Guid paymentId, string? collectedBy);
+
+    // Ensure a payment record exists for an order and mark it as paid (admin flow).
+    Task<bool> EnsurePaymentAndMarkPaidAsync(Guid orderId, string? collectedBy);
 }

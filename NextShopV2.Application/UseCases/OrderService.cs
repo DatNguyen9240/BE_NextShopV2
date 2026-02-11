@@ -22,8 +22,9 @@ namespace NextShopV2.Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IProductAttributeService _attributeService;
         private readonly ITaxSettingService _settingService;
+        private readonly NextShopV2.Application.Interfaces.Services.IPaymentService _paymentService;
 
-        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, IProductAttributeService attributeService, ITaxSettingService settingService)
+        public OrderService(IOrderRepository orderRepo, IProductVariantRepository variantRepo, IInventoryService inventoryService, ICouponService couponService, IUserRepository userRepository, IProductAttributeService attributeService, ITaxSettingService settingService, NextShopV2.Application.Interfaces.Services.IPaymentService paymentService)
         {
             _orderRepo = orderRepo;
             _variantRepo = variantRepo;
@@ -32,6 +33,7 @@ namespace NextShopV2.Application.Services
             _userRepo = userRepository;
             _attributeService = attributeService;
             _settingService = settingService;
+            _paymentService = paymentService;
         }
 
         public async Task<List<OrderResponse>> GetAllAsync()
@@ -316,8 +318,17 @@ namespace NextShopV2.Application.Services
         {
             var order = await _orderRepo.GetByIdAsync(id);
             if (order == null) return false;
+            var previous = order.Status;
 
-            var previous = order.Status; 
+            // If admin sets to Paid, ensure payment record exists and run payment flow to keep payments and orders in sync
+            if (!string.Equals(previous, request.Status, StringComparison.OrdinalIgnoreCase) && request.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                // Delegate to payment service which will set Order.Status and perform side-effects
+                var ok = await _paymentService.EnsurePaymentAndMarkPaidAsync(id, "admin");
+                return ok;
+            }
+
+            // Otherwise, perform normal status update
             order.Status = request.Status;
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveAsync();

@@ -288,6 +288,32 @@ public class PaymentService : IPaymentService
         return true;
     }
 
+    public async Task<bool> EnsurePaymentAndMarkPaidAsync(Guid orderId, string? collectedBy)
+    {
+        // Try to find existing payment for order
+        var payment = _db.Payments.FirstOrDefault(p => p.OrderId == orderId);
+
+        if (payment == null)
+        {
+            // Create a synthetic admin payment record (Pending) and then mark it paid
+            payment = new Payment
+            {
+                PaymentId = Guid.NewGuid(),
+                OrderId = orderId,
+                Method = "ADMIN",
+                Status = "Pending",
+                ProviderPaymentId = $"admin-{Guid.NewGuid()}",
+                ProviderData = "{\"source\":\"admin-manual\"}",
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+        }
+
+        // Mark the payment as paid using existing logic
+        return await MarkPaymentAsPaidAsync(payment.PaymentId, collectedBy ?? "admin");
+    }
+
     public async Task<PaymentLinkResponse> CreatePaymentForOrderAsync(Guid orderId)
     {
         var order = await _db.Orders
