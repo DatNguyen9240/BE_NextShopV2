@@ -241,6 +241,19 @@ namespace NextShopV2.Application.Services
             }).ToList();
         }
 
+        public async Task<List<CouponResponse>> GetUserCouponsAsync(Guid userId)
+        {
+            var coupons = await _couponRepo.GetByUserIdAsync(userId);
+            if (!coupons.Any()) return new List<CouponResponse>();
+
+            var responses = new List<CouponResponse>();
+            foreach (var c in coupons)
+            {
+                responses.Add(await MapToResponseAsync(c));
+            }
+            return responses;
+        }
+
         public async Task<bool> ValidateCouponAsync(string code)
         {
             var coupon = await _couponRepo.GetByCodeAsync(code);

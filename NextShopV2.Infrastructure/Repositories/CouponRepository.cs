@@ -33,6 +33,14 @@ namespace NextShopV2.Infrastructure.Repositories
                 .FirstOrDefaultAsync(c => c.Code.ToUpper() == code.ToUpper());
         }
 
+        public async Task<IEnumerable<Coupon>> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.Coupons
+                .Where(c => c.UserId == userId)
+                .OrderByDescending(c => c.StartDate)
+                .ToListAsync();
+        }
+
         public async Task<Coupon> CreateAsync(Coupon coupon)
         {
             _context.Coupons.Add(coupon);

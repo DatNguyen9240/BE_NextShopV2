@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.Interfaces.Services;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Shared.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NextShopV2.Api.Controllers
 {
@@ -9,7 +10,7 @@ namespace NextShopV2.Api.Controllers
     [Route("api/[controller]")]
     public class CouponController : ControllerBase
     {
-        private readonly ICouponService _couponService;
+        private readonly ICouponService _couponService;  
 
         public CouponController(ICouponService couponService)
         {
@@ -331,6 +332,36 @@ namespace NextShopV2.Api.Controllers
                         DiscountAmount = discountAmount,
                         FinalAmount = finalAmount
                     }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyCoupons()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                {
+                    return Unauthorized(new ApiResponse { Success = false, Message = "Invalid token" });
+                }
+
+                var coupons = await _couponService.GetUserCouponsAsync(userId);
+                return Ok(new ApiResponse
+                {
+                    Success = true,
+                    Message = "User coupons retrieved successfully",
+                    Data = coupons
                 });
             }
             catch (Exception ex)
