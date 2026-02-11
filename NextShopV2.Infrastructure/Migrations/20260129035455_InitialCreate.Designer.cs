@@ -929,6 +929,12 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Phone")
@@ -1006,6 +1012,37 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WelcomeCouponSettings");
+                });
+
+            // Welcome voucher issuance tracking to prevent duplicate issuance
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Marketing.WelcomeVoucherIssuance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IdentifierHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Ip")
+                        .HasColumnType("text");
+
+                    b.Property<string>("VoucherCode")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdentifierHash")
+                        .IsUnique();
+
+                    b.ToTable("WelcomeVoucherIssuances");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>

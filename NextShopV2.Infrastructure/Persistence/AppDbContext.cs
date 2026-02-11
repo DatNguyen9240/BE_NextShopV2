@@ -237,6 +237,16 @@ namespace NextShopV2.Infrastructure.Persistence
                 eb.Property(w => w.MaxDiscountAmount).HasPrecision(18, 2);
             });
 
+            // Welcome voucher issuance tracking to prevent duplicate issuance
+            modelBuilder.Entity<NextShopV2.Domain.Entities.Marketing.WelcomeVoucherIssuance>(eb => {
+                eb.HasKey(w => w.Id);
+                eb.Property(w => w.IdentifierHash).IsRequired();
+                eb.HasIndex(w => w.IdentifierHash).IsUnique();
+                eb.Property(w => w.VoucherCode);
+                eb.Property(w => w.Ip);
+                eb.Property(w => w.IssuedAt).IsRequired();
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }

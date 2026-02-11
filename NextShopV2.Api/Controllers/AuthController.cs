@@ -323,6 +323,34 @@ namespace NextShopV2.Api.Controllers
             return ResponseHelper.Success("Deleted");
         }
 
+        [HttpPost("me/deactivate")]
+        [Authorize]
+        public async Task<IActionResult> DeactivateAccount()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return ResponseHelper.Unauthorized("Invalid token");
+
+            // Attempt to get access token from Authorization header so we can blacklist it as well
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            string? accessToken = null;
+            if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer "))
+            {
+                accessToken = authHeader.Substring("Bearer ".Length).Trim();
+            }
+
+            var result = await _authService.DeactivateAccount(userId);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Failed to deactivate");
+
+            // Blacklist the access token if present
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                await _authService.Logout(accessToken, string.Empty);
+            }
+
+            return ResponseHelper.Success(result.Message ?? "Account deactivated");
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {

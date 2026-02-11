@@ -332,6 +332,10 @@ namespace NextShopV2.Api.Extensions
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IProductVariantCartService, NextShopV2.Application.UseCases.ProductVariantCartService>();
             services.AddScoped<NextShopV2.Application.Interfaces.Services.IRedisCartService, NextShopV2.Infrastructure.Services.RedisCartService>();
 
+            // Welcome voucher issuance repository & utilities
+            services.AddScoped<NextShopV2.Application.Interfaces.repositories.IWelcomeVoucherIssuanceRepository, NextShopV2.Infrastructure.Repositories.WelcomeVoucherIssuanceRepository>();
+            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
+
             // External Clients
             services.AddSingleton<PayOSClient>(sp =>
             {

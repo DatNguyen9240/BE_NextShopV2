@@ -185,7 +185,9 @@ namespace NextShopV2.Infrastructure.Migrations
                     MfaEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     MfaType = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -210,6 +212,29 @@ namespace NextShopV2.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_WelcomeCouponSettings", x => x.Id);
                 });
+
+            // Welcome voucher issuance tracking to prevent duplicate issuance
+            migrationBuilder.CreateTable(
+                name: "WelcomeVoucherIssuances",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IdentifierHash = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Ip = table.Column<string>(type: "text", nullable: true),
+                    VoucherCode = table.Column<string>(type: "text", nullable: true),
+                    IssuedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WelcomeVoucherIssuances", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WelcomeVoucherIssuances_IdentifierHash",
+                table: "WelcomeVoucherIssuances",
+                column: "IdentifierHash",
+                unique: true);
 
             migrationBuilder.CreateTable(
                 name: "AttributeValues",
@@ -815,6 +840,9 @@ namespace NextShopV2.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "TaxSettings");
+
+            migrationBuilder.DropTable(
+                name: "WelcomeVoucherIssuances");
 
             migrationBuilder.DropTable(
                 name: "WelcomeCouponSettings");

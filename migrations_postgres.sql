@@ -130,6 +130,8 @@ CREATE TABLE "Users" (
     "MfaType" text,
     "CreatedAt" timestamp with time zone NOT NULL,
     "UpdatedAt" timestamp with time zone,
+    "IsDeleted" boolean NOT NULL DEFAULT false,
+    "DeletedAt" timestamp with time zone,
     CONSTRAINT "PK_Users" PRIMARY KEY ("Id")
 );
 
@@ -424,11 +426,27 @@ CREATE TABLE "WelcomeCouponSettings" (
     CONSTRAINT "PK_WelcomeCouponSettings" PRIMARY KEY ("Id")
 );
 
+-- Welcome voucher issuance tracking table (prevent duplicate welcome vouchers)
+CREATE TABLE IF NOT EXISTS "WelcomeVoucherIssuances" (
+    "Id" uuid NOT NULL,
+    "IdentifierHash" text NOT NULL,
+    "UserId" uuid,
+    "Ip" text,
+    "VoucherCode" text,
+    "IssuedAt" timestamp with time zone NOT NULL,
+    CONSTRAINT "PK_WelcomeVoucherIssuances" PRIMARY KEY ("Id")
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "IX_WelcomeVoucherIssuances_IdentifierHash" ON "WelcomeVoucherIssuances" ("IdentifierHash");
+
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260128064705_InitCreate', '9.0.9');
 
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260210143423_AddWelcomeCouponSettings', '9.0.9');
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260211090000_AddSoftDeleteAndWelcomeIssuance', '9.0.9');
 
 COMMIT;
 

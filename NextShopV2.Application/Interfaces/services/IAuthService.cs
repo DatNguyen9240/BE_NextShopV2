@@ -40,5 +40,8 @@ namespace NextShopV2.Application.Interfaces
         // Forgot Password & Reset Password
         Task<AppApiResponse> ForgotPassword(ForgotPasswordRequest request);
         Task<AppApiResponse> ResetPassword(ResetPasswordRequest request);
+
+        // Account management
+        Task<AppApiResponse> DeactivateAccount(Guid userId);
     }
 }

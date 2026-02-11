@@ -22,7 +22,10 @@ namespace NextShopV2.Application.Services
         private readonly string? _mfaKey;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
 
-        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config, NextShopV2.Application.Interfaces.Services.IEmailService emailService, NextShopV2.Application.Interfaces.Services.ICouponService couponService)
+        private readonly NextShopV2.Application.Interfaces.repositories.IWelcomeVoucherIssuanceRepository _issuanceRepo;
+        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor? HttpContextAccessor;
+
+        public AuthService(IUserRepository userRepository, IConnectionMultiplexer redis, IConfiguration config, NextShopV2.Application.Interfaces.Services.IEmailService emailService, NextShopV2.Application.Interfaces.Services.ICouponService couponService, NextShopV2.Application.Interfaces.repositories.IWelcomeVoucherIssuanceRepository issuanceRepo, Microsoft.AspNetCore.Http.IHttpContextAccessor? httpContextAccessor = null)
         {
             _userRepository = userRepository;
             _redisDb = redis.GetDatabase();
@@ -31,6 +34,8 @@ namespace NextShopV2.Application.Services
             _couponService = couponService;
             _mfaKey = config["Mfa:Key"] ?? config["Jwt:Key"];
             _config = config;
+            _issuanceRepo = issuanceRepo;
+            HttpContextAccessor = httpContextAccessor;
         }
 
     public async Task<AppApiResponse> Register(RegisterRequest request)
@@ -70,6 +75,10 @@ namespace NextShopV2.Application.Services
             var user = await _userRepository.GetByEmailAsync(request.Email!);
             if (user == null || user.PasswordHash != passwordHash)
                 return new AppAuthResponse { Success = false, Message = "Thông tin đăng nhập không hợp lệ" };
+
+            // Disallow login for deactivated accounts
+            if (user.IsDeleted)
+                return new AppAuthResponse { Success = false, Message = "Tài khoản đã bị vô hiệu hóa" };
 
             // Require email verification before issuing tokens
             if (!user.EmailVerified)
@@ -141,6 +150,13 @@ namespace NextShopV2.Application.Services
             var html = LoadOtpTemplate(code, "Đăng nhập", 5);
             try
             {
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    // remove the stored request to avoid orphaned OTPs and return a friendly error
+                    await _redisDb.KeyDeleteAsync($"mfa:email:req:{requestId}");
+                    return new AppApiResponse { Success = false, Message = "Email không hợp lệ" };
+                }
+
                 await _emailService.SendEmailAsync(user.Email, subject, html);
             }
             catch (System.Exception)
@@ -798,6 +814,12 @@ namespace NextShopV2.Application.Services
 
             try
             {
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    await _redisDb.KeyDeleteAsync(key);
+                    return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+                }
+
                 await _emailService.SendEmailAsync(user.Email, subject, html);
             }
             catch (Exception)
@@ -807,7 +829,7 @@ namespace NextShopV2.Application.Services
                 return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
             }
 
-            return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+            return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" }; 
         }
 
         public async Task<AppApiResponse> ResetPassword(ResetPasswordRequest request)
@@ -843,6 +865,21 @@ namespace NextShopV2.Application.Services
             return new AppApiResponse { Success = true, Message = "Đặt lại mật khẩu thành công" };
         }
 
+        public async Task<AppApiResponse> DeactivateAccount(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
+
+            user.IsDeleted = true;
+            user.DeletedAt = DateTime.UtcNow;
+            await _userRepository.SaveAsync();
+
+            // invalidate refresh tokens
+            await _redisDb.KeyDeleteAsync($"refresh:{user.Id}");
+
+            return new AppApiResponse { Success = true, Message = "Tài khoản đã được vô hiệu hóa" };
+        }
+
         private string LoadResetPasswordTemplate(string resetUrl, int expiryHours)
         {
             try
@@ -872,10 +909,30 @@ namespace NextShopV2.Application.Services
             }
         }
 
+        private string ComputeIdentifierHash(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            var normalized = input.Trim().ToLowerInvariant();
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var bytes = System.Text.Encoding.UTF8.GetBytes(normalized);
+            var hash = sha.ComputeHash(bytes);
+            return System.BitConverter.ToString(hash).Replace("-", "");
+        }
+
         private async Task CreateWelcomeVoucherForUser(Guid userId, WelcomeCouponSettingsResponse settings)
         {
             try
             {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null) return;
+
+                // Compute identifier hash (use email as canonical identifier)
+                var idHash = ComputeIdentifierHash(user.Email ?? string.Empty);
+
+                // Prevent duplicate issuance for same identifier
+                if (await _issuanceRepo.AnyByIdentifierHashAsync(idHash))
+                    return;
+
                 // Generate unique coupon code
                 var code = $"WELCOME{userId.ToString().Substring(0, 8).ToUpper()}";
 
@@ -895,8 +952,25 @@ namespace NextShopV2.Application.Services
 
                 await _couponService.CreateAsync(createRequest);
 
+                // Record issuance so we won't give another welcome voucher to same identifier
+                try
+                {
+                    var issuance = new NextShopV2.Domain.Entities.Marketing.WelcomeVoucherIssuance
+                    {
+                        IdentifierHash = idHash,
+                        UserId = userId,
+                        VoucherCode = code,
+                        Ip = HttpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString()
+                    };
+
+                    await _issuanceRepo.AddAsync(issuance);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: failed to record welcome issuance for user {userId}: {ex.Message}");
+                }
+
                 // Send notification email
-                var user = await _userRepository.GetByIdAsync(userId);
                 if (user != null)
                 {
                     var subject = "Chào mừng bạn đến với NextShop!";
@@ -908,7 +982,14 @@ namespace NextShopV2.Application.Services
                         <p>Voucher có hiệu lực trong {settings.ValidityMonths} tháng.</p>
                         <p>Chúc bạn mua sắm vui vẻ!</p>
                     ";
-                    await _emailService.SendEmailAsync(user.Email, subject, html);
+                    if (!string.IsNullOrWhiteSpace(user.Email))
+                    {
+                        await _emailService.SendEmailAsync(user.Email, subject, html);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Warning: user {userId} has no email; welcome email skipped");
+                    }
                 }
             }
             catch (Exception ex)

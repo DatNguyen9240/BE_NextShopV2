@@ -108,6 +108,37 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("WelcomeCouponSettings");
                 });
 
+            // WelcomeVoucherIssuances snapshot
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Marketing.WelcomeVoucherIssuance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("IdentifierHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VoucherCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdentifierHash")
+                        .IsUnique();
+
+                    b.ToTable("WelcomeVoucherIssuances");
+                });
+
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -1011,6 +1042,13 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    // Soft-delete fields
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
