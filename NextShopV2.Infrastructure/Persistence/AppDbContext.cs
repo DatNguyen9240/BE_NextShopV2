@@ -239,6 +239,7 @@ namespace NextShopV2.Infrastructure.Persistence
 
             // Welcome voucher issuance tracking to prevent duplicate issuance
             modelBuilder.Entity<NextShopV2.Domain.Entities.Marketing.WelcomeVoucherIssuance>(eb => {
+                eb.ToTable("WelcomeVoucherIssuances");
                 eb.HasKey(w => w.Id);
                 eb.Property(w => w.IdentifierHash).IsRequired();
                 eb.HasIndex(w => w.IdentifierHash).IsUnique();
