@@ -351,6 +351,39 @@ namespace NextShopV2.Api.Controllers
             return ResponseHelper.Success(result.Message ?? "Account deactivated");
         }
 
+        // ADMIN: Issue welcome voucher to a specific user (idempotent)
+        [HttpPost("admin/issue-welcome/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> IssueWelcomeToUser(Guid userId)
+        {
+            var result = await _authService.IssueWelcomeVoucher(userId);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Issue failed");
+            return ResponseHelper.Success(result.Message ?? "Issued");
+        }
+
+        // ADMIN: Issue welcome vouchers to all users (idempotent)
+        [HttpPost("admin/issue-welcome/all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> IssueWelcomeToAll()
+        {
+            var result = await _authService.IssueWelcomeVoucherToAll();
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Issue failed");
+            return ResponseHelper.Success(result.Message ?? "Issued to all (where eligible)");
+        }
+
+        // ADMIN: Issue welcome voucher by email
+        public class IssueByEmailRequest { public string Email { get; set; } }
+
+        [HttpPost("admin/issue-welcome-by-email")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> IssueWelcomeToUserByEmail([FromBody] IssueByEmailRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email)) return ResponseHelper.BadRequest("Email is required");
+            var result = await _authService.IssueWelcomeVoucherByEmail(request.Email);
+            if (!result.Success) return ResponseHelper.BadRequest(result.Message ?? "Issue failed");
+            return ResponseHelper.Success(result.Message ?? "Issued");
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {

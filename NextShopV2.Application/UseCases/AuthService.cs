@@ -1005,6 +1005,65 @@ namespace NextShopV2.Application.Services
             }
         }
 
+        // Public admin helpers
+        public async Task<AppApiResponse> IssueWelcomeVoucherByEmail(string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                    return new AppApiResponse { Success = false, Message = "Email is required" };
+
+                var user = await _userRepository.GetByEmailAsync(email);
+                if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
+
+                return await IssueWelcomeVoucher(user.Id);
+            }
+            catch (Exception ex)
+            {
+                return new AppApiResponse { Success = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<AppApiResponse> IssueWelcomeVoucher(Guid userId)
+        {
+            try
+            {
+                var settings = await _couponService.GetWelcomeCouponSettingsAsync();
+                if (settings == null || !settings.IsEnabled)
+                    return new AppApiResponse { Success = false, Message = "Welcome vouchers are disabled" };
+
+                await CreateWelcomeVoucherForUser(userId, settings);
+                return new AppApiResponse { Success = true, Message = "Issued (if eligible)" };
+            }
+            catch (Exception ex)
+            {
+                return new AppApiResponse { Success = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<AppApiResponse> IssueWelcomeVoucherToAll()
+        {
+            try
+            {
+                var settings = await _couponService.GetWelcomeCouponSettingsAsync();
+                if (settings == null || !settings.IsEnabled)
+                    return new AppApiResponse { Success = false, Message = "Welcome vouchers are disabled" };
+
+                // Use GetAllAsync (may be large) — acceptable for ad-hoc admin operation
+                var users = await _userRepository.GetAllAsync();
+                foreach (var u in users)
+                {
+                    await CreateWelcomeVoucherForUser(u.Id, settings);
+                }
+
+                return new AppApiResponse { Success = true, Message = "Issued (where eligible)" };
+            }
+            catch (Exception ex)
+            {
+                return new AppApiResponse { Success = false, Message = ex.Message };
+            }
+        }
+
         private string GetFrontendBaseUrl()
         {
             var configValue = _config["Frontend:BaseUrl"];

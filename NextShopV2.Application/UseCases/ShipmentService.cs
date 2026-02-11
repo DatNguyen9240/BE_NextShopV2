@@ -19,13 +19,15 @@ namespace NextShopV2.Application.Services
         private readonly ITrackingService _trackingService;
         private readonly IOrderRepository _orderRepo;
         private readonly IAuthService _authService;
+        private readonly ISocketNotificationService _notificationService;
 
-        public ShipmentService(IShipmentRepository shipmentRepo, ITrackingService trackingService, IOrderRepository orderRepo, IAuthService authService)
+        public ShipmentService(IShipmentRepository shipmentRepo, ITrackingService trackingService, IOrderRepository orderRepo, IAuthService authService, ISocketNotificationService notificationService)
         {
             _shipmentRepo = shipmentRepo;
             _trackingService = trackingService;
             _orderRepo = orderRepo;
             _authService = authService;
+            _notificationService = notificationService;
         }
 
         public async Task<List<ShipmentResponse>> GetAllAsync()

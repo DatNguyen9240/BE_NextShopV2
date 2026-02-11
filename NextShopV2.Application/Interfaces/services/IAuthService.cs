@@ -43,5 +43,10 @@ namespace NextShopV2.Application.Interfaces
 
         // Account management
         Task<AppApiResponse> DeactivateAccount(Guid userId);
+
+        // Admin: issue welcome vouchers
+        Task<AppApiResponse> IssueWelcomeVoucher(Guid userId);
+        Task<AppApiResponse> IssueWelcomeVoucherByEmail(string email);
+        Task<AppApiResponse> IssueWelcomeVoucherToAll();
     }
 }
