@@ -49,34 +49,44 @@ namespace NextShopV2.Infrastructure.Services
             var cartId = Guid.Parse(cartData.FirstOrDefault(x => x.Name == "cartId").Value.ToString());
             var createdAt = DateTime.Parse(cartData.FirstOrDefault(x => x.Name == "createdAt").Value!);
 
-            foreach (var item in cartData.Where(x => x.Name.ToString().StartsWith("item:")))
+            // Batch fetch variant infos to avoid N+1 when cart has multiple items
+            var itemEntries = cartData.Where(x => x.Name.ToString().StartsWith("item:")).ToList();
+            var variantIds = itemEntries
+                .Select(i => JsonSerializer.Deserialize<RedisCartItem>(i.Value.ToString())?.VariantId)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .Distinct()
+                .ToList();
+
+            var variantInfoMap = variantIds.Any() ? await _variantService.GetVariantInfosAsync(variantIds) : new Dictionary<Guid, VariantInfo>();
+
+            foreach (var item in itemEntries)
             {
                 var redisItem = JsonSerializer.Deserialize<RedisCartItem>(item.Value.ToString());
                 if (redisItem != null)
                 {
-                    var variantInfo = await _variantService.GetVariantInfoAsync(redisItem.VariantId);
-                    if (variantInfo != null)
+                    if (!variantInfoMap.TryGetValue(redisItem.VariantId, out var variantInfo) || variantInfo == null)
+                        continue;
+
+                    var priceBeforeTax = variantInfo.Price * redisItem.Quantity; // Price excluding tax
+                    var taxRate = variantInfo.TaxRate;
+                    
+                    // Calculate tax (tax-exclusive): add tax on top of price
+                    var taxAmount = Math.Round(priceBeforeTax * taxRate, 0, MidpointRounding.AwayFromZero);
+                    var totalPrice = priceBeforeTax + taxAmount; // Total = Price + Tax
+                    
+                    cartItems.Add(new CartItemDto
                     {
-                        var priceBeforeTax = variantInfo.Price * redisItem.Quantity; // Price excluding tax
-                        var taxRate = variantInfo.TaxRate;
-                        
-                        // Calculate tax (tax-exclusive): add tax on top of price
-                        var taxAmount = Math.Round(priceBeforeTax * taxRate, 0, MidpointRounding.AwayFromZero);
-                        var totalPrice = priceBeforeTax + taxAmount; // Total = Price + Tax
-                        
-                        cartItems.Add(new CartItemDto
-                        {
-                            CartItemId = redisItem.CartItemId,
-                            VariantId = redisItem.VariantId,
-                            Quantity = redisItem.Quantity,
-                            UnitPrice = variantInfo.Price,
-                            TotalPrice = totalPrice,
-                            VariantInfo = variantInfo,
-                            TaxRate = taxRate,
-                            PriceBeforeTax = priceBeforeTax,
-                            TaxAmount = taxAmount
-                        });
-                    }
+                        CartItemId = redisItem.CartItemId,
+                        VariantId = redisItem.VariantId,
+                        Quantity = redisItem.Quantity,
+                        UnitPrice = variantInfo.Price,
+                        TotalPrice = totalPrice,
+                        VariantInfo = variantInfo,
+                        TaxRate = taxRate,
+                        PriceBeforeTax = priceBeforeTax,
+                        TaxAmount = taxAmount
+                    });
                 }
             }
 

@@ -88,6 +88,12 @@ namespace NextShopV2.Application.Services
                 oc.Status = "Applied";
                 oc.AppliedAt = DateTime.UtcNow;
 
+                // If usage limit reached, deactivate coupon to make it clearly unusable
+                if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
+                {
+                    coupon.IsActive = false;
+                }
+
                 await _couponRepo.UpdateAsync(coupon);
                 anyChanged = true;
             }

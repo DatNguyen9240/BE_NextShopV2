@@ -53,6 +53,40 @@ namespace NextShopV2.Application.UseCases
             };
         }
 
+        public async Task<Dictionary<Guid, VariantInfo>> GetVariantInfosAsync(IEnumerable<Guid> variantIds)
+        {
+            var result = new Dictionary<Guid, VariantInfo>();
+            if (variantIds == null) return result;
+
+            var ids = variantIds.Distinct().Where(id => id != Guid.Empty).ToList();
+            if (!ids.Any()) return result;
+
+            var variants = await _variantRepository.GetByIdsAsync(ids);
+            var attributeMaps = await _attributeService.GetVariantAttributeMapsAsync(ids);
+
+            foreach (var v in variants)
+            {
+                var attributes = attributeMaps.TryGetValue(v.VariantId, out var map) ? map : new System.Collections.Generic.Dictionary<string, string>();
+                var taxRate = await GetTaxRateAsync(v.Product);
+
+                result[v.VariantId] = new VariantInfo
+                {
+                    ProductId = v.ProductId,
+                    Price = v.PriceAfterDiscount,
+                    ProductName = v.Product?.Name ?? string.Empty,
+                    Attributes = attributes,
+                    ImageUrl = v.ImageUrl ?? string.Empty,
+                    Sku = string.IsNullOrEmpty(v.SKU) ? CommonHelpers.GenerateSKU("PRD") : v.SKU,
+                    StockQuantity = v.StockQuantity,
+                    IsActive = v.IsActive,
+                    ProductIsActive = v.Product?.IsActive ?? true,
+                    TaxRate = taxRate
+                };
+            }
+
+            return result;
+        }
+
         private async Task<decimal> GetTaxRateAsync(Domain.Entities.Products.Product? product)
         {
             if (product == null)

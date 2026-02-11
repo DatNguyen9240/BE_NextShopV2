@@ -4,6 +4,7 @@ using NextShopV2.Application.Interfaces;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.DTOs.Request.UpdateDto;
 using NextShopV2.Application.DTOs.Response;
+using NextShopV2.Application.DTOs.Request.CreateDto;
 using NextShopV2.Domain.Entities.Orders;
 using NextShopV2.Shared.Extensions;
 using System;
@@ -20,14 +21,16 @@ namespace NextShopV2.Application.Services
         private readonly IOrderRepository _orderRepo;
         private readonly IAuthService _authService;
         private readonly ISocketNotificationService _notificationService;
+        private readonly IPushNotificationService _pushNotificationService;
 
-        public ShipmentService(IShipmentRepository shipmentRepo, ITrackingService trackingService, IOrderRepository orderRepo, IAuthService authService, ISocketNotificationService notificationService)
+        public ShipmentService(IShipmentRepository shipmentRepo, ITrackingService trackingService, IOrderRepository orderRepo, IAuthService authService, ISocketNotificationService notificationService, IPushNotificationService pushNotificationService)
         {
             _shipmentRepo = shipmentRepo;
             _trackingService = trackingService;
             _orderRepo = orderRepo;
             _authService = authService;
             _notificationService = notificationService;
+            _pushNotificationService = pushNotificationService;
         }
 
         public async Task<List<ShipmentResponse>> GetAllAsync()
@@ -44,10 +47,13 @@ namespace NextShopV2.Application.Services
             // Load unique shippers to minimize queries
             var shipperIds = shipments.Where(s => s.ShipperId.HasValue).Select(s => s.ShipperId!.Value).Distinct().ToList();
             var shipperDict = new Dictionary<Guid, UserResponse?>();
-            foreach (var shipperId in shipperIds)
+            if (shipperIds.Any())
             {
-                var shipper = await _authService.GetMe(shipperId);
-                shipperDict[shipperId] = shipper;
+                var shippers = await _authService.GetUsersByIdsAsync(shipperIds);
+                foreach (var kv in shippers)
+                {
+                    shipperDict[kv.Key] = kv.Value;
+                }
             }
 
             var responses = new List<ShipmentResponse>();
@@ -84,10 +90,13 @@ namespace NextShopV2.Application.Services
             // Load unique shippers to minimize queries
             var shipperIds = shipments.Where(s => s.ShipperId.HasValue).Select(s => s.ShipperId!.Value).Distinct().ToList();
             var shipperDict = new Dictionary<Guid, UserResponse?>();
-            foreach (var shipperId in shipperIds)
+            if (shipperIds.Any())
             {
-                var shipper = await _authService.GetMe(shipperId);
-                shipperDict[shipperId] = shipper;
+                var shippers = await _authService.GetUsersByIdsAsync(shipperIds);
+                foreach (var kv in shippers)
+                {
+                    shipperDict[kv.Key] = kv.Value;
+                }
             }
 
             var responses = new List<ShipmentResponse>();
@@ -243,6 +252,61 @@ namespace NextShopV2.Application.Services
                     {
                         order.Status = "Completed";
                         await _orderRepo.UpdateAsync(order);
+
+                        // prepare a completion socket notification (already implemented earlier)
+                        try
+                        {
+                            var notify = new SocketNotificationDto
+                            {
+                                Title = "Đơn hàng hoàn thành",
+                                Body = $"Đơn hàng {order.OrderId} đã hoàn thành. Cảm ơn bạn đã mua hàng!",
+                                Url = $"/account/orders/{order.OrderId}",
+                                Read = false,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            await _notificationService.AddNotificationAsync(order.UserId.ToString(), notify);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to send completion socket notification for order {order.OrderId}: {ex.Message}");
+                        }
+                    }
+
+                    // Notify user when shipper starts delivery
+                    if (request.Status == "In transit")
+                    {
+                        try
+                        {
+                            var pushReq = new FirebaseNotificationRequest
+                            {
+                                Title = "Shipper đang đến",
+                                Body = $"Shipper đang giao đơn hàng {order.OrderId}.",
+                                Data = new System.Collections.Generic.Dictionary<string, string> { { "orderId", order.OrderId.ToString() } }
+                            };
+
+                            await _pushNotificationService.SendToUserAsync(order.UserId, pushReq);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to send push notification for order {order.OrderId}: {ex.Message}");
+                        }
+
+                        try
+                        {
+                            var socketNotify = new SocketNotificationDto
+                            {
+                                Title = "Shipper đang đến",
+                                Body = $"Shipper đang giao đơn hàng {order.OrderId}.",
+                                Url = $"/account/orders/{order.OrderId}",
+                                Read = false,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            await _notificationService.AddNotificationAsync(order.UserId.ToString(), socketNotify);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to send socket notification for order {order.OrderId}: {ex.Message}");
+                        }
                     }
                 }
             }

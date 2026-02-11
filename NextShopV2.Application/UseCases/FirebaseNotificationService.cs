@@ -118,6 +118,49 @@ namespace NextShopV2.Application.UseCases
             return result;
         }
 
+        public async Task<FirebaseNotificationSendResult> SendToUserAsync(Guid userId, FirebaseNotificationRequest request)
+        {
+            var tokens = (await _pushTokenRepository.GetTokensByUserIdAsync(userId)).ToList();
+            var tokenStrings = tokens.Select(t => t.Token).ToList();
+
+            if (tokenStrings.Count == 0)
+            {
+                // No tokens for this user
+                return new FirebaseNotificationSendResult { SuccessCount = 0, FailureCount = 0, Summary = "No tokens for user" };
+            }
+
+            var result = await _firebaseService.SendToMultipleAsync(tokenStrings, request);
+
+            // Disable invalid tokens
+            if (result.InvalidTokens.Any())
+            {
+                foreach (var invalidToken in result.InvalidTokens)
+                {
+                    var tokenEntity = tokens.FirstOrDefault(t => t.Token == invalidToken);
+                    if (tokenEntity != null)
+                    {
+                        tokenEntity.IsActive = false;
+                        await _pushTokenRepository.UpdateAsync(tokenEntity);
+                    }
+                }
+            }
+
+            // Save history
+            var history = new NotificationHistory
+            {
+                Title = request.Title,
+                Body = request.Body,
+                ImageUrl = request.ImageUrl,
+                Data = request.Data != null ? JsonSerializer.Serialize(request.Data) : null,
+                RecipientCount = tokenStrings.Count,
+                Status = "success",
+                SentAt = DateTime.UtcNow
+            };
+            await _notificationHistoryRepository.AddAsync(history);
+
+            return result;
+        }
+
         public async Task<IEnumerable<FirebaseFcmTokenDto>> GetTokensAsync()
         {
             var tokens = await _pushTokenRepository.GetActiveTokensAsync();

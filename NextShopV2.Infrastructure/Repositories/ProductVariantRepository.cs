@@ -45,6 +45,18 @@ namespace NextShopV2.Infrastructure.Repositories
             return list;
         }
 
+        public async Task<List<ProductVariant>> GetByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || ids.Count == 0) return new List<ProductVariant>();
+
+            return await _context.ProductVariants
+                .Where(v => ids.Contains(v.VariantId))
+                .Include(v => v.Product)
+                    .ThenInclude(p => p.ProductCategories)
+                        .ThenInclude(pc => pc.Category)
+                .ToListAsync();
+        }
+
         public async Task<List<(Guid VariantId, bool IsActive)>> GetActiveFlagsByProductIdAsync(Guid productId)
         {
             return await _context.ProductVariants

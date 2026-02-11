@@ -12,5 +12,8 @@ namespace NextShopV2.Application.Interfaces.Services
         Task<IEnumerable<FirebaseNotificationHistoryDto>> GetHistoryAsync(int count = 50);
         Task TestFirebaseAsync();
         Task ClearTokensAsync();
+
+        // Send notification to tokens owned by a specific user
+        Task<FirebaseNotificationSendResult> SendToUserAsync(Guid userId, FirebaseNotificationRequest request);
     }
 }

@@ -100,6 +100,16 @@ namespace NextShopV2.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<List<User>> GetByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || ids.Count == 0) return new List<User>();
+
+            return await _context.Users
+                .Where(u => ids.Contains(u.Id))
+                .Include(u => u.Addresses)
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(User user)
         {
             _context.Users.Update(user);

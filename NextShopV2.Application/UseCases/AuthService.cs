@@ -608,6 +608,51 @@ namespace NextShopV2.Application.Services
             };
         }
 
+        public async Task<Dictionary<Guid, UserResponse?>> GetUsersByIdsAsync(IEnumerable<Guid> ids)
+        {
+            var result = new Dictionary<Guid, UserResponse?>();
+            if (ids == null) return result;
+
+            var idList = ids.Where(id => id != Guid.Empty).Distinct().ToList();
+            if (!idList.Any()) return result;
+
+            var users = await _userRepository.GetByIdsAsync(idList);
+            var dict = users.ToDictionary(u => u.Id, u => u);
+
+            foreach (var id in idList)
+            {
+                if (dict.TryGetValue(id, out var u) && u != null)
+                {
+                    result[id] = new UserResponse
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FullName = u.FullName,
+                        Phone = u.Phone,
+                        Gender = u.Gender,
+                        Role = u.Role,
+                        CreatedAt = u.CreatedAt,
+                        Addresses = u.Addresses?.OrderByDescending(a => a.IsDefault).Select(a => new AddressResponse
+                        {
+                            AddressId = a.AddressId,
+                            FullAddress = a.FullAddress,
+                            Latitude = a.Latitude,
+                            Longitude = a.Longitude,
+                            IsDefault = a.IsDefault
+                        }).ToList() ?? new List<AddressResponse>(),
+                        Avatar = u.Avatar,
+                        MfaEnabled = u.MfaEnabled,
+                        MfaType = u.MfaType
+                    };
+                }
+                else
+                {
+                    result[id] = null;
+                }
+            }
+
+            return result;
+        }
         public async Task<AppApiResponse> UpdateProfile(Guid userId, UpdateProfileRequest request)
         {
             var user = await _userRepository.GetByIdAsync(userId);

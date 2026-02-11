@@ -13,6 +13,7 @@ namespace NextShopV2.Application.Interfaces
         Task<AppAuthResponse> Refresh(RefreshTokenRequest request);
         Task<AppApiResponse> Logout(string accessToken, string refreshToken);
         Task<UserResponse?> GetMe(Guid userId);
+        Task<Dictionary<Guid, UserResponse?>> GetUsersByIdsAsync(IEnumerable<Guid> ids);
 
         // Profile & address management
         Task<AppApiResponse> UpdateProfile(Guid userId, UpdateProfileRequest request);

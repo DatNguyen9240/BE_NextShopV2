@@ -7,5 +7,6 @@ namespace NextShopV2.Application.Interfaces.Services
     public interface IProductVariantCartService
     {
         Task<VariantInfo?> GetVariantInfoAsync(Guid variantId);
+        Task<Dictionary<Guid, VariantInfo>> GetVariantInfosAsync(IEnumerable<Guid> variantIds);
     }
 }
