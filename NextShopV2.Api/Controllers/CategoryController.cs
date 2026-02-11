@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NextShopV2.Application.DTOs.Request;
 using NextShopV2.Application.Interfaces.services;
+using NextShopV2.Api.Attributes;
 using NextShopV2.Shared.Helpers;
 using NextShopV2.Shared.Extensions;
 
