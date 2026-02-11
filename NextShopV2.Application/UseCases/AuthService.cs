@@ -870,6 +870,12 @@ namespace NextShopV2.Application.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return new AppApiResponse { Success = false, Message = "User not found" };
 
+            // Only regular users may deactivate their account. Prevent deactivation for elevated roles.
+            if (!string.Equals(user.Role, "User", StringComparison.OrdinalIgnoreCase))
+            {
+                return new AppApiResponse { Success = false, Message = "Không thể vô hiệu hóa tài khoản có quyền (role) này" };
+            }
+
             user.IsDeleted = true;
             user.DeletedAt = DateTime.UtcNow;
             await _userRepository.SaveAsync();
