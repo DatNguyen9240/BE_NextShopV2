@@ -260,7 +260,7 @@ namespace NextShopV2.Application.Services
                             {
                                 Title = "Đơn hàng hoàn thành",
                                 Body = $"Đơn hàng {order.OrderId} đã hoàn thành. Cảm ơn bạn đã mua hàng!",
-                                Url = $"/account/orders/{order.OrderId}",
+                                Url = $"/payment/success?orderId={order.OrderId}",
                                 Read = false,
                                 CreatedAt = DateTime.UtcNow
                             };
@@ -297,7 +297,7 @@ namespace NextShopV2.Application.Services
                             {
                                 Title = "Shipper đang đến",
                                 Body = $"Shipper đang giao đơn hàng {order.OrderId}.",
-                                Url = $"/account/orders/{order.OrderId}",
+                                Url = $"/payment/success?orderId={order.OrderId}",
                                 Read = false,
                                 CreatedAt = DateTime.UtcNow
                             };
