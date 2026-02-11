@@ -167,6 +167,12 @@ namespace NextShopV2.Api.Controllers
             if (!ModelState.IsValid)
                 return ResponseHelper.ValidationError(ModelState);
 
+            // Disallow direct setting to Paid via this endpoint - payments must be handled through Payments API
+            if (!string.IsNullOrWhiteSpace(request?.Status) && request.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseHelper.BadRequest("Use Payments API to mark an order as Paid. Do not set status to 'Paid' via this endpoint.");
+            }
+
             var success = await _orderService.UpdateStatusAsync(id, request);
             return success ? 
                 ResponseHelper.Success("Order status updated successfully") :

@@ -23,6 +23,23 @@ public class PaymentsController : ControllerBase
         _config = config;
     }
 
+    [HttpPost("order/{orderId}/collect")]
+    [AdminOnly]
+    public async Task<IActionResult> CollectPaymentByOrder(Guid orderId, [FromBody] CollectPaymentRequest? request)
+    {
+        try
+        {
+            var ok = await _paymentService.EnsurePaymentAndMarkPaidAsync(orderId, request?.CollectedBy);
+            if (ok) return Ok(new { success = true, message = "Order payment marked as Paid" });
+            return NotFound(new { success = false, message = "Order not found" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"CollectPaymentByOrder error: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, new { success = false, message = ex.Message });
+        }
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request)
     {
