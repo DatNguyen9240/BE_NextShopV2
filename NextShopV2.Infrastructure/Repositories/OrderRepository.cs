@@ -25,6 +25,8 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
                         .ThenInclude(v => v!.Product)
+                .Include(o => o.OrderCoupons)
+                    .ThenInclude(oc => oc.Coupon)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
@@ -39,6 +41,7 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.Payments)
                 .Include(o => o.Shipment)
                 .Include(o => o.OrderCoupons)
+                    .ThenInclude(oc => oc.Coupon)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
         }
 
@@ -80,6 +83,7 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.Payments)
                 .Include(o => o.Shipment)
                 .Include(o => o.OrderCoupons)
+                    .ThenInclude(oc => oc.Coupon)
                 .Where(o => orderIds.Contains(o.OrderId))
                 .ToListAsync();
         }
@@ -90,6 +94,8 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
                         .ThenInclude(v => v!.Product)
+                .Include(o => o.OrderCoupons)
+                    .ThenInclude(oc => oc.Coupon)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
@@ -101,6 +107,8 @@ namespace NextShopV2.Infrastructure.Repositories
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Variant)
                         .ThenInclude(v => v!.Product)
+                .Include(o => o.OrderCoupons)
+                    .ThenInclude(oc => oc.Coupon)
                 .Where(o => o.UserId == userId && (string.IsNullOrEmpty(status) || o.Status == status));
 
             var total = await query.CountAsync();
