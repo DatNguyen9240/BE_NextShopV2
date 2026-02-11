@@ -411,9 +411,9 @@ CREATE UNIQUE INDEX "IX_Users_Phone" ON "Users" ("Phone");
 
 CREATE INDEX "IX_VariantAttributeValues_AttributeValueId" ON "VariantAttributeValues" ("AttributeValueId");
 
-CREATE TABLE "WelcomeSettings" (
+CREATE TABLE "WelcomeCouponSettings" (
     "Id" uuid NOT NULL,
-    "DiscountPercent" numeric(10,2) NOT NULL,
+    "DiscountPercent" numeric(5,2) NOT NULL,
     "MinOrderAmount" numeric(18,2),
     "MaxDiscountAmount" numeric(18,2),
     "UsageLimit" integer NOT NULL,
@@ -421,7 +421,7 @@ CREATE TABLE "WelcomeSettings" (
     "IsEnabled" boolean NOT NULL,
     "CreatedAt" timestamp with time zone NOT NULL,
     "UpdatedAt" timestamp with time zone,
-    CONSTRAINT "PK_WelcomeSettings" PRIMARY KEY ("Id")
+    CONSTRAINT "PK_WelcomeCouponSettings" PRIMARY KEY ("Id")
 );
 
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")

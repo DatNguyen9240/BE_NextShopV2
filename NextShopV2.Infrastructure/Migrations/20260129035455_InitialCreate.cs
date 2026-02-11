@@ -193,13 +193,13 @@ namespace NextShopV2.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WelcomeSettings",
+                name: "WelcomeCouponSettings",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscountPercent = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
-                    MinOrderAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxDiscountAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    DiscountPercent = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: false),
+                    MinOrderAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    MaxDiscountAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     UsageLimit = table.Column<int>(type: "integer", nullable: false),
                     ValidityMonths = table.Column<int>(type: "integer", nullable: false),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
@@ -208,7 +208,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WelcomeSettings", x => x.Id);
+                    table.PrimaryKey("PK_WelcomeCouponSettings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -817,7 +817,7 @@ namespace NextShopV2.Infrastructure.Migrations
                 name: "TaxSettings");
 
             migrationBuilder.DropTable(
-                name: "WelcomeSettings");
+                name: "WelcomeCouponSettings");
 
             migrationBuilder.DropTable(
                 name: "TrackingEvents");

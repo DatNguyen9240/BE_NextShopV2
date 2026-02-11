@@ -70,7 +70,7 @@ namespace NextShopV2.Infrastructure.Migrations
                     b.ToTable("Coupons");
                 });
 
-            modelBuilder.Entity("NextShopV2.Domain.Entities.WelcomeSetting", b =>
+            modelBuilder.Entity("NextShopV2.Domain.Entities.Coupons.WelcomeCouponSettings", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,15 +80,18 @@ namespace NextShopV2.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("DiscountPercent")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MaxDiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MinOrderAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -102,7 +105,7 @@ namespace NextShopV2.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WelcomeSettings");
+                    b.ToTable("WelcomeCouponSettings");
                 });
 
             modelBuilder.Entity("NextShopV2.Domain.Entities.Interactions.ProductLike", b =>
