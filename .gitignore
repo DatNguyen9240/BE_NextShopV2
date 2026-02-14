@@ -18,6 +18,7 @@ obj/
 
 # Logs
 *.log
+logs/
 
 # Database
 *.mdf
