@@ -43,7 +43,25 @@ namespace NextShopV2.Application.Services
             // check existence first to respond immediately if email taken
             var existingUser = await _userRepository.GetByEmailAsync(request.Email!);
             if (existingUser != null)
-                return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
+            {
+                if (!existingUser.EmailVerified)
+                {
+                    // Send verification email again
+                    var sent = await StartEmailVerification(existingUser.Id, existingUser.Email);
+                    if (sent.Success)
+                    {
+                        return new AppApiResponse { Success = false, Message = "Email đã được đăng ký nhưng chưa xác thực. Đã gửi email xác thực lại." };
+                    }
+                    else
+                    {
+                        return new AppApiResponse { Success = false, Message = "Email đã tồn tại và chưa xác thực, nhưng không thể gửi email." };
+                    }
+                }
+                else
+                {
+                    return new AppApiResponse { Success = false, Message = "Đã tồn tại" };
+                }
+            }
 
             var passwordHash = PasswordHelper.HashPassword(request.Password!);
             var user = new User
@@ -60,8 +78,8 @@ namespace NextShopV2.Application.Services
             await _userRepository.SaveAsync();
 
             // Send verification email after successful registration
-            var sent = await StartEmailVerification(user.Id, user.Email);
-            if (!sent.Success)
+            var verificationSent = await StartEmailVerification(user.Id, user.Email);
+            if (!verificationSent.Success)
             {
                 return new AppApiResponse { Success = true, Message = "Đăng ký thành công nhưng gửi email xác thực thất bại" };
             }
@@ -434,8 +452,9 @@ namespace NextShopV2.Application.Services
                 // Require verification before issuing tokens
                 if (!user.EmailVerified)
                 {
-                    // Do not auto-send verification on sign-in; return an error so client can prompt the user to register or request verification
-                    return new AppAuthResponse { Success = false, Message = "Email not verified" };
+                    // Send verification email and return appropriate message
+                    await StartEmailVerification(user.Id, user.Email);
+                    return new AppAuthResponse { Success = false, Message = "Đã đăng ký, hãy vào email xác thực" };
                 }
 
                 if (string.IsNullOrWhiteSpace(_jwtKey)) return new AppAuthResponse { Success = false, Message = "JWT key is missing in configuration" };
