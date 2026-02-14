@@ -41,6 +41,20 @@ namespace NextShopV2.Infrastructure.Repositories
             _context.Products.Remove(product);
             return Task.CompletedTask;
         }
+
+        // Dashboard metrics
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.Products.CountAsync();
+        }
+
+        public async Task<int> GetLowStockCountAsync(int threshold)
+        {
+            return await _context.ProductVariants
+                .Where(pv => pv.StockQuantity <= threshold)
+                .CountAsync();
+        }
+
         public async Task SaveAsync()
             => await _context.SaveChangesAsync();
     }

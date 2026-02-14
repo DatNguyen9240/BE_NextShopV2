@@ -130,6 +130,19 @@ namespace NextShopV2.Infrastructure.Repositories
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
+        // Dashboard metrics
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.Users.CountAsync();
+        }
+
+        public async Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Users
+                .Where(u => u.CreatedAt >= startDate && u.CreatedAt <= endDate)
+                .CountAsync();
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

@@ -158,6 +158,26 @@ namespace NextShopV2.Infrastructure.Repositories
             }
         }
 
+        // Dashboard metrics
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.Orders.CountAsync();
+        }
+
+        public async Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Orders
+                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+                .CountAsync();
+        }
+
+        public async Task<int> GetCountByStatusAsync(string status)
+        {
+            return await _context.Orders
+                .Where(o => o.Status == status)
+                .CountAsync();
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

@@ -348,6 +348,9 @@ namespace NextShopV2.Api.Extensions
                 });
             });
 
+            // Dashboard repositories
+            services.AddScoped<NextShopV2.Application.Interfaces.Repositories.IPaymentRepository, NextShopV2.Infrastructure.Repositories.PaymentRepository>();
+
             return services;
         }
     }

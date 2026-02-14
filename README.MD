@@ -120,6 +120,14 @@ Pending → Paid → Processing → Shipped → Completed
 - Push (Firebase Admin SDK)
 - Background queue + retry policy
 
+### 📊 Dashboard & Monitoring
+
+- **Metrics API**: Thống kê users, orders, revenue, products, inventory changes, notifications
+- **Audit Logs**: Lịch sử inventory transactions, notification history, tracking events
+- **Performance Metrics**: Placeholder cho monitoring thực (có thể tích hợp App.Metrics/Prometheus)
+- **Security**: Admin-only access với role-based authorization
+- **Logging**: Serilog với file rotation tối ưu (giữ 30 file, 10MB/file, buffered)
+
 ### ⚙️ Background Jobs
 
 - `IHostedService` / `BackgroundService`

@@ -26,5 +26,10 @@ namespace NextShopV2.Application.Interfaces.Repositories
         
         // Get multiple orders by ids
         Task<List<Order>> GetByIdsAsync(List<Guid> orderIds);
+
+        // Dashboard metrics
+        Task<int> GetTotalCountAsync();
+        Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<int> GetCountByStatusAsync(string status);
     }
 }

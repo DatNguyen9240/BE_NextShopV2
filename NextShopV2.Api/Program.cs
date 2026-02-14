@@ -2,8 +2,27 @@ using Microsoft.AspNetCore.HttpOverrides;
 using NextShopV2.Api.Extensions;
 using NextShopV2.Shared.Extensions.Web;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("../logs/log-.txt", 
+        rollingInterval: RollingInterval.Day, 
+        retainedFileCountLimit: 30, 
+        fileSizeLimitBytes: 10 * 1024 * 1024, // 10MB per file
+        rollOnFileSizeLimit: true,
+        buffered: true)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Configure App.Metrics (removed due to dependency issues - can implement manual metrics later)
+builder.Services.AddMetricsTrackingMiddleware();
 
 // 1. Load Environment Variables
 var environment = builder.Environment.EnvironmentName;
@@ -82,6 +101,8 @@ if (app.Environment.IsProduction()) app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Use metrics middleware (removed due to issues)
 app.MapControllers();
 
 // SignalR Hubs

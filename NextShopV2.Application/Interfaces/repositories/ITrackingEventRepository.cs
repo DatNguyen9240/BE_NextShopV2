@@ -11,5 +11,8 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task AddAsync(TrackingEvent trackingEvent);
         Task AddRangeAsync(IEnumerable<TrackingEvent> trackingEvents);
         Task SaveAsync();
+
+        // Dashboard metrics
+        Task<List<TrackingEvent>> GetRecentAsync(int limit);
     }
 }

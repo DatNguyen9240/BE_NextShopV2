@@ -36,6 +36,15 @@ namespace NextShopV2.Infrastructure.Repositories
             await _context.TrackingEvents.AddRangeAsync(trackingEvents);
         }
 
+        // Dashboard metrics
+        public async Task<List<TrackingEvent>> GetRecentAsync(int limit)
+        {
+            return await _context.TrackingEvents
+                .OrderByDescending(te => te.EventTime)
+                .Take(limit)
+                .ToListAsync();
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

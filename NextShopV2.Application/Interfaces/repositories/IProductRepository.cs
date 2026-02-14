@@ -14,5 +14,9 @@ namespace NextShopV2.Application.Interfaces.Repositories
         Task UpdateAsync(Product product);
         Task DeleteAsync(Product product);
         Task SaveAsync();
+
+        // Dashboard metrics
+        Task<int> GetTotalCountAsync();
+        Task<int> GetLowStockCountAsync(int threshold);
     }
 }

@@ -76,9 +76,9 @@ namespace NextShopV2.Application.Services
             if (user == null || user.PasswordHash != passwordHash)
                 return new AppAuthResponse { Success = false, Message = "Thông tin đăng nhập không hợp lệ" };
 
-            // Disallow login for deactivated accounts
-            if (user.IsDeleted)
-                return new AppAuthResponse { Success = false, Message = "Tài khoản đã bị vô hiệu hóa" };
+            // Disallow login for deactivated accounts (commented out)
+            // if (user.IsDeleted)
+            //     return new AppAuthResponse { Success = false, Message = "Tài khoản đã bị vô hiệu hóa" };
 
             // Require email verification before issuing tokens
             if (!user.EmailVerified)
@@ -921,8 +921,8 @@ namespace NextShopV2.Application.Services
                 return new AppApiResponse { Success = false, Message = "Không thể vô hiệu hóa tài khoản có quyền (role) này" };
             }
 
-            user.IsDeleted = true;
-            user.DeletedAt = DateTime.UtcNow;
+            // user.IsDeleted = true;
+            // user.DeletedAt = DateTime.UtcNow;
             await _userRepository.SaveAsync();
 
             // invalidate refresh tokens

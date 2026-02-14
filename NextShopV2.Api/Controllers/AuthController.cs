@@ -372,7 +372,7 @@ namespace NextShopV2.Api.Controllers
         }
 
         // ADMIN: Issue welcome voucher by email
-        public class IssueByEmailRequest { public string Email { get; set; } }
+        public class IssueByEmailRequest { public required string Email { get; set; } }
 
         [HttpPost("admin/issue-welcome-by-email")]
         [Authorize(Roles = "Admin")]

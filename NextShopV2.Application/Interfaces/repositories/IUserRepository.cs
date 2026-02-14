@@ -31,5 +31,9 @@ namespace NextShopV2.Application.Interfaces
 
         // Insert an address record (no user object required)
         void InsertAddress(Domain.Entities.Users.Address address);
+
+        // Dashboard metrics
+        Task<int> GetTotalCountAsync();
+        Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate);
     }
 }

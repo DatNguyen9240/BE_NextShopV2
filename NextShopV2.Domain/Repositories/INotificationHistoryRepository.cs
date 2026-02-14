@@ -10,5 +10,9 @@ namespace NextShopV2.Domain.Repositories
         Task AddAsync(NotificationHistory notificationHistory);
         Task UpdateAsync(NotificationHistory notificationHistory);
         Task DeleteAsync(Guid id);
+
+        // Dashboard metrics
+        Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<List<NotificationHistory>> GetRecentAsync(int limit);
     }
 }

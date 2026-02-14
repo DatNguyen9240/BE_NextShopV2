@@ -46,5 +46,22 @@ namespace NextShopV2.Infrastructure.Repositories
                 .OrderByDescending(it => it.CreatedAt)
                 .ToListAsync();
         }
+
+        // Dashboard metrics
+        public async Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.InventoryTransactions
+                .Where(it => it.CreatedAt >= startDate && it.CreatedAt <= endDate)
+                .CountAsync();
+        }
+
+        public async Task<List<InventoryTransaction>> GetRecentAsync(int limit)
+        {
+            return await _context.InventoryTransactions
+                .Include(it => it.Variant)
+                .OrderByDescending(it => it.CreatedAt)
+                .Take(limit)
+                .ToListAsync();
+        }
     }
 }

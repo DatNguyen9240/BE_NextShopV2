@@ -56,5 +56,21 @@ namespace NextShopV2.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        // Dashboard metrics
+        public async Task<int> GetCountByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.NotificationHistories
+                .Where(nh => nh.CreatedAt >= startDate && nh.CreatedAt <= endDate)
+                .CountAsync();
+        }
+
+        public async Task<List<NotificationHistory>> GetRecentAsync(int limit)
+        {
+            return await _context.NotificationHistories
+                .OrderByDescending(nh => nh.CreatedAt)
+                .Take(limit)
+                .ToListAsync();
+        }
     }
 }
