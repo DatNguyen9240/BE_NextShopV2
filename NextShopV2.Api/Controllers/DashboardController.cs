@@ -45,8 +45,8 @@ namespace NextShopV2.Api.Controllers
         public async Task<IActionResult> GetMetrics()
         {
             var now = DateTime.UtcNow;
-            var startOfDay = now.Date;
-            var startOfMonth = new DateTime(now.Year, now.Month, 1);
+            var startOfDay = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
+            var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
             // User metrics
             var totalUsers = await _userRepository.GetTotalCountAsync();
