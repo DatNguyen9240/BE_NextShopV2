@@ -46,7 +46,11 @@ namespace NextShopV2.Application.Services
             {
                 if (!existingUser.EmailVerified)
                 {
-                    // Send verification email again
+                    // Update password and send verification email again
+                    existingUser.PasswordHash = PasswordHelper.HashPassword(request.Password!);
+                    existingUser.UpdatedAt = DateTime.UtcNow;
+                    await _userRepository.SaveAsync();
+
                     var sent = await StartEmailVerification(existingUser.Id, existingUser.Email);
                     if (sent.Success)
                     {
@@ -857,6 +861,13 @@ namespace NextShopV2.Application.Services
             // For security, don't reveal whether the email exists or not
             // Always return success to prevent email enumeration attacks
             if (user == null)
+            {
+                // Simulate delay to prevent timing attacks
+                await Task.Delay(100);
+                return new AppApiResponse { Success = true, Message = "Nếu email tồn tại, link reset mật khẩu đã được gửi" };
+            }
+
+            if (!user.EmailVerified)
             {
                 // Simulate delay to prevent timing attacks
                 await Task.Delay(100);
